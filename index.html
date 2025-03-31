@@ -47,7 +47,7 @@
             return matchScore(fileA, filter) < matchScore(fileB, filter) ? -1 : 1;
           }
         }
-        
+
       const updateList = (data, filter = '') => {
         let htmlString = '';
         for (let file of data.filter(filterFiles(filter)).sort(sortFiles(filter))) {
@@ -68,6 +68,17 @@
 
       (async () => {
         const response = await fetch('https://api.github.com/repos/howellsryan/career-catalogue/contents/');
+        const data = await response.json();
+
+        let htmlString = '<ul>';
+
+        for (let file of data) {
+        htmlString += `<li><a href="${file.path}">${file.name}</a></li>`;
+        }
+
+        htmlString += '</ul>';
+        document.getElementsByTagName('body')[0].innerHTML = htmlString;
+        
         const search_form = document.getElementById('search_form');
         const search_input = document.getElementById('search_input');
         const search_value = decodeURIComponent(document.location.search.replace('?', '').replace(/\+/g, ' '));
@@ -85,17 +96,6 @@
         document.addEventListener('keypress', (event) => {
           search_input.focus()
         })
-
-        const data = await response.json();
-
-        let htmlString = '<ul>';
-        
-        for (let file of data) {
-          htmlString += `<li><a href="${file.path}">${file.name}</a></li>`;
-        }
-
-        htmlString += '</ul>';
-        document.getElementsByTagName('body')[0].innerHTML = htmlString;
       })()
     </script>
   <body>
