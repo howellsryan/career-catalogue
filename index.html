@@ -1,84 +1,129 @@
-<html>
-  <body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Catalogue</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>My Career Catalogue</h1>
+        </div>
+    </header>
+    
+    <main>
+        <section id="search-section">
+            <div id="search-container">
+                <h2 class="search-title"><a href="./">Search Catalogue</a></h2>
+                <form id="search_form" autocomplete="off">
+                    <input id="search_input" placeholder="Type to search resources...">
+                </form>
+                <ul id="list"></ul>
+                <div id="no-results" class="no-results" style="display: none;">
+                    <p>No resources found matching your search criteria.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
     <script>
         const filterFiles = (filter) => {
-          filter = filter.toLowerCase()
-          return (file) => {
-            const filePath = file.path;
-            const fileName = filePath.replace('.html', '').toLowerCase().replace(/-/g, '');
-            const isHtml = (/.html$/).test(filePath);
-            const isNotIndex = filePath !== 'index.html';
-            const isInFilter = filter.split(' ')
-              .every((token) => fileName.indexOf(token.toLowerCase()) !== -1)
-            return isHtml && isNotIndex && isInFilter;
-          }
+            filter = filter.toLowerCase()
+            return (file) => {
+                const filePath = file.path;
+                const fileName = filePath.replace('.html', '').toLowerCase().replace(/-/g, '');
+                const isHtml = (/.html$/).test(filePath);
+                const isNotIndex = filePath !== 'index.html';
+                const isInFilter = filter.split(' ')
+                    .every((token) => fileName.indexOf(token.toLowerCase()) !== -1)
+                return isHtml && isNotIndex && isInFilter;
+            }
         }
 
         const matchScore = (file, filter) => {
-          const fileWords = file.name.replace('.html', '').toLowerCase().split('-');
-          filter = filter.toLowerCase()
-          let wordIndex;
-          let letterPosition;
-          for (wordIndex = 0; wordIndex < fileWords.length; wordIndex++) {
-            letterPosition = fileWords[wordIndex].indexOf(filter)
-            if (letterPosition > -1) break;
-          }
-          if (letterPosition < 0) {
-            letterPosition = 100;
-          }
-          return wordIndex + letterPosition * 100;
+            const fileWords = file.name.replace('.html', '').toLowerCase().split('-');
+            filter = filter.toLowerCase()
+            let wordIndex;
+            let letterPosition;
+            for (wordIndex = 0; wordIndex < fileWords.length; wordIndex++) {
+                letterPosition = fileWords[wordIndex].indexOf(filter)
+                if (letterPosition > -1) break;
+            }
+            if (letterPosition < 0) {
+                letterPosition = 100;
+            }
+            return wordIndex + letterPosition * 100;
         }
         
         const sortFiles = (filter) => {
-          filter = filter.toLowerCase()
-          return (fileA, fileB) => {
-            return matchScore(fileA, filter) < matchScore(fileB, filter) ? -1 : 1;
-          }
+            filter = filter.toLowerCase()
+            return (fileA, fileB) => {
+                return matchScore(fileA, filter) < matchScore(fileB, filter) ? -1 : 1;
+            }
         }
 
-      const updateList = (data, filter = '') => {
-        let htmlString = '';
-        for (let file of data.filter(filterFiles(filter)).sort(sortFiles(filter))) {
-          const fileName = file.path;
-          const fileDisplayName = fileName.replace('.html', '').split('-').join(' ');
-          htmlString += `<li><a href="${fileName}">${fileDisplayName}</a></li>`;
+        const updateList = (data, filter = '') => {
+            const filteredFiles = data.filter(filterFiles(filter)).sort(sortFiles(filter));
+            const noResultsElement = document.getElementById('no-results');
+            
+            let htmlString = '';
+            if (filteredFiles.length > 0) {
+                for (let file of filteredFiles) {
+                    const fileName = file.path;
+                    const fileDisplayName = fileName.replace('.html', '').split('-').join(' ');
+                    htmlString += `<li><a href="${fileName}">${fileDisplayName}</a></li>`;
+                }
+                document.getElementById('list').innerHTML = htmlString;
+                noResultsElement.style.display = 'none';
+            } else {
+                document.getElementById('list').innerHTML = '';
+                noResultsElement.style.display = 'block';
+            }
         }
-        document.getElementById('list').innerHTML = htmlString;
-      }
 
         const navigateToFile = (data, filter = '') => {
-        files = data.filter(filterFiles(filter));
-      }
+            const files = data.filter(filterFiles(filter));
+            if (files.length === 1) {
+                window.location.href = files[0].path;
+            }
+        }
 
-      (async () => {
-        const response = await fetch('https://api.github.com/repos/howellsryan/career-catalogue/contents/');
-        const data = await response.json();
+        (async () => {
+            try {
+                const response = await fetch('https://api.github.com/repos/howellsryan/career-catalogue/contents/');
+                const data = await response.json();
+                
+                const search_form = document.getElementById('search_form');
+                const search_input = document.getElementById('search_input');
+                const search_value = decodeURIComponent(document.location.search.replace('?', '').replace(/\+/g, ' '));
+                search_input.value = search_value;
 
-
-        
-        let htmlString = '<div> <h1> <a href="./">Search:</a> <form id="search_form" autocomplete="off"> <input id="search_input"> </form> </h1> <ul id="list"> </ul> </div> <ul>';
-
-        htmlString += '</ul>';
-        document.getElementsByTagName('body')[0].innerHTML = htmlString;
-        
-        const search_form = document.getElementById('search_form');
-        const search_input = document.getElementById('search_input');
-        const search_value = decodeURIComponent(document.location.search.replace('?', '').replace(/\+/g, ' '));
-        search_input.value = search_value;
-
-        updateList(data, search_value);
-        // Configure search box events
-        search_form.addEventListener('submit', (event) => {
-          event.preventDefault();
-          navigateToFile(data, search_input.value);
-        })
-        search_input.addEventListener('input', (event) => {
-          updateList(data, event.target.value);
-        })
-        document.addEventListener('keypress', (event) => {
-          search_input.focus()
-        })
-      })()
+                updateList(data, search_value);
+                
+                // Configure search box events
+                search_form.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    navigateToFile(data, search_input.value);
+                });
+                
+                search_input.addEventListener('input', (event) => {
+                    updateList(data, event.target.value);
+                });
+                
+                document.addEventListener('keypress', (event) => {
+                    if (event.target.tagName !== 'INPUT') {
+                        search_input.focus();
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('list').innerHTML = '<li><p style="color:red;">Error loading resources. Please try again later.</p></li>';
+            }
+        })();
     </script>
-  <body>
+</body>
 </html>
