@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getting Things Done - Summary</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Getting Things Done</h1>
+            <p class="subtitle">A productivity methodology by David Allen to reduce stress and increase efficiency</p>
+        </div>
+    </header>
+    
+    <main>
+        <section id="introduction">
+            <h2>Introduction</h2>
+            <p>Getting Things Done is a productivity methodology created by David Allen. It focuses on organizing tasks and projects to reduce stress and increase efficiency.</p>
+        </section>
+        
+        <section id="key-principles">
+            <h2>Key Principles</h2>
+            <div class="key-principles">
+                <div class="principle-card" id="capture-card">
+                    <h4>Capture</h4>
+                    <p>Collect all tasks, ideas, and commitments in a trusted system (like a notebook or app).</p>
+                </div>
+                <div class="principle-card" id="clarify-card">
+                    <h4>Clarify</h4>
+                    <p>Process what each item means and decide the next action.</p>
+                </div>
+                <div class="principle-card" id="organize-card">
+                    <h4>Organize</h4>
+                    <p>Categorize tasks into lists (e.g., "Next Actions," "Waiting For," "Projects").</p>
+                </div>
+                <div class="principle-card" id="reflect-card">
+                    <h4>Reflect</h4>
+                    <p>Regularly review your lists to stay on track.</p>
+                </div>
+                <div class="principle-card" id="engage-card">
+                    <h4>Engage</h4>
+                    <p>Choose tasks based on context, time, energy, and priority.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="two-minute-rule">
+            <h2>2 Minute Rule</h2>
+            <div class="highlight-box">
+                <h4>If it takes less than 2 minutes, just do it!</h4>
+                <p>One of the key concepts within this methodology is if something takes less than 2 minutes to complete, rather than sorting it into lists and organising, <strong>just do it</strong>.</p>
+            </div>
+        </section>
+        
+        <section id="delegation">
+            <h2>Delegation</h2>
+            <p>He talks a lot around delegating to the team, but it isn't a case of forgetting about the task once it's delegated, but more around creating a new type of "Waiting For" list.</p>
+            
+            <ol class="steps-list">
+                <li>Ensure that both you and the person you're delegating to understand the task and its desired outcome.</li>
+                <li>Add task into "Waiting For" list.</li>
+                <li>Trust your team but check-in regularly, be available for any issues early on.</li>
+                <li>Regularly review your "Waiting For" list during your weekly review to stay updated on the status of delegated tasks.</li>
+            </ol>
+        </section>
+        
+        <section id="weekly-reflection">
+            <h2>Weekly Reflection</h2>
+            <p>Part of the methodology talks about reflection being a key part of getting things done, understanding context of the week and keeping "things" on track.</p>
+            
+            <ol class="steps-list">
+                <li><strong>Review Your Calendar:</strong> Look at the past week and figure out what was useful, what was not useful, can I better organise my week? Am I able to drop out of certain calls? Do I need more of a particular call? etc. Getting the right balance of meetings is difficult, too many and you lose productivity, too little and you're out the loop.</li>
+                
+                <li><strong>Update Your Lists:</strong> The idea that is that the lists are constantly updated and fairly correct in real-time, but this weekly reflection gives us a chance to make sure before end of week, e.g. Friday, the list is ready for next week.</li>
+                
+                <li><strong>Review Long-term vision / Roadmap:</strong> Gives me a chance to review on what the long-term vision is of Paul / John, are we heading in the right direction? Are we on-track to meet the roadmap deliverables?</li>
+                
+                <li><strong>Plan for Next Week:</strong> Start to creating items to complete next week, think of talking points for catchups, etc.</li>
+            </ol>
+        </section>
+    </main>
+    
+    <footer>
+        <p>Based on David Allen's Getting Things Done methodology</p>
+    </footer>
+    
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.querySelector('.theme-toggle');
+        const body = document.body;
+        
+        // Check for saved theme preference
+        if (localStorage.getItem('theme') === 'dark') {
+            body.classList.add('dark-mode');
+        }
+        
+        // Principle card animations
+        const cards = document.querySelectorAll('.principle-card');
+        
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                // Remove active class from all cards
+                cards.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked card
+                card.classList.add('active');
+                
+                // Animate clicked card
+                card.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    card.style.transform = '';
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>
