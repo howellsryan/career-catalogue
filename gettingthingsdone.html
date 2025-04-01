@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <a href="index.html" class="home-button" title="Back to Home">
+        <i>⌂</i>
+    </a>
     <header>
         <div class="header-content">
             <h1>Getting Things Done</h1>
@@ -82,20 +85,7 @@
         </section>
     </main>
     
-    <footer>
-        <p>Based on David Allen's Getting Things Done methodology</p>
-    </footer>
-    
     <script>
-        // Theme toggle functionality
-        const themeToggle = document.querySelector('.theme-toggle');
-        const body = document.body;
-        
-        // Check for saved theme preference
-        if (localStorage.getItem('theme') === 'dark') {
-            body.classList.add('dark-mode');
-        }
-        
         // Principle card animations
         const cards = document.querySelectorAll('.principle-card');
         

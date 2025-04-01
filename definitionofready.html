@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Definition of Ready - Summary</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <a href="index.html" class="home-button" title="Back to Home">
+        <i>⌂</i>
+    </a>
+    <header>
+        <div class="header-content">
+            <h1>Definition of Ready</h1>
+            <p class="subtitle">Requirements for work to be undertaken by the development team and brought into a sprint</p>
+        </div>
+    </header>
+    
+    <main>
+        <section id="introduction">
+            <h2>Introduction</h2>
+            <p>Our Definition of Ready represents the requirements for work to be undertaken by the development team and brought into a sprint. We should refine stories on a regular basis to bring them in line with this definition.</p>
+        </section>
+        
+        <section id="key-criteria">
+            <h2>Key Criteria</h2>
+            <div class="key-principles">
+                <div class="principle-card" id="acceptance-criteria-card">
+                    <h4>Acceptance Criteria</h4>
+                    <p>Acceptance criteria is in place for the story.</p>
+                </div>
+                <div class="principle-card" id="understanding-card">
+                    <h4>Team Understanding</h4>
+                    <p>The intent of the story and the work involved is understood by the team and/or clearly documented.</p>
+                </div>
+                <div class="principle-card" id="value-card">
+                    <h4>Value Addition</h4>
+                    <p>The story represents adding value to the product or service.</p>
+                </div>
+                <div class="principle-card" id="deliverable-card">
+                    <h4>Deliverable Outcome</h4>
+                    <p>Outcome of the story is something deliverable.</p>
+                </div>
+                <div class="principle-card" id="breakdown-card">
+                    <h4>Proper Breakdown</h4>
+                    <p>The story is broken down into earliest deliverable chunk, as soon as there is value, we should split work up.</p>
+                </div>
+                <div class="principle-card" id="blockers-card">
+                    <h4>No Blockers</h4>
+                    <p>There are no known blockers that would prevent work from starting.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="refinement-process">
+            <h2>Refinement Process</h2>
+            <p>Regular refinement sessions help ensure that stories are properly prepared before being considered for sprint planning. This increases team efficiency and delivery success.</p>
+            
+            <ol class="steps-list">
+                <li><strong>Initial Review:</strong> Product owner presents new stories to the team.</li>
+                <li><strong>Discussion:</strong> Team discusses requirements, technical approach, and potential challenges.</li>
+                <li><strong>Refinement:</strong> Stories are refined with acceptance criteria and any necessary documentation.</li>
+                <li><strong>Final Check:</strong> Team confirms that all Definition of Ready criteria are met before bringing stories to sprint planning.</li>
+            </ol>
+        </section>
+        
+        <section id="sprint-planning">
+            <h2>Sprint Planning</h2>
+            <div class="highlight-box">
+                <h4>Ready for Sprint Planning!</h4>
+                <p>Once stories meet the Definition of Ready criteria, they can be brought to <strong>Sprint Planning</strong> where we can schedule and commit to undertaking the work.</p>
+            </div>
+        </section>
+    </main>
+    
+    <script>
+        // Principle card animations
+        const cards = document.querySelectorAll('.principle-card');
+        
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                // Remove active class from all cards
+                cards.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked card
+                card.classList.add('active');
+                
+                // Animate clicked card
+                card.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    card.style.transform = '';
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>

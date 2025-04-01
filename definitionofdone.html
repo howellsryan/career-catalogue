@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Definition of Done - Summary</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <a href="index.html" class="home-button" title="Back to Home">
+        <i>⌂</i>
+    </a>
+    <header>
+        <div class="header-content">
+            <h1>Definition of Done</h1>
+            <p class="subtitle">Conditions for a story to be considered complete within a sprint</p>
+        </div>
+    </header>
+    
+    <main>
+        <section id="introduction">
+            <h2>Introduction</h2>
+            <p>The Definition of Done represents a set of conditions for a story undertaken by the development team to be considered complete (in regards to a sprint). These criteria ensure quality and consistency across all delivered work.</p>
+        </section>
+        
+        <section id="key-criteria">
+            <h2>Key Criteria</h2>
+            <div class="key-principles">
+                <div class="principle-card" id="tests-card">
+                    <h4>Testing Complete</h4>
+                    <p>Tests written and passing for all new and modified functionality.</p>
+                </div>
+                <div class="principle-card" id="ci-card">
+                    <h4>CI Passing</h4>
+                    <p>Continuous Integration build is successfully passing.</p>
+                </div>
+                <div class="principle-card" id="security-card">
+                    <h4>Security Verified</h4>
+                    <p>Security vulnerability scan passing with no critical issues.</p>
+                </div>
+                <div class="principle-card" id="review-card">
+                    <h4>Peer Reviewed</h4>
+                    <p>Code has been peer-reviewed by at least one other team member.</p>
+                </div>
+                <div class="principle-card" id="docs-card">
+                    <h4>Documentation</h4>
+                    <p>Documentation has been updated to reflect changes.</p>
+                </div>
+                <div class="principle-card" id="acceptance-card">
+                    <h4>Acceptance Criteria</h4>
+                    <p>We believe all acceptance criteria defined in the story are met.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="production-ready">
+            <h2>Production Ready</h2>
+            <div class="highlight-box">
+                <h4>Ready for Production!</h4>
+                <p>The change is considered deliverable and <strong>Production ready</strong>. When possible, it should be deployed to Production as part of being "Done".</p>
+            </div>
+            <div class="highlight-box">
+                <h4>Important Note</h4>
+                <p>A story is not considered "Done" until it has been deployed to Production (where possible and scenario-appropriate).</p>
+            </div>
+        </section>
+        
+        <section id="qa-involvement">
+            <h2>QA Involvement</h2>
+            <p>Quality Assurance is a critical component of our Definition of Done process. QA should be involved throughout development rather than just at the end.</p>
+            
+            <ol class="steps-list">
+                <li><strong>Early Involvement:</strong> QA should be included in story refinement to understand requirements.</li>
+                <li><strong>Ongoing Testing:</strong> Testing should happen throughout development, not just at the end.</li>
+                <li><strong>Final Verification:</strong> QA performs final verification against acceptance criteria.</li>
+                <li><strong>Sign-off Required:</strong> If there are issues found at the last stage, the item <strong>cannot</strong> be marked as done.</li>
+            </ol>
+        </section>
+    </main>
+    
+    <script>
+        // Principle card animations
+        const cards = document.querySelectorAll('.principle-card');
+        
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                // Remove active class from all cards
+                cards.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked card
+                card.classList.add('active');
+                
+                // Animate clicked card
+                card.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    card.style.transform = '';
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>
