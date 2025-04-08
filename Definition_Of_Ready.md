@@ -1,3 +1,8 @@
+---
+layout: default
+title: Definition of Ready
+---
+
 # Criteria
 
 Our Definition of Ready represents the requirements for work to be undertaken by the development team and brought into a sprint.

@@ -1,3 +1,8 @@
+---
+layout: default
+title: Definition of Done
+---
+
 # Criteria
 
 The Definition of Done represents a set of conditions for a story undertaken by the development team to be considered complete (in regards to a sprint).
