@@ -3,5 +3,9 @@ plugins:
 relative_links:
   enabled: true
   collections: true
+include:
+  - Definition_Of_Done.md
+  - Definition_Of_Ready.md
+  - Getting_Things_Done.md
 
 theme: jekyll-theme-tactile
