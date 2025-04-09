@@ -34,17 +34,17 @@
             filter = filter.toLowerCase()
             return (file) => {
                 const filePath = file.path;
-                const fileName = filePath.replace('.html', '').toLowerCase().replace(/-/g, '');
-                const isHtml = (/.html$/).test(filePath);
+                const fileName = filePath.replace('.md', '').toLowerCase().replace(/-/g, '');
+                const isMarkdown = (/.md$/).test(filePath);
                 const isNotIndex = filePath !== 'index.html';
                 const isInFilter = filter.split(' ')
                     .every((token) => fileName.indexOf(token.toLowerCase()) !== -1)
-                return isHtml && isNotIndex && isInFilter;
+                return isMarkdown && isNotIndex && isInFilter;
             }
         }
 
         const matchScore = (file, filter) => {
-            const fileWords = file.name.replace('.html', '').toLowerCase().split('-');
+            const fileWords = file.name.replace('.md', '').toLowerCase().split('-');
             filter = filter.toLowerCase()
             let wordIndex;
             let letterPosition;
@@ -72,9 +72,8 @@
             let htmlString = '';
             if (filteredFiles.length > 0) {
                 for (let file of filteredFiles) {
-                    const fileName = file.path;
-                    const fileDisplayName = fileName.replace('.html', '').split('-').join(' ');
-                    htmlString += `<li><a href="${fileName}">${fileDisplayName}</a></li>`;
+                    const fileDisplayName = fileName.replace('.md', '').split('-').join(' ');
+                    htmlString += `<li><a href="${fileDisplayName}">${fileDisplayName}</a></li>`;
                 }
                 document.getElementById('list').innerHTML = htmlString;
                 noResultsElement.style.display = 'none';
