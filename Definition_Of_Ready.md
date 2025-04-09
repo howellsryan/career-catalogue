@@ -1,9 +1,8 @@
----
-layout: default
-title: Definition of Ready
----
+[Home](https://howellsryan.github.io/career-catalogue/)
 
-# Criteria
+# Definition of Ready Summary
+
+## Criteria
 
 Our Definition of Ready represents the requirements for work to be undertaken by the development team and brought into a sprint.
 

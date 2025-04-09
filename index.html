@@ -72,7 +72,7 @@
             let htmlString = '';
             if (filteredFiles.length > 0) {
                 for (let file of filteredFiles) {
-                    const fileDisplayName = file.path.replace('.md', '').split('-').join(' ');
+                    const fileDisplayName = file.path.replace('.md', '').split('_').join(' ');
                     htmlString += `<li><a href="${fileDisplayName}">${fileDisplayName}</a></li>`;
                 }
                 document.getElementById('list').innerHTML = htmlString;
