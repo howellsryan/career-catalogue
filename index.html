@@ -72,8 +72,9 @@
             let htmlString = '';
             if (filteredFiles.length > 0) {
                 for (let file of filteredFiles) {
+                    const fileName = file.path.replace('.md', '');
                     const fileDisplayName = file.path.replace('.md', '').split('_').join(' ');
-                    htmlString += `<li><a href="${fileDisplayName}">${fileDisplayName}</a></li>`;
+                    htmlString += `<li><a href="${fileName}">${fileDisplayName}</a></li>`;
                 }
                 document.getElementById('list').innerHTML = htmlString;
                 noResultsElement.style.display = 'none';
