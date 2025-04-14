@@ -1,0 +1,14 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+/* Hide the Jekyll theme header elements */
+.page-header, #header, #title, #header h1, #header p, .project-name, .project-tagline {
+  display: none !important;
+}
+
+/* Make sure your custom header displays properly */
+header {
+  display: block !important;
+}
