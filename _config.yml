@@ -1,6 +1,7 @@
 # Site settings
 name: ""
 title: null
+description: ""
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://howellsryan.github.io/career-catalogue/" # the base hostname & protocol for your site
 
@@ -14,13 +15,16 @@ plugins:
   - jekyll-feed
   - jekyll-seo-tag
 
+github:
+  is_project_page: false
+  
 # Relative links settings
 relative_links:
   enabled: true
   collections: true
 
 # Theme
-theme: jekyll-theme-tactile
+theme: jekyll-theme-midnight
 
 # Default front matter (applied to all files)
 defaults:
