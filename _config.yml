@@ -1,5 +1,6 @@
 # Site settings
-title: Career Catalogue
+name: ""
+title: null
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://howellsryan.github.io/career-catalogue/" # the base hostname & protocol for your site
 
