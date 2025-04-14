@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Career Catalogue</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-    </style>
 </head>
 <body>
     <header>
@@ -18,12 +16,22 @@
     <main>
         <section id="search-section">
             <div id="search-container">
+                <div class="sort-controls">
+                    <select id="sort-order">
+                        <option value="date-desc">Newest First</option>
+                        <option value="date-asc">Oldest First</option>
+                        <option value="name-asc">Name (A-Z)</option>
+                    </select>
+                </div>
                 <form id="search_form" autocomplete="off">
                     <input id="search_input" placeholder="Type to search resources...">
                 </form>
                 <ul id="list"></ul>
                 <div id="no-results" class="no-results" style="display: none;">
                     <p>No resources found matching your search criteria.</p>
+                </div>
+                <div id="loading" class="loading">
+                    <p>Loading files...</p>
                 </div>
             </div>
         </section>
@@ -58,23 +66,44 @@
             return wordIndex + letterPosition * 100;
         }
         
-        const sortFiles = (filter) => {
-            filter = filter.toLowerCase()
-            return (fileA, fileB) => {
-                return matchScore(fileA, filter) < matchScore(fileB, filter) ? -1 : 1;
+        const sortFiles = (files, sortOption, filter = '') => {
+            switch (sortOption) {
+                case 'date-desc':
+                    return files.sort((a, b) => new Date(b.commitDate) - new Date(a.commitDate));
+                case 'date-asc':
+                    return files.sort((a, b) => new Date(a.commitDate) - new Date(b.commitDate));
+                case 'name-asc':
+                    return files.sort((a, b) => a.path.localeCompare(b.path));
+                default:
+                    // When sorting by relevance (search results)
+                    filter = filter.toLowerCase();
+                    return files.sort((a, b) => matchScore(a, filter) < matchScore(b, filter) ? -1 : 1);
             }
         }
 
-        const updateList = (data, filter = '') => {
-            const filteredFiles = data.filter(filterFiles(filter)).sort(sortFiles(filter));
+        const formatDate = (dateString) => {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        const updateList = (files, filter = '') => {
+            const filteredFiles = files.filter(filterFiles(filter));
+            const sortOption = document.getElementById('sort-order').value;
+            const sortedFiles = sortFiles(filteredFiles, sortOption, filter);
+            
             const noResultsElement = document.getElementById('no-results');
             
             let htmlString = '';
-            if (filteredFiles.length > 0) {
-                for (let file of filteredFiles) {
+            if (sortedFiles.length > 0) {
+                for (let file of sortedFiles) {
                     const fileName = file.path.replace('.md', '');
                     const fileDisplayName = file.path.replace('.md', '').split('_').join(' ');
-                    htmlString += `<li><a href="${fileName}">${fileDisplayName}</a></li>`;
+                    const dateDisplay = file.commitDate ? `<span class="file-date">${formatDate(file.commitDate)}</span>` : '';
+                    htmlString += `<li><a href="${fileName}">${fileDisplayName}</a>${dateDisplay}</li>`;
                 }
                 document.getElementById('list').innerHTML = htmlString;
                 noResultsElement.style.display = 'none';
@@ -84,33 +113,77 @@
             }
         }
 
-        const navigateToFile = (data, filter = '') => {
-            const files = data.filter(filterFiles(filter));
-            if (files.length === 1) {
-                window.location.href = files[0].path;
+        const navigateToFile = (files, filter = '') => {
+            const filteredFiles = files.filter(filterFiles(filter));
+            if (filteredFiles.length === 1) {
+                window.location.href = filteredFiles[0].path;
             }
         }
 
-        (async () => {
+        async function getFileCommitDate(repoOwner, repoName, filePath) {
             try {
-                const response = await fetch('https://api.github.com/repos/howellsryan/career-catalogue/contents/');
+                const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/commits?path=${filePath}&page=1&per_page=1`);
+                const commits = await response.json();
+                if (commits.length > 0) {
+                    return commits[0].commit.author.date;
+                }
+                return null;
+            } catch (error) {
+                console.error(`Error fetching commit data for ${filePath}:`, error);
+                return null;
+            }
+        }
+
+        async function enrichFilesWithDates(files, repoOwner, repoName) {
+            const enrichedFiles = [];
+            
+            for (const file of files) {
+                if (file.type === 'file' && file.path.endsWith('.md')) {
+                    const commitDate = await getFileCommitDate(repoOwner, repoName, file.path);
+                    enrichedFiles.push({
+                        ...file,
+                        commitDate: commitDate
+                    });
+                }
+            }
+            
+            return enrichedFiles;
+        }
+
+        (async () => {
+            const repoOwner = 'howellsryan';
+            const repoName = 'career-catalogue';
+            const loadingElement = document.getElementById('loading');
+            
+            try {
+                loadingElement.style.display = 'block';
+                const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/`);
                 const data = await response.json();
+                
+                // Enrich files with commit dates
+                const filesWithDates = await enrichFilesWithDates(data, repoOwner, repoName);
+                loadingElement.style.display = 'none';
                 
                 const search_form = document.getElementById('search_form');
                 const search_input = document.getElementById('search_input');
+                const sort_select = document.getElementById('sort-order');
                 const search_value = decodeURIComponent(document.location.search.replace('?', '').replace(/\+/g, ' '));
                 search_input.value = search_value;
 
-                updateList(data, search_value);
+                updateList(filesWithDates, search_input.value);
                 
                 // Configure search box events
                 search_form.addEventListener('submit', (event) => {
                     event.preventDefault();
-                    navigateToFile(data, search_input.value);
+                    navigateToFile(filesWithDates, search_input.value);
                 });
                 
                 search_input.addEventListener('input', (event) => {
-                    updateList(data, event.target.value);
+                    updateList(filesWithDates, event.target.value);
+                });
+                
+                sort_select.addEventListener('change', () => {
+                    updateList(filesWithDates, search_input.value);
                 });
                 
                 document.addEventListener('keypress', (event) => {
@@ -120,6 +193,7 @@
                 });
             } catch (error) {
                 console.error('Error loading data:', error);
+                loadingElement.style.display = 'none';
                 document.getElementById('list').innerHTML = '<li><p style="color:red;">Error loading resources. Please try again later.</p></li>';
             }
         })();
