@@ -3,12 +3,68 @@
 
 @import "{{ site.theme }}";
 
-/* Hide the Jekyll theme header elements */
-.page-header, #header, #title, #header h1, #header p, .project-name, .project-tagline {
+/* Hide all Jekyll theme header elements */
+#title, header#header, .header, .project-name, .project-tagline, .header h1, .header p {
   display: none !important;
 }
 
-/* Make sure your custom header displays properly */
-header {
-  display: block !important;
+/* Basic styling for our elements */
+#search-container {
+  margin-top: 20px;
+}
+
+.sort-controls {
+  margin-bottom: 15px;
+}
+
+.sort-controls select {
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+#search_input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background-color: #333;
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+#list {
+  list-style-type: none;
+  padding: 0;
+}
+
+#list li {
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: rgba(255,255,255,0.05);
+  border-radius: 4px;
+}
+
+#list a {
+  color: #5fd;
+  text-decoration: none;
+}
+
+#list a:hover {
+  text-decoration: underline;
+}
+
+.file-date {
+  color: #999;
+  margin-left: 10px;
+  font-size: 0.85em;
+}
+
+.loading, .no-results {
+  padding: 15px;
+  background-color: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  margin-top: 15px;
 }
