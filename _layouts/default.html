@@ -92,8 +92,9 @@
   </style>
 </head>
 <body>
+  {% if page.url != "/" and page.url != "/index.html" %}
   <a href="https://howellsryan.github.io/career-catalogue/" class="home-button">Home</a>
-  
+  {% endif %}
   {{ content }}
 </body>
 </html>

@@ -1,5 +1,3 @@
-[Home](https://howellsryan.github.io/career-catalogue/)
-
 # Definition of Done Summary
 
 ## Criteria
