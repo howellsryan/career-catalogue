@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ site.title }}</title>
+  
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -72,9 +73,27 @@
       border-radius: 4px;
       margin-top: 15px;
     }
+    
+    .home-button {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: #373b41;
+      color: #f0c674;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+    
+    .home-button:hover {
+      background-color: #4a4e52;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
+  <a href="https://howellsryan.github.io/career-catalogue/" class="home-button">Home</a>
+  
   {{ content }}
 </body>
 </html>
