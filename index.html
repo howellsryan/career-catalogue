@@ -4,25 +4,23 @@ layout: default
 
 <h1>My Career Catalogue</h1>
 
-<div id="search-section">
-  <div id="search-container">
-    <div class="sort-controls">
-      <select id="sort-order">
-        <option value="date-desc">Newest First</option>
-        <option value="date-asc">Oldest First</option>
-        <option value="name-asc">Name (A-Z)</option>
-      </select>
-    </div>
-    <form id="search_form" autocomplete="off">
-      <input id="search_input" placeholder="Type to search resources...">
-    </form>
-    <ul id="list"></ul>
-    <div id="no-results" class="no-results" style="display: none;">
-      <p>No resources found matching your search criteria.</p>
-    </div>
-    <div id="loading" class="loading">
-      <p>Loading files...</p>
-    </div>
+<div id="search-container">
+  <div class="sort-controls">
+    <select id="sort-order">
+      <option value="date-desc">Newest First</option>
+      <option value="date-asc">Oldest First</option>
+      <option value="name-asc">Name (A-Z)</option>
+    </select>
+  </div>
+  <form id="search_form" autocomplete="off">
+    <input id="search_input" placeholder="Type to search resources...">
+  </form>
+  <ul id="list"></ul>
+  <div id="no-results" class="no-results" style="display: none;">
+    <p>No resources found matching your search criteria.</p>
+  </div>
+  <div id="loading" class="loading">
+    <p>Loading files...</p>
   </div>
 </div>
 
@@ -91,7 +89,7 @@ layout: default
       for (let file of sortedFiles) {
         const fileName = file.path.replace('.md', '');
         const fileDisplayName = file.path.replace('.md', '').split('_').join(' ');
-        const dateDisplay = file.commitDate ? `<span class="file-date" style="color: #666; margin-left: 10px; font-size: 0.85em;">${formatDate(file.commitDate)}</span>` : '';
+        const dateDisplay = file.commitDate ? `<span class="file-date">${formatDate(file.commitDate)}</span>` : '';
         htmlString += `<li><a href="${fileName}">${fileDisplayName}</a>${dateDisplay}</li>`;
       }
       document.getElementById('list').innerHTML = htmlString;
