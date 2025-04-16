@@ -1,32 +1,12 @@
 # Site settings
-name: ""
-title: ""
-description: ""
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://howellsryan.github.io/career-catalogue/" # the base hostname & protocol for your site
+title: Career Catalogue
+description: A collection of career resources
+baseurl: "/career-catalogue"
+url: "https://howellsryan.github.io"
 
 # Build settings
 markdown: kramdown
-highlighter: rouge
-
-# Plugins
-plugins:
-  - jekyll-relative-links
-  - jekyll-feed
-  - jekyll-seo-tag
-
-github:
-  is_project_page: false
-  
-# Relative links settings
-relative_links:
-  enabled: true
-  collections: true
-
-# Default front matter (applied to all files)
-defaults:
-  -
-    scope:
-      path: "" # an empty string here means all files in the project
-    values:
-      layout: "default"
+theme: minima  # Using minima as the base theme
+sass:
+  sass_dir: _sass
+  style: compressed
