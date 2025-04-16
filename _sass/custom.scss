@@ -114,21 +114,32 @@
     margin-top: 15px;
   }
   
-  /* Home button */
+  /* Home button - improved styling */
   .home-button {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     padding: 8px 16px;
-    background-color: #373b41;
+    background-color: #2a2d31;
     color: #f0c674;
-    border-radius: 4px;
-    margin-bottom: 20px;
-    font-weight: bold;
-    transition: background-color 0.2s;
+    border-radius: 6px;
+    margin-bottom: 24px;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    border: 1px solid #373b41;
+    transition: all 0.2s ease;
   }
   
   .home-button:hover {
-    background-color: #4a4e52;
+    background-color: #373b41;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
     text-decoration: none;
+  }
+  
+  .home-button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
   
   /* Mobile responsive styles */
