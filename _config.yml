@@ -10,3 +10,6 @@ theme: minima  # Using minima as the base theme
 sass:
   sass_dir: _sass
   style: compressed
+
+kramdown:
+  auto_ids: false
