@@ -1,3 +1,5 @@
+# 44 Engineering Management Lessons
+
 Welcome to engineering management. It's fun, it's exhausting, it's rewarding — but most importantly it's new! What worked for you before won't work now. You'll have to acquire a new set of skills, and shed some bad habits in the process. Here is a short guide to get you started.
 
 ## Do
@@ -25,7 +27,6 @@ Welcome to engineering management. It's fun, it's exhausting, it's rewarding —
 - Building intuition on how to make good decisions and cultivating a great relationship with your team will get you 95% of the way there. The plethora of conceptual frameworks for organizing engineering teams won't make much difference. They make good managers slightly better and bad managers slightly worse.
 
 ## Emotions and People
-
 - Management happens to be prestigious in our culture, but it's a skill like any other. Prestige is a distraction — it's fickle and arbitrary. Guard against believing you're any better than anyone else. The sooner you get over prestige, the sooner you can focus on doing your job well.
 - Management also attracts scorn. Ignore it — the people who believe managers are useless don't understand the dynamics of building a winning human organization.
 - If you feel something's wrong, you're probably right. Don't let anyone bully you into ignoring your feelings.
