@@ -1,166 +1,191 @@
 /* Hide all Jekyll theme header elements */
 #title, header#header, .header, .project-name, .project-tagline, .header h1, .header p {
-    display: none !important;
-  }
-  
-  /* Basic styling for body and layout */
+  display: none !important;
+}
+
+/* Basic styling for body and layout */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: #c5c8c6;
+  background-color: #1d1f21;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Headings */
+h1 {
+  color: #f0c674;
+  border-bottom: 1px solid #373b41;
+  padding-bottom: 10px;
+}
+
+/* Links */
+a {
+  color: #81a2be;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Search container */
+#search-container {
+  margin-top: 20px;
+}
+
+/* Search controls layout */
+.search-controls {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+/* Sort controls */
+.sort-controls {
+  flex: 0 0 auto;
+}
+
+.sort-controls select {
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #282a2e;
+  color: #c5c8c6;
+  border: 1px solid #373b41;
+}
+
+/* Form elements */
+select, input {
+  background-color: #282a2e;
+  color: #c5c8c6;
+  border: 1px solid #373b41;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+/* Search input */
+#search_form {
+  flex: 1;
+}
+
+#search_input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #373b41;
+  background-color: #282a2e;
+  color: #c5c8c6;
+  box-sizing: border-box;
+}
+
+/* Lists */
+#list {
+  list-style-type: none;
+  padding: 0;
+}
+
+/* Regular lists - proper bullet styling */
+ul:not(#list) {
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+li:not(#list li) {
+  background-color: transparent;
+  padding: 0;
+  margin-bottom: 5px;
+}
+
+/* Resource list items */
+#list li {
+  margin-bottom: 10px;
+  padding: 10px 15px;
+  background-color: #282a2e;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#list a {
+  color: #5fd;
+  text-decoration: none;
+  display: inline-block;
+}
+
+#list a:hover {
+  text-decoration: underline;
+}
+
+/* File date */
+.file-date {
+  color: #969896;
+  margin-left: 10px;
+  font-size: 0.85em;
+}
+
+/* Status messages */
+.loading, .no-results {
+  padding: 15px;
+  background-color: #282a2e;
+  border-radius: 4px;
+  margin-top: 15px;
+}
+
+/* Home button - improved styling */
+.home-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #2a2d31;
+  color: #f0c674;
+  border-radius: 6px;
+  margin-bottom: 24px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid #373b41;
+  transition: all 0.2s ease;
+}
+
+.home-button:hover {
+  background-color: #373b41;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  text-decoration: none;
+}
+
+.home-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.6;
-    color: #c5c8c6;
-    background-color: #1d1f21;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  
-  /* Headings */
-  h1 {
-    color: #f0c674;
-    border-bottom: 1px solid #373b41;
-    padding-bottom: 10px;
-  }
-  
-  /* Links */
-  a {
-    color: #81a2be;
-    text-decoration: none;
-  }
-  
-  a:hover {
-    text-decoration: underline;
-  }
-  
-  /* Search container */
-  #search-container {
-    margin-top: 20px;
-  }
-  
-  /* Sort controls */
-  .sort-controls {
-    margin-bottom: 15px;
-  }
-  
-  .sort-controls select {
-    padding: 8px;
-    border-radius: 4px;
-    background-color: #282a2e;
-    color: #c5c8c6;
-    border: 1px solid #373b41;
-    margin-bottom: 10px;
-  }
-  
-  /* Form elements */
-  select, input {
-    background-color: #282a2e;
-    color: #c5c8c6;
-    border: 1px solid #373b41;
-    padding: 8px;
-    border-radius: 4px;
-    margin-bottom: 10px;
-  }
-  
-  /* Search input */
-  #search_input {
-    width: 100%;
     padding: 10px;
-    border-radius: 4px;
-    border: 1px solid #373b41;
-    background-color: #282a2e;
-    color: #c5c8c6;
-    margin-bottom: 15px;
+    max-width: 100%;
+  }
+  
+  .search-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  #search_input, 
+  .sort-controls select {
+    width: 100%;
     box-sizing: border-box;
   }
-  
-  /* Lists */
-  #list {
-    list-style-type: none;
-    padding: 0;
+
+  #list li {
+    padding: 8px;
   }
   
-  ul {
-    padding: 0;
-    list-style-type: none;
-  }
-  
-  #list li, li {
-    margin-bottom: 10px;
-    padding: 10px;
-    background-color: #282a2e;
-    border-radius: 4px;
-  }
-  
-  #list a {
-    color: #5fd;
-    text-decoration: none;
-  }
-  
-  #list a:hover {
-    text-decoration: underline;
-  }
-  
-  /* File date */
   .file-date {
-    color: #969896;
-    margin-left: 10px;
-    font-size: 0.85em;
+    display: block;
+    margin: 5px 0 0 0;
   }
-  
-  /* Status messages */
-  .loading, .no-results {
-    padding: 15px;
-    background-color: #282a2e;
-    border-radius: 4px;
-    margin-top: 15px;
-  }
-  
-  /* Home button - improved styling */
-  .home-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background-color: #2a2d31;
-    color: #f0c674;
-    border-radius: 6px;
-    margin-bottom: 24px;
-    font-weight: 500;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    border: 1px solid #373b41;
-    transition: all 0.2s ease;
-  }
-  
-  .home-button:hover {
-    background-color: #373b41;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-    text-decoration: none;
-  }
-  
-  .home-button:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  }
-  
-  /* Mobile responsive styles */
-  @media (max-width: 768px) {
-    body {
-      padding: 10px;
-      max-width: 100%;
-    }
-    
-    #search_input, 
-    .sort-controls select {
-      width: 100%;
-      box-sizing: border-box;
-    }
-  
-    #list li {
-      padding: 8px;
-    }
-    
-    .file-date {
-      display: block;
-      margin: 5px 0 0 0;
-    }
-  }
+}

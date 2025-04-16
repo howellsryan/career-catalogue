@@ -1,20 +1,21 @@
 ---
 layout: default
+title: Career Catalogue
 ---
 
-<h1>My Career Catalogue</h1>
-
 <div id="search-container">
-  <div class="sort-controls">
-    <select id="sort-order">
-      <option value="date-desc">Newest First</option>
-      <option value="date-asc">Oldest First</option>
-      <option value="name-asc">Name (A-Z)</option>
-    </select>
+  <div class="search-controls">
+    <div class="sort-controls">
+      <select id="sort-order">
+        <option value="date-desc">Newest First</option>
+        <option value="date-asc">Oldest First</option>
+        <option value="name-asc">Name (A-Z)</option>
+      </select>
+    </div>
+    <form id="search_form" autocomplete="off">
+      <input id="search_input" placeholder="Type to search resources...">
+    </form>
   </div>
-  <form id="search_form" autocomplete="off">
-    <input id="search_input" placeholder="Type to search resources...">
-  </form>
   <ul id="list"></ul>
   <div id="no-results" class="no-results" style="display: none;">
     <p>No resources found matching your search criteria.</p>
