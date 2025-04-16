@@ -1,3 +1,5 @@
+# Getting Things Done
+
 Getting Things Done is a productivity methodology created by David Allen. It focuses on organizing tasks and projects to reduce stress and increase efficiency. 
 
 Here are the key principles broken down:
