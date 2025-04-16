@@ -1,5 +1,3 @@
-# Project deadlines
-
 While I like anyone else appreciate some guidance on expectations, deadlines for me aren’t the answer within a high performing tech team.
 
 Parkinson’s Law suggests that resources for a project will expand based on the time that is permitted, simply if a project has a deadline, the work will be extended to fit that date rather than completing early. 

@@ -1,5 +1,3 @@
-# 44 Engineering Management Lessons
-
 Welcome to engineering management. It's fun, it's exhausting, it's rewarding — but most importantly it's new! What worked for you before won't work now. You'll have to acquire a new set of skills, and shed some bad habits in the process. Here is a short guide to get you started.
 
 ## Do

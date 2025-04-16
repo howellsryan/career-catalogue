@@ -85,6 +85,7 @@ select, input {
 #list {
   list-style-type: none;
   padding: 0;
+  margin-left: 0px;
 }
 
 /* Regular lists - proper bullet styling */
@@ -141,7 +142,7 @@ li:not(#list li) {
   gap: 8px;
   padding: 8px 16px;
   background-color: #2a2d31;
-  color: #f0c674;
+  color: #f0c674 !important;
   border-radius: 6px;
   margin-bottom: 24px;
   font-weight: 500;

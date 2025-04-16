@@ -1,5 +1,3 @@
-# My People
-
 In my experience as an Engineering Manager and an Engineer, I have found that the people in the team are what make the job and role.
 
 I have worked on legacy platforms with hard deadlines and pressure as an engineer, but the whole team were in it together and had a very strong culture and desire to succeed as a team. I've also worked within a team where the pressure was much less, deadlines were non-existent but the team had no culture, dragged into the office and sat in a corner on your own all day.
