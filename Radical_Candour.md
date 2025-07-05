@@ -1,5 +1,3 @@
-# Radical Candour: The Core of a High-Performing Engineering Team
-
 As an engineering manager, my primary focus is building and nurturing a high-performing team. Over the years, I've learnt that the secret to achieving this isn't just about having the most skilled engineers or the flashiest tech stack. It's about fostering an environment of trust and open communication. This is where the concept of **Radical Candour** proves its worth.
 
 ## What is Radical Candour?
