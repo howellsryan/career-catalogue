@@ -1,3 +1,5 @@
+## Passion and Burnout
+
 As an engineering leader, one of my constant concerns with the engineers on my team is **burnout and stress**.
 
 Why, when I am such a preacher of this, do I ignore my own advice? I reflect almost daily on the work I completed through the day, what I did well, what I could have done better, and more times than not, I come to the conclusion: **I did too much**.
