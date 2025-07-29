@@ -2,7 +2,7 @@ As an engineering leader, one of my constant concerns with the engineers on my t
 
 Why, when I am such a preacher of this, do I ignore my own advice? I reflect almost daily on the work I completed through the day, what I did well, what I could have done better, and more times than not, I come to the conclusion: **I did too much**.
 
-That sounds like I’m trying to do less, but it’s the opposite; I want to do more and have an overwhelming and sometimes overreaching ambition.
+That sounds like I’m trying to do less, but it’s the opposite; I want to do more, but have an overwhelming and sometimes overreaching ambition.
 
 I have a thing where I struggle to feel stress. I love the pressure, I love the challenge, I’m a problem solver and engineer at heart; the problems keep me motivated. But there is a **fine line** I tread and have trod for many years, bordering burning out and a **passionate obsession** with my work.
 
