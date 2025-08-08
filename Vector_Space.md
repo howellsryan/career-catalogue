@@ -1,6 +1,6 @@
 (AI Generated)
 
-# 🚀 From Galaxy Maps to Vector Search: Understanding Similarity in Azure AI Search
+# 🚀  Vector Spaces in Azure AI Search
 
 Imagine a galaxy where each star is a thought, a rule, or a query—floating in a high-dimensional space. Welcome to the world of vector search, where understanding meaning isn't about matching keywords but measuring _semantic closeness_.
 
