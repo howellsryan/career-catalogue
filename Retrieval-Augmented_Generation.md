@@ -25,7 +25,7 @@ Perfect for internal tools, compliance-heavy systems, and AI you can trust.
 
 ---
 
-## ✅ Benefits of RAG
+## ✅ Benefits 
 
 - **Grounded Answers**  
   Responses are based on actual source content (like policy docs or manuals), not guesses.
