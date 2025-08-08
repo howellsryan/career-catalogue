@@ -29,6 +29,36 @@ title: Career Catalogue
   // Constants
   const repoOwner = 'howellsryan';
   const repoName = 'career-catalogue';
+
+  // NEW: Cache settings
+  const CACHE_KEY = 'cc_filesWithDates_v1';
+  const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+  // NEW: Read from cache if fresh
+  const readCache = () => {
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.storedAt || !parsed.files) return null;
+      if (Date.now() - parsed.storedAt > CACHE_TTL_MS) return null;
+      return parsed.files;
+    } catch {
+      return null;
+    }
+  };
+
+  // NEW: Write to cache
+  const writeCache = (files) => {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        storedAt: Date.now(),
+        files
+      }));
+    } catch {
+      // Ignore quota or serialization issues silently
+    }
+  };
   
   // Filter files based on search input
   const filterFiles = (filter) => {
@@ -114,23 +144,32 @@ title: Career Catalogue
     const search_form = document.getElementById('search_form');
     const search_input = document.getElementById('search_input');
     const sort_select = document.getElementById('sort-order');
-    
+
+    loadingElement.style.display = 'block';
+
     try {
-      // Load repository contents
-      loadingElement.style.display = 'block';
-      const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/`);
-      const data = await response.json();
-      
-      // Process markdown files and add creation dates
-      const filesWithDates = await Promise.all(
-        data
-          .filter(file => file.type === 'file' && file.path.endsWith('.md'))
-          .map(async file => ({
-            ...file,
-            createdDate: await getFileCreatedDate(file.path)
-          }))
-      );
-      
+      // NEW: Try to load from cache first
+      let filesWithDates = readCache();
+
+      if (!filesWithDates) {
+        // Load repository contents
+        const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/`);
+        const data = await response.json();
+        
+        // Process markdown files and add creation dates
+        filesWithDates = await Promise.all(
+          data
+            .filter(file => file.type === 'file' && file.path.endsWith('.md'))
+            .map(async file => ({
+              ...file,
+              createdDate: await getFileCreatedDate(file.path)
+            }))
+        );
+
+        // NEW: Cache the result
+        writeCache(filesWithDates);
+      }
+
       loadingElement.style.display = 'none';
       
       // Set initial search value from URL
