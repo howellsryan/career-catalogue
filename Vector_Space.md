@@ -1,7 +1,5 @@
 (AI Generated)
 
-# Vector Space
-
 ---
 
 🧠 What is a vector space?
