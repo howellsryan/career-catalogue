@@ -71,8 +71,6 @@ Before the tunnel is established, your device and the VPN server perform a "hand
 
 The "protocol" is the set of rules that determines how the tunnel is built. Not all tunnels are created equal.
 
-### WireGuard: The Gold Standard
-In 2026, WireGuard is the king of tunnelling. It’s incredibly fast because it lives inside the "kernel" of your operating system. While older protocols like OpenVPN have hundreds of thousands of lines of code, WireGuard has around 4,000. This makes it lean, extremely fast for gaming and 4K streaming, and much easier for security experts to audit for bugs.
 
 ### OpenVPN: The Reliable Veteran
 OpenVPN has been around forever. It’s highly configurable and can "disguise" its traffic to look like standard web traffic (HTTPS), which is great for bypassing strict government firewalls that try to block VPNs specifically. However, it’s "heavy" and can be slower on mobile devices.
