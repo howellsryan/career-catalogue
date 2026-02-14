@@ -115,7 +115,7 @@ In 2026, most top-tier VPN providers (the ones worth that **£50 a year**) have 
 
 WireGuard handles the heavy-duty security with minimal overhead, while Split Tunnelling ensures you aren't sacrificing your gigabit fiber speeds just to stay private. It’s no longer a choice between being "safe" or being "fast"—you can finally have both.
 
-# Remote Access VPNs: How the Office Follows You Home
+## Remote Access VPNs: How the Office Follows You Home
 
 If the standard VPN is a tunnel for your personal privacy, the **Remote Access VPN** is a secure bridge back to the mothership. In 2026, where "the office" is often a kitchen table or a seat in a crowded airport, understanding how you're connecting to your company’s internal servers is vital.
 
