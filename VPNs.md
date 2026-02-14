@@ -88,7 +88,7 @@ If you’ve ever noticed your VPN stays connected even when you switch from Wi-F
 
 ## WireGuard: The Lean, Mean Encryption Machine
 
-For years, the tech world relied on OpenVPN. It was solid, but it was a beast—hundreds of thousands of lines of code, slow to connect, and a nightmare to audit for security holes. 
+For years, the tech world relied on OpenVPN. It was solid, but it was a beast - hundreds of thousands of lines of code, slow to connect, and a nightmare to audit for security holes. 
 
 Then came **WireGuard**.
 
