@@ -67,6 +67,13 @@ Encapsulation hides the *destination*, but Encryption hides the *content*. Even 
 ### 3. Authentication
 Before the tunnel is established, your device and the VPN server perform a "handshake." This ensures that both sides are who they say they are. This prevents "Man-in-the-Middle" attacks where a hacker tries to pretend to be your VPN provider to steal your data.
 
+
+## Why Tunnelling Matters for Your Privacy
+
+Without a tunnel, your digital life is an open book. Every site you visit, every unencrypted form you fill out, and every "ping" your apps send is logged by your ISP and likely sold to data brokers.
+
+By forcing all your traffic through an encrypted tunnel, you reclaim the "Right to be Forgotten." You aren't just hiding a single search; you are creating a permanent barrier between your identity and the companies that want to commodify it.
+
 ## The Modern Protocols: Choosing Your Tunnel
 
 The "protocol" is the set of rules that determines how the tunnel is built. Not all tunnels are created equal.
@@ -77,12 +84,6 @@ OpenVPN has been around forever. It’s highly configurable and can "disguise" i
 
 ### IKEv2/IPSec: The Mobile Specialist
 If you’ve ever noticed your VPN stays connected even when you switch from Wi-Fi to 4G/5G, you’re likely using IKEv2. It’s excellent at re-establishing a tunnel quickly if the connection drops, making it the go-to for smartphones.
-
-## Why Tunnelling Matters for Your Privacy
-
-Without a tunnel, your digital life is an open book. Every site you visit, every unencrypted form you fill out, and every "ping" your apps send is logged by your ISP and likely sold to data brokers.
-
-By forcing all your traffic through an encrypted tunnel, you reclaim the "Right to be Forgotten." You aren't just hiding a single search; you are creating a permanent barrier between your identity and the companies that want to commodify it.
 
 
 ## WireGuard: The Lean, Mean Encryption Machine
