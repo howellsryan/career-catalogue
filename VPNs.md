@@ -121,6 +121,6 @@ If you’re setting up a VPN today, check your settings. Ensure your protocol is
 
 ## The Verdict
 
-For roughly **£50 a year**, a high-quality, audited "no-logs" VPN is one of the best investments you can make for your digital life. 
+For roughly **£50 a year**, a high-quality, audited "no-logs", utilising WireGuard VPN is one of the best investments you can make for your digital life. 
 
 Whether you want to stay truly incognito, stop your information from being sold to advertising giants, or just want to ensure your ISP isn't throttling your streaming speeds, a VPN should be your default way of browsing. It’s a small price to pay for reclaiming your privacy in an era where everything is up for sale.
