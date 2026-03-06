@@ -1,4 +1,4 @@
-# Closing the Feedback Loop
+## Closing the Feedback Loop
 
 A high-performing team is rarely defined by technical ability alone. Instead, it is often the rhythm of the team and how they interact with the wider business that determines success. While many organisations focus on the mechanics of a sprint, the most effective teams prioritising the feedback loop that exists at the end of every two-week cycle.
 
