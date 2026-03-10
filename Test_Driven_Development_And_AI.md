@@ -1,5 +1,5 @@
 
-# Test Driven Development (TDD) with AI
+# Test Driven Development (TDD) and AI
 
 ## So, what is TDD?
 
