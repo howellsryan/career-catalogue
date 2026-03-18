@@ -6,7 +6,7 @@ In reality, motivation is a delicate ecosystem built on four specific distinctio
 
 ### 1. The Foundation: Hygiene Factors
 
-Before you can inspire an engineer to reach for the stretch zone, you must ensure the baseline is covered. Hygiene factors, including salary, benefits, work-life balance, and basic tools, are the table stakes of management. 
+Before you can inspire an engineer to reach for the stretch zone, which is the space just beyond their current comfort level but before the point of total frustration, you must ensure the baseline is covered. Hygiene factors, including salary, benefits, work-life balance, and basic tools, are the table stakes of management. 
 
 These factors are critical for retention, but they are ineffective at driving day-to-day engagement. If an engineer is working on a legacy monolith with no test coverage and a deployment process that takes six hours, a 5% bonus will not make them excited to wake up on Monday. Hygiene factors keep people from leaving, but they do not create the drive to innovate. Once the hygiene is settled, you must look toward intrinsic motivators to move the needle.
 
@@ -14,7 +14,7 @@ These factors are critical for retention, but they are ineffective at driving da
 
 Engineers are professional problem solvers. When the problems disappear or become repetitive, boredom sets in. 
 
-The most engaged engineers are those working in the "stretch zone." This is the space just beyond their current comfort level but before the point of total frustration. As a manager, your job is to catalog the specific technical interests of your team. If someone wants to learn Rust, find a low-risk internal tool they can build with it. If they are fascinated by distributed systems, let them lead the discovery phase for the next service.
+The most engaged engineers are those working in the stretch zone. As a manager, your job is to catalog the specific technical interests of your team. If someone wants to learn Rust, find a low-risk internal tool they can build with it. If they are fascinated by distributed systems, let them lead the discovery phase for the next service.
 
 ### 3. Radical Ownership (Autonomy)
 
