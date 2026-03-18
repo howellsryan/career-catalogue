@@ -24,11 +24,13 @@ High-performing teams thrive when they are given problems, not solutions. Instea
 
 ### 4. The Line of Sight (Purpose)
 
-We often bury our engineers under layers of abstraction. They see the PR, the build pipeline, and the cloud infrastructure, but they rarely see the human on the other side of the screen. To fix this, you have to shorten the feedback loop between code and impact:
+We often bury our engineers under layers of abstraction. They see the pull request, the build pipeline, and the cloud infrastructure, but they rarely see the human on the other side of the screen. To fix this, you must shorten the feedback loop between code and impact. Motivation thrives when an engineer is exposed to the closing of a cycle, where they can see their contribution reach its destination and solve a real world problem.
 
-* **Share the "Why":** Explain how a refactor reduces infrastructure costs, which in turn allows the company to invest in more headcount or better tools.
-* **Expose the Pain:** Let engineers sit in on user research sessions. Watching a customer struggle with a UI lag is a far more powerful motivator than a generic bug report.
-* **Celebrate the Save:** When a quick fix prevents a system failure, do not just move on. Document the impact of that "invisible" work.
+This is where the importance of regular sprint ends becomes clear. These milestones are not just for tracking progress; they provide a vital psychological finish line. Closing a sprint provides a sense of achievement and a regular opportunity to see the loop fully closed. Without these intentional moments of completion, the work can feel like an endless stream of tasks without a clear destination.
+
+* **Share the Why:** Explain how a technical refactor reduces infrastructure costs, which in turn allows the company to invest in more headcount or better tools.
+* **Expose the Pain:** Let engineers sit in on user research sessions. Watching a customer struggle with an interface lag is a far more powerful motivator than a generic bug report.
+* **Celebrate the Completion:** When the sprint ends and a feature is delivered, do not just move on to the next priority. Document the impact of that work and show the team exactly how they closed the gap for the user.
 
 ### Building a Motivation Framework
 
