@@ -27,5 +27,5 @@ shipping real software cheaply.
 - **Applied AI** — architecture, cost, and where it earns its keep
 - **Craft** — testing, design patterns, and defensive programming
 
-Browse everything by [topic](/career-catalogue/tags/), or subscribe via
-[RSS](/career-catalogue/feed.xml).
+Browse everything by [topic]({{ '/tags/' | relative_url }}), or subscribe via
+[RSS]({{ '/feed.xml' | relative_url }}).

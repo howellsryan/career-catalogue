@@ -44,6 +44,11 @@ defaults:
 feed:
   path: feed.xml
 
+# Ship the Cloudflare Pages `_headers` file into _site (it starts with an
+# underscore, so Jekyll would otherwise ignore it).
+include:
+  - _headers
+
 # ── Housekeeping (kept out of the built site) ────────────────────
 exclude:
   - Gemfile
@@ -54,3 +59,6 @@ exclude:
   - vendor
   - scripts
   - node_modules
+  - docs
+  - wrangler.toml
+  - _config.cloudflare.yml

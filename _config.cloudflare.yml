@@ -1,0 +1,17 @@
+# Cloudflare Pages overrides.
+#
+# GitHub Pages serves this site under /career-catalogue, so _config.yml sets
+# `baseurl: "/career-catalogue"`. Cloudflare Pages serves it at the domain root,
+# so those must be blank. Layer this file on top of the base config:
+#
+#   bundle exec jekyll build --config _config.yml,_config.cloudflare.yml
+#
+# (That is exactly the "Build command" configured in the Cloudflare Pages
+# dashboard — see docs/cloudflare-pages.md.)
+
+baseurl: ""
+
+# The public URL Cloudflare serves. Change this to your custom domain once it's
+# attached (e.g. https://blog.example.com); it feeds canonical URLs, the sitemap
+# and social-card metadata.
+url: "https://career-catalogue.pages.dev"

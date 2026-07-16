@@ -1,0 +1,31 @@
+# Cloudflare Pages headers. Copied into _site/ by Jekyll (see `include:` in
+# _config.yml) so Cloudflare picks it up. Syntax: https://developers.cloudflare.com/pages/configuration/headers/
+#
+# NOTE: Cloudflare injects `x-robots-tag: noindex` on *.pages.dev preview
+# deployments at the edge and that can't be overridden here — verify indexing
+# against the production custom domain, not a *.pages.dev URL.
+
+/*
+  X-Robots-Tag: index, follow
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# Compiled CSS/JS: stable filenames whose contents can change in place on a new
+# deploy, so revalidate hourly (a cheap 304 via ETag when unchanged) rather than
+# caching immutably.
+/assets/css/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/assets/js/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# The favicon rarely changes — cache for a day.
+/assets/favicon.svg
+  Cache-Control: public, max-age=86400
+
+# Feed and sitemap: short cache so new posts surface quickly.
+/feed.xml
+  Cache-Control: public, max-age=3600
+/sitemap.xml
+  Cache-Control: public, max-age=3600
