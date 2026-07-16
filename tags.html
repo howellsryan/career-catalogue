@@ -1,0 +1,33 @@
+---
+layout: page
+title: Topics
+subtitle: Browse every post by theme.
+permalink: /tags/
+---
+
+{% comment %} Sort tags alphabetically for a stable cloud + index. {% endcomment %}
+{% assign sorted_tags = site.tags | sort %}
+
+<div class="tag-cloud">
+  {% for tag in sorted_tags %}
+    {% assign name = tag | first %}
+    {% assign posts = tag | last %}
+    <a class="tag-pill" href="#{{ name }}">{{ name | replace: '-', ' ' }} <span class="tag-group__count">{{ posts.size }}</span></a>
+  {% endfor %}
+</div>
+
+{% for tag in sorted_tags %}
+  {% assign name = tag | first %}
+  {% assign posts = tag | last %}
+  <section class="tag-group" id="{{ name }}">
+    <h2 class="tag-group__title">{{ name | replace: '-', ' ' }} <span class="tag-group__count">· {{ posts.size }} post{% if posts.size != 1 %}s{% endif %}</span></h2>
+    <ul>
+      {% for post in posts %}
+      <li>
+        <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endfor %}
