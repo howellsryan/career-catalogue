@@ -1,0 +1,47 @@
+name: Build & check
+
+# Validates the site on every PR and on pushes to working branches. GitHub Pages
+# still handles the actual production build/deploy from the default branch; this
+# job is here to catch broken front matter and dead links before they merge.
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
+      - gh-pages
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Lint post front matter
+        run: ruby scripts/lint-posts.rb
+
+      - name: Build site
+        run: bundle exec jekyll build
+        env:
+          JEKYLL_ENV: production
+
+      # html-proofer is installed standalone (not via the Gemfile) so the site's
+      # bundle stays free of its heavy native deps — those broke the Cloudflare
+      # Pages build.
+      - name: Install html-proofer
+        run: gem install html-proofer -v "~> 5.0"
+
+      - name: Check internal links
+        run: |
+          htmlproofer ./_site \
+            --disable-external \
+            --allow-hash-href \
+            --swap-urls "^/career-catalogue/:/"

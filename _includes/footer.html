@@ -1,0 +1,13 @@
+<footer class="site-footer">
+  <div class="wrap site-footer__inner">
+    <p class="site-footer__copy">© {{ site.time | date: "%Y" }} {{ site.author.name }}</p>
+    <nav class="site-footer__links" aria-label="Footer">
+      <a href="{{ '/' | relative_url }}">Writing</a>
+      <a href="{{ '/tags/' | relative_url }}">Topics</a>
+      <a href="{{ '/feed.xml' | relative_url }}">RSS</a>
+      <a href="https://github.com/howellsryan/career-catalogue">GitHub</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="{{ '/assets/js/theme.js' | relative_url }}" defer></script>

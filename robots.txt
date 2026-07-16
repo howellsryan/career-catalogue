@@ -1,0 +1,9 @@
+---
+# Front matter (even empty) tells Jekyll to process this file so the Sitemap
+# line below resolves to the correct absolute URL for whichever host built it
+# (GitHub Pages or Cloudflare Pages).
+---
+User-agent: *
+Allow: /
+
+Sitemap: {{ "/sitemap.xml" | absolute_url }}

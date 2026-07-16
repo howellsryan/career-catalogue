@@ -1,199 +1,108 @@
 ---
 layout: default
-title: Career Catalogue
+title: Writing
 ---
 
-<div id="search-container">
-  <div class="search-controls">
+<section class="hero wrap">
+  <h1 class="hero__title">{{ site.tagline }}</h1>
+  <p class="hero__lead">{{ site.description }}</p>
+</section>
+
+<div class="wrap">
+  <div class="controls">
+    <div class="search">
+      <svg class="search__icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input id="search_input" type="search" placeholder="Search by title, topic or keyword…"
+             aria-label="Search writing" autocomplete="off">
+    </div>
     <div class="sort-controls">
-      <select id="sort-order">
-        <option value="date-desc">Newest First</option>
-        <option value="date-asc">Oldest First</option>
-        <option value="name-asc">Name (A-Z)</option>
+      <label class="visually-hidden" for="sort-order">Sort order</label>
+      <select id="sort-order" aria-label="Sort order">
+        <option value="date-desc">Newest first</option>
+        <option value="date-asc">Oldest first</option>
+        <option value="title-asc">Title (A–Z)</option>
       </select>
     </div>
-    <form id="search_form" autocomplete="off">
-      <input id="search_input" placeholder="Type to search resources...">
-    </form>
   </div>
-  <ul id="list"></ul>
-  <div id="no-results" class="no-results" style="display: none;">
-    <p>No resources found matching your search criteria.</p>
-  </div>
-  <div id="loading" class="loading">
-    <p>Loading files...</p>
+
+  <p class="results-meta" id="results-meta"></p>
+
+  <ul class="post-list" id="post-list">
+    {% for post in site.posts %}
+    <li class="post-card"
+        data-title="{{ post.title | escape | downcase }}"
+        data-tags="{{ post.tags | join: ' ' | downcase }}"
+        data-desc="{{ post.description | escape | downcase }}"
+        data-date="{{ post.date | date: '%s' }}">
+      <a class="post-card__link" href="{{ post.url | relative_url }}">
+        <span class="post-card__date">{{ post.date | date: "%-d %b %Y" }}</span>
+        <h2 class="post-card__title">{{ post.title }}</h2>
+        {% if post.description %}<p class="post-card__desc">{{ post.description }}</p>{% endif %}
+      </a>
+      {% if post.tags.size > 0 %}
+      <ul class="tag-row">
+        {% for tag in post.tags %}
+        <li><a class="tag-pill" href="{{ '/tags/#' | append: tag | relative_url }}">{{ tag | replace: '-', ' ' }}</a></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+
+  <div class="empty-state" id="empty-state" hidden>
+    <p>No writing matches your search.</p>
   </div>
 </div>
 
 <script>
-  // Constants
-  const repoOwner = 'howellsryan';
-  const repoName = 'career-catalogue';
+  (function () {
+    var input = document.getElementById('search_input');
+    var sortSel = document.getElementById('sort-order');
+    var list = document.getElementById('post-list');
+    var empty = document.getElementById('empty-state');
+    var meta = document.getElementById('results-meta');
+    var cards = Array.prototype.slice.call(list.querySelectorAll('.post-card'));
+    var total = cards.length;
 
-  // NEW: Cache settings
-  const CACHE_KEY = 'cc_filesWithDates_v1';
-  const CACHE_TTL_MS = 1 * 2 * 60 * 1000; // 2 minutes
+    function apply() {
+      var q = input.value.trim().toLowerCase();
+      var tokens = q ? q.split(/\s+/) : [];
+      var visible = 0;
 
-  // NEW: Read from cache if fresh
-  const readCache = () => {
-    try {
-      const raw = localStorage.getItem(CACHE_KEY);
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!parsed || !parsed.storedAt || !parsed.files) return null;
-      if (Date.now() - parsed.storedAt > CACHE_TTL_MS) return null;
-      return parsed.files;
-    } catch {
-      return null;
-    }
-  };
-
-  // NEW: Write to cache
-  const writeCache = (files) => {
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({
-        storedAt: Date.now(),
-        files
-      }));
-    } catch {
-      // Ignore quota or serialization issues silently
-    }
-  };
-  
-  // Filter files based on search input
-  const filterFiles = (filter) => {
-    filter = filter.toLowerCase();
-    return (file) => {
-      const fileName = file.path.replace('.md', '').toLowerCase().replace(/-/g, '');
-      return file.path.endsWith('.md') && 
-             file.path !== 'index.html' && 
-             filter.split(' ').every(token => fileName.includes(token));
-    }
-  }
-
-  // Calculate match score for search relevance
-  const matchScore = (file, filter) => {
-    const fileWords = file.name.replace('.md', '').toLowerCase().split('-');
-    filter = filter.toLowerCase();
-    
-    for (let i = 0; i < fileWords.length; i++) {
-      const pos = fileWords[i].indexOf(filter);
-      if (pos > -1) return i + pos * 100;
-    }
-    return 10000; // Large default score if no match
-  }
-  
-  // Sort files based on selected criteria
-  const sortFiles = (files, sortOption, filter = '') => {
-    switch (sortOption) {
-      case 'date-desc': return files.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
-      case 'date-asc': return files.sort((a, b) => new Date(a.createdDate) - new Date(b.createdDate));
-      case 'name-asc': return files.sort((a, b) => a.path.localeCompare(b.path));
-      default: return files.sort((a, b) => matchScore(a, filter.toLowerCase()) - matchScore(b, filter.toLowerCase()));
-    }
-  }
-
-  // Format date for display
-  const formatDate = dateString => 
-    new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'short', day: 'numeric'
-    });
-
-  // Update the displayed file list
-  const updateList = (files, filter = '') => {
-    const filteredFiles = files.filter(filterFiles(filter));
-    const sortedFiles = sortFiles(filteredFiles, document.getElementById('sort-order').value, filter);
-    const listElement = document.getElementById('list');
-    const noResultsElement = document.getElementById('no-results');
-    
-    if (sortedFiles.length > 0) {
-      listElement.innerHTML = sortedFiles.map(file => {
-        const fileName = file.path.replace('.md', '');
-        const fileDisplayName = fileName.split('_').join(' ');
-        const dateDisplay = file.createdDate ? `<span class="file-date">${formatDate(file.createdDate)}</span>` : '';
-        return `<li><a href="${fileName}">${fileDisplayName}</a>${dateDisplay}</li>`;
-      }).join('');
-      noResultsElement.style.display = 'none';
-    } else {
-      listElement.innerHTML = '';
-      noResultsElement.style.display = 'block';
-    }
-  }
-
-  // Navigate to file if there's only one search result
-  const navigateToFile = (files, filter) => {
-    const filteredFiles = files.filter(filterFiles(filter));
-    if (filteredFiles.length === 1) window.location.href = filteredFiles[0].path;
-  }
-
-  // Fetch file creation date from GitHub API
-  async function getFileCreatedDate(filePath) {
-    try {
-      const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/commits?path=${filePath}&per_page=100`);
-      const commits = await response.json();
-      return commits.length ? commits[commits.length - 1].commit.author.date : null;
-    } catch (error) {
-      console.error(`Error fetching creation date for ${filePath}:`, error);
-      return null;
-    }
-  }
-
-  // Initialize the page
-  (async () => {
-    const loadingElement = document.getElementById('loading');
-    const search_form = document.getElementById('search_form');
-    const search_input = document.getElementById('search_input');
-    const sort_select = document.getElementById('sort-order');
-
-    loadingElement.style.display = 'block';
-
-    try {
-      // NEW: Try to load from cache first
-      let filesWithDates = readCache();
-
-      if (!filesWithDates) {
-        // Load repository contents
-        const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/`);
-        const data = await response.json();
-        
-        // Process markdown files and add creation dates
-        filesWithDates = await Promise.all(
-          data
-            .filter(file => file.type === 'file' && file.path.endsWith('.md'))
-            .map(async file => ({
-              ...file,
-              createdDate: await getFileCreatedDate(file.path)
-            }))
-        );
-
-        // NEW: Cache the result
-        writeCache(filesWithDates);
-      }
-
-      loadingElement.style.display = 'none';
-      
-      // Set initial search value from URL
-      search_input.value = decodeURIComponent(document.location.search.replace('?', '').replace(/\+/g, ' '));
-      updateList(filesWithDates, search_input.value);
-      
-      // Set up event listeners
-      search_form.addEventListener('submit', e => {
-        e.preventDefault();
-        navigateToFile(filesWithDates, search_input.value);
+      cards.forEach(function (card) {
+        var hay = card.dataset.title + ' ' + card.dataset.tags + ' ' + card.dataset.desc;
+        var match = tokens.every(function (t) { return hay.indexOf(t) !== -1; });
+        card.hidden = !match;
+        if (match) visible++;
       });
-      
-      search_input.addEventListener('input', e => updateList(filesWithDates, e.target.value));
-      sort_select.addEventListener('change', () => updateList(filesWithDates, search_input.value));
-      
-      // Focus search input when typing starts
-      document.addEventListener('keypress', e => {
-        if (e.target.tagName !== 'INPUT') search_input.focus();
+
+      // Sort the currently-ordered nodes.
+      var order = sortSel.value;
+      var sorted = cards.slice().sort(function (a, b) {
+        if (order === 'title-asc') return a.dataset.title.localeCompare(b.dataset.title);
+        var da = +a.dataset.date, db = +b.dataset.date;
+        return order === 'date-asc' ? da - db : db - da;
       });
-      
-    } catch (error) {
-      console.error('Error loading data:', error);
-      loadingElement.style.display = 'none';
-      document.getElementById('list').innerHTML = '<li><p style="color:red;">Error loading resources. Please try again later.</p></li>';
+      sorted.forEach(function (card) { list.appendChild(card); });
+
+      empty.hidden = visible !== 0;
+      meta.textContent = q
+        ? visible + ' of ' + total + ' posts'
+        : total + ' posts';
     }
+
+    input.addEventListener('input', apply);
+    sortSel.addEventListener('change', apply);
+
+    // Preserve deep-link search via ?query
+    var initial = decodeURIComponent(location.search.replace(/^\?/, '').replace(/\+/g, ' '));
+    if (initial) input.value = initial;
+
+    apply();
   })();
 </script>

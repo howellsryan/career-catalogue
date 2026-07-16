@@ -1,0 +1,24 @@
+# Cloudflare Pages project configuration for the Career Catalogue blog.
+#
+# Deployment model mirrors PocketRPG: Cloudflare Pages with the GitHub Git
+# integration (no deploy CI in this repo). Cloudflare builds the site on every
+# push using the dashboard "Build command" and serves the output directory
+# named below. See docs/cloudflare-pages.md for the exact dashboard settings.
+#
+# Unlike PocketRPG this is a static site, so there are no D1 / R2 / AI bindings
+# and no Pages Functions — Jekyll emits a plain _site/ that Pages serves as-is.
+
+name = "career-catalogue"
+compatibility_date = "2025-01-01"
+
+# Jekyll builds into _site/ (GitHub Pages' default output dir too).
+pages_build_output_dir = "_site"
+
+[vars]
+# Production public URL. Update if you attach a custom domain.
+APP_BASE_URL = "https://career-catalogue.pages.dev"
+
+# Preview deployments (every non-production branch, e.g. the redesign branch and
+# future PRs). Cloudflare sets CF_PAGES_BRANCH; production is the `main` branch.
+[env.preview]
+vars = { APP_BASE_URL = "https://preview.career-catalogue.pages.dev" }

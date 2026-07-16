@@ -1,0 +1,15 @@
+# Jekyll build output & caches
+_site/
+.jekyll-cache/
+.jekyll-metadata
+.sass-cache/
+
+# Bundler
+/vendor/
+/.bundle/
+Gemfile.lock
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp

@@ -1,0 +1,42 @@
+---
+layout: default
+---
+<article class="post wrap wrap--reading">
+  <header class="post__header">
+    <a class="post__back" href="{{ '/' | relative_url }}">← All writing</a>
+    <h1 class="post__title">{{ page.title }}</h1>
+    <div class="post__meta">
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%-d %B %Y" }}</time>
+      <span class="post__dot" aria-hidden="true">·</span>
+      <span>{% include reading-time.html content=content %}</span>
+    </div>
+    {% if page.tags and page.tags.size > 0 %}
+    <ul class="post__tags">
+      {% for tag in page.tags %}
+      <li><a class="tag-pill" href="{{ '/tags/#' | append: tag | relative_url }}">{{ tag | replace: '-', ' ' }}</a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </header>
+
+  <div class="post__body prose">
+    {{ content }}
+  </div>
+
+  <footer class="post__footer">
+    <nav class="post-nav" aria-label="More posts">
+      {% if page.previous %}
+      <a class="post-nav__item post-nav__item--prev" href="{{ page.previous.url | relative_url }}">
+        <span class="post-nav__dir">← Previous</span>
+        <span class="post-nav__title">{{ page.previous.title }}</span>
+      </a>
+      {% endif %}
+      {% if page.next %}
+      <a class="post-nav__item post-nav__item--next" href="{{ page.next.url | relative_url }}">
+        <span class="post-nav__dir">Next →</span>
+        <span class="post-nav__title">{{ page.next.title }}</span>
+      </a>
+      {% endif %}
+    </nav>
+  </footer>
+</article>
