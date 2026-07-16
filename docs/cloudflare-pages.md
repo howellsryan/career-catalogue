@@ -11,29 +11,52 @@ The site stays deployable to **GitHub Pages** at the same time — nothing here
 removes that. The only difference between the two hosts is the URL base, handled
 by `_config.cloudflare.yml`.
 
+> ### ⚠️ Create a **Pages** project, not a **Worker**
+>
+> Cloudflare's "Workers & Pages → **Import a repository**" flow now creates a
+> **Worker** by default. A Worker runs `npx wrangler deploy`, which prepends
+> `npx` to the build command — so `bundle exec jekyll build` becomes
+> `npx bundle exec jekyll build` and dies with **"could not determine executable
+> to run"** (`npx` only knows Node packages; `bundle` is a Ruby gem). Workers
+> also ignore `pages_build_output_dir` in `wrangler.toml`.
+>
+> A Ruby/Jekyll site must use a **Pages** project, whose build system has native
+> Ruby/Jekyll support and runs the build command as-is. Use the **Pages** entry
+> point described below, not "Import a repository".
+
 ---
 
 ## One-time setup
 
-1. **Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to Git.**
-   Pick `howellsryan/career-catalogue`.
+0. **Delete the failed Worker first** (if you already made one). A Worker named
+   `career-catalogue` will collide with the Pages project name. Workers & Pages
+   → the `career-catalogue` Worker → Settings → Delete.
+
+1. **Create the Pages project.** Go to **Workers & Pages → Create → Pages tab →
+   "Connect to Git"** (direct link: `https://dash.cloudflare.com/?to=/:account/pages/new/provider/github`).
+   Pick `howellsryan/career-catalogue`. If a screen offers "Import a repository"
+   that provisions a *Worker*, back out — you want the **Pages** path above.
 
 2. **Build settings:**
 
    | Setting                | Value                                                        |
    | ---------------------- | ------------------------------------------------------------ |
-   | Framework preset       | Jekyll (or "None")                                            |
-   | Build command          | `bundle exec jekyll build --config _config.yml,_config.cloudflare.yml` |
+   | Framework preset       | None (do **not** rely on the Jekyll preset's default command)|
+   | Build command          | `LANG=C.UTF-8 LC_ALL=C.UTF-8 bundle exec jekyll build --config _config.yml,_config.cloudflare.yml` |
    | Build output directory | `_site` (also set in `wrangler.toml`)                        |
    | Production branch      | `main`                                                        |
 
-3. **Environment variables** (Settings → Environment variables):
+   The inline `LANG=…` makes the build robust even if you skip the env var below.
+   The `--config` layer is what serves the site correctly at the domain root
+   instead of under `/career-catalogue`.
+
+3. **Environment variables** (Settings → Environment variables → Production):
 
    | Variable        | Value    | Why                                                     |
    | --------------- | -------- | ------------------------------------------------------- |
    | `RUBY_VERSION`  | `3.3.6`  | Matches `.ruby-version` and the `github-pages` gem.     |
    | `BUNDLE_WITHOUT`| `test`   | Skips the CI-only `html-proofer` gem during the build.  |
-   | `LANG`          | `C.UTF-8`| Avoids the Ruby-Sass "Invalid US-ASCII character" error.|
+   | `LANG`          | `C.UTF-8`| Avoids the Ruby-Sass "Invalid US-ASCII character" error (also inlined in the build command as a backup). |
 
 4. **Save and deploy.** The first build publishes to
    `https://career-catalogue.pages.dev`. Push to any other branch (like the
@@ -72,3 +95,25 @@ LANG=C.UTF-8 LC_ALL=C.UTF-8 \
 # Links are root-relative under this config (no /career-catalogue prefix):
 bundle exec htmlproofer ./_site --disable-external --allow-hash-href
 ```
+
+---
+
+## Troubleshooting
+
+**`npm error could not determine executable to run` / build command shows as
+`npx bundle exec jekyll build`.**
+You created a Worker, not a Pages project — see the warning box at the top.
+Delete the Worker and create a **Pages** project instead.
+
+**`Invalid US-ASCII character "\xE2" …` during Sass compilation.**
+The build locale isn't UTF-8. The build command above inlines `LANG=C.UTF-8`;
+make sure that prefix is present (and/or set the `LANG` env var).
+
+**Every link 404s / CSS doesn't load on `*.pages.dev`.**
+The `--config _config.yml,_config.cloudflare.yml` part of the build command is
+missing, so the site built with the `/career-catalogue` base path. Add it back.
+
+**`bundler: command not found: jekyll` or a Ruby version error.**
+`RUBY_VERSION` isn't taking effect. Confirm the env var is set to `3.3.6` and
+that the Pages project is using build system **v2** (Settings → Build → Build
+system version), which honours `.ruby-version`.
