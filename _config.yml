@@ -1,15 +1,56 @@
-# Site settings
-title: Career Catalogue
-description: A collection of career resources
+# ── Site identity ────────────────────────────────────────────────
+title: "Career Catalogue"
+tagline: "Notes on engineering leadership, AI and building things"
+description: >-
+  Essays and field notes from Ryan Howells on engineering leadership,
+  agile delivery, applied AI and the occasional side project.
+author:
+  name: "Ryan Howells"
+
+# ── URLs ─────────────────────────────────────────────────────────
 baseurl: "/career-catalogue"
 url: "https://howellsryan.github.io"
 
-# Build settings
+# Pretty, stable post URLs: /career-catalogue/radical-candour/
+permalink: /:title/
+
+# ── Build ────────────────────────────────────────────────────────
 markdown: kramdown
-theme: minima  # Using minima as the base theme
+highlighter: rouge
+kramdown:
+  auto_ids: true          # heading anchors, so posts can deep-link
+  input: GFM              # GitHub-flavoured markdown (fenced code, tables)
+  syntax_highlighter: rouge
+
 sass:
   sass_dir: _sass
   style: compressed
 
-kramdown:
-  auto_ids: false
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-redirect-from
+
+# ── Defaults ─────────────────────────────────────────────────────
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+
+# ── Feed / SEO ───────────────────────────────────────────────────
+feed:
+  path: feed.xml
+
+# ── Housekeeping (kept out of the built site) ────────────────────
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - CLAUDE.md
+  - LICENSE
+  - vendor
+  - scripts
+  - node_modules
