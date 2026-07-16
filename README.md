@@ -80,7 +80,10 @@ bundle exec jekyll serve --drafts   # include work-in-progress drafts
 ```bash
 ruby scripts/lint-posts.rb          # validates front matter + tags
 bundle exec jekyll build
-bundle exec htmlproofer ./_site --disable-external --allow-hash-href \
+
+# Link check (html-proofer is installed standalone, not via the Gemfile):
+gem install html-proofer -v "~> 5.0"
+htmlproofer ./_site --disable-external --allow-hash-href \
   --swap-urls "^/career-catalogue/:/"
 ```
 

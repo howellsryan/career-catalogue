@@ -55,8 +55,10 @@ by `_config.cloudflare.yml`.
    | Variable        | Value    | Why                                                     |
    | --------------- | -------- | ------------------------------------------------------- |
    | `RUBY_VERSION`  | `3.3.6`  | Matches `.ruby-version` and the `github-pages` gem.     |
-   | `BUNDLE_WITHOUT`| `test`   | Skips the CI-only `html-proofer` gem during the build.  |
    | `LANG`          | `C.UTF-8`| Avoids the Ruby-Sass "Invalid US-ASCII character" error (also inlined in the build command as a backup). |
+
+   (No `BUNDLE_WITHOUT` needed — `html-proofer` isn't in the Gemfile, so the
+   build bundle only contains what Jekyll needs.)
 
 4. **Save and deploy.** The first build publishes to
    `https://career-catalogue.pages.dev`. Push to any other branch (like the
@@ -93,7 +95,8 @@ LANG=C.UTF-8 LC_ALL=C.UTF-8 \
   bundle exec jekyll build --config _config.yml,_config.cloudflare.yml
 
 # Links are root-relative under this config (no /career-catalogue prefix):
-bundle exec htmlproofer ./_site --disable-external --allow-hash-href
+gem install html-proofer -v "~> 5.0"
+htmlproofer ./_site --disable-external --allow-hash-href
 ```
 
 ---
@@ -112,6 +115,11 @@ make sure that prefix is present (and/or set the `LANG` env var).
 **Every link 404s / CSS doesn't load on `*.pages.dev`.**
 The `--config _config.yml,_config.cloudflare.yml` part of the build command is
 missing, so the site built with the `/career-catalogue` base path. Add it back.
+
+**`Could not find html-proofer-…, pdf-reader-…, Ascii85-… (Bundler::GemNotFound)`.**
+An older revision listed `html-proofer` in the Gemfile. It has been removed —
+pull the latest of this branch. `html-proofer` is now installed standalone in CI
+only, never as part of the site build.
 
 **`bundler: command not found: jekyll` or a Ruby version error.**
 `RUBY_VERSION` isn't taking effect. Confirm the env var is set to `3.3.6` and

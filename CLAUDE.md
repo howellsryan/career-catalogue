@@ -35,7 +35,8 @@ baseurl — every internal link must go through `relative_url` / `absolute_url`)
 ```bash
 LANG=C.UTF-8 LC_ALL=C.UTF-8 bundle exec jekyll build   # UTF-8 needed on some shells
 ruby scripts/lint-posts.rb
-bundle exec htmlproofer ./_site --disable-external --allow-hash-href \
+gem install html-proofer -v "~> 5.0"                    # standalone, not in the Gemfile
+htmlproofer ./_site --disable-external --allow-hash-href \
   --swap-urls "^/career-catalogue/:/"
 ```
 
@@ -45,7 +46,8 @@ The `--swap-urls` flag is required because links are `baseurl`-prefixed but
 ## Gotchas
 
 - GitHub Pages pins gem versions via the `github-pages` gem; only use plugins on
-  its allow-list. `html-proofer` is in a `:test` group so it never runs on Pages.
+  its allow-list. `html-proofer` is intentionally NOT in the Gemfile (its native
+  deps broke the Cloudflare build); CI installs it standalone.
 - On some local shells Ruby's Sass throws `Invalid US-ASCII character` — that's a
   locale issue, fixed by exporting a UTF-8 locale, not a code bug.
 - A stray `_site/assets/css/style.css` may appear from the Pages default theme;

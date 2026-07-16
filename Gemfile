@@ -21,7 +21,8 @@ platforms :mingw, :x64_mingw, :mswin, :jruby do
 end
 gem "wdm", "~> 0.1.1", platforms: [:mingw, :x64_mingw, :mswin]
 
-# CI-only: link checking. Not a Jekyll plugin, so it never runs on GitHub Pages.
-group :test do
-  gem "html-proofer", "~> 5.0"
-end
+# NOTE: link checking uses `html-proofer`, but it is deliberately NOT a
+# dependency here. It pulls heavy native gems (pdf-reader, Ascii85, async…)
+# that the site build never needs, and their presence broke the Cloudflare
+# Pages build. CI installs it standalone instead (`gem install html-proofer`);
+# see .github/workflows/ci.yml and README.md.
