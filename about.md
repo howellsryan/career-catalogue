@@ -16,9 +16,8 @@ more reflective (passion and burnout, living in the present), and a growing set
 is technical: retrieval-augmented generation, semantic caching, MCP servers,
 fuzzy search, and the lessons from running squads of AI agents.
 
-On the side I build **PocketRPG**, a browser-based idle RPG that runs on a
-600ms tick and costs nothing to host — a recurring source of write-ups on
-shipping real software cheaply.
+On the side, I experiment with AI and have been investigating agentic workflows
+through my game **PocketRPG**, which is played by 100s of people world-wide.
 
 ### Topics I come back to
 
