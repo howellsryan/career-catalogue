@@ -1,10 +1,4 @@
----
-layout: post
-title: "Jev: A Better Way to Route AI Tools"
-date: 2026-09-16 18:14:00 +0100
-description: "I tested TypeSafe AI's new Jev model inside PocketRPG to see whether it could route natural-language requests to the right tools more accurately and efficiently."
-tags: [ai, projects]
----
+# Jev: A Better Way to Route AI Tools
 
 TypeSafe AI has released **Jev**, its first System One Model. The company was founded by Diogo Almeida, formerly of OpenAI, and the idea behind Jev is simple: not every AI problem needs a model that generates paragraphs of text.
 
