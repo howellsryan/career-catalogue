@@ -71,7 +71,7 @@ There were **zero Jev API errors in those 159 requests**.
 
 Top 6 is the most useful metric for this architecture because the router reveals up to six candidates rather than executing its first choice.
 
-The optimized lexical router failed to include the expected tool in **8 of the 53 cases**. Jev included the expected tool in its Top 6 on **all 159 runs**.
+The optimized lexical router failed the Top 6 criterion in **8 of the 53 cases**. Jev satisfied it on **all 159 runs**: the expected tool was always present for the 48 tool cases, and the five unsupported cases correctly returned no match.
 
 Jev's only repeated Top 1 miss was "start Dragon Slayer for me": it preferred `assign_slayer_task`, while the expected `start_quest` tool was still in its Top 3.
 
