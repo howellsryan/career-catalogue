@@ -79,28 +79,37 @@ Jev included it **100% of the time** in this benchmark.
 
 That means the main model is far less likely to reach a point where it simply does not have the capability needed to answer the player.
 
-### Cost and speed
+### Cost at scale
 
-The final benchmark averaged about **3,830 Jev input tokens per routing decision**.
+For a real product, the useful comparison is what happens once free allowances are gone and every model token is billable.
 
-TypeSafe currently prices Jev at **$0.042 per million input tokens**, with output tokens free.
+My benchmark averaged about **3,830 Jev input tokens per routing decision**.
 
-Based on my benchmark, that works out at roughly:
+At current list pricing:
 
-- **$0.00016 per search**
-- **$0.16 per 1,000 searches**
-- **$1.61 per 10,000 searches**
-- **$16.09 per 100,000 searches**
+- Jev: **$0.042 per million input tokens**, with output free.
+- GPT-5.6 Luna: **$0.20 per million input tokens** and **$1.20 per million output tokens**.
 
-The old lexical router was effectively free, so Jev does add a small routing cost.
+So if the same 3,830-token routing context were sent to Luna, Jev is about **79% cheaper on input alone**.
 
-The value is downstream.
+| Routing decisions | Jev | GPT-5.6 Luna input only |
+| --- | ---: | ---: |
+| 1,000 | **$0.16** | $0.77 |
+| 100,000 | **$16.09** | $76.60 |
+| 1,000,000 | **$160.86** | $766.02 |
 
-A bad route can cause another GPT tool-search round, another model call, or another message from the player. Jev reduced complete routing misses from 15.1% to zero in my benchmark, so there is a realistic opportunity for the extra routing cost to be recovered through fewer wasted LLM calls.
+That Luna figure is a minimum because it excludes output tokens entirely. Jev's output is free.
 
-Latency increased from roughly **1ms** for lexical search to around **155ms median** for Jev, with a **216ms p95**.
+This isn't a claim that I benchmarked Jev against Luna as the router — my accuracy comparison was Jev against the existing lexical search. It is simply the cost of giving both models the same amount of routing input at current list prices.
 
-Inside an AI interaction that already involves model calls and tools, I think that is a very reasonable trade for the accuracy improvement.
+The old lexical router is still effectively free, but it also missed the correct tool entirely on **15.1%** of my test cases. At scale, those misses matter because they can create another GPT tool-search round, another model call, or another player message.
+
+That gives Jev two useful economics for a high-volume product: it is much cheaper than using a general-purpose LLM for the semantic routing decision, while its better recall can also reduce expensive downstream retries.
+
+Latency increased from roughly **1ms** for lexical search to around **155ms median** for Jev, with a **216ms p95**. Inside an interaction already involving LLM and tool calls, I think that is a reasonable trade.
+
+[TypeSafe's Jev pricing and announcement](https://typesafe.ai/blog/introducing-system-one-models-and-jev)  
+[OpenAI GPT-5.6 Luna pricing](https://developers.openai.com/api/docs/models/gpt-5.6-luna)
 
 ### Why I think Jev is interesting
 
@@ -110,9 +119,9 @@ It does not need to write the response. It does not need to run the workflow. It
 
 It just needs to make one fuzzy decision well.
 
-For PocketRPG, that took tool recall from **84.9% to 100%** while costing around **16 cents per 1,000 searches**.
+For PocketRPG, that took tool recall from **84.9% to 100%**. At volume, it also gives me a semantic routing layer that is substantially cheaper than spending general-purpose LLM tokens on the same decision.
 
-That is a useful trade.
+That combination — better routing and lower model cost at scale — is what makes it particularly interesting for high-volume products.
 
 I would not use Jev where deterministic code already knows the correct answer. But for routing, classification and other places where humans express the same intent in dozens of different ways, it is a very compelling tool.
 
