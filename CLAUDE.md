@@ -19,6 +19,10 @@ baseurl — every internal link must go through `relative_url` / `absolute_url`)
 - **Drafts** go in `_drafts/` (never published). Use `scripts/new-post.sh` to
   create one and `scripts/publish.sh` to promote it into `_posts/`.
 - **Old URLs** are preserved with `redirect_from` — don't remove those lines.
+- **Practice** (`practice.html`, permalink `/practice/`) is a tools section, not a
+  post. Do not move it into `_posts/`. Behaviour is in `assets/js/practice.js`;
+  its stylesheet is `assets/css/practice.scss` and must keep using the existing
+  colour tokens rather than inventing new ones.
 
 ## Design system
 
