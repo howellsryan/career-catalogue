@@ -210,6 +210,10 @@ img { max-width: 100%; height: auto; }
   font-weight: 500;
 }
 .site-nav a:hover { color: var(--text); background: var(--surface-2); text-decoration: none; }
+.site-nav a[aria-current="page"] {
+  color: var(--text);
+  background: var(--surface-2);
+}
 
 .theme-toggle {
   display: grid;
@@ -254,6 +258,15 @@ img { max-width: 100%; height: auto; }
   margin: 0;
   line-height: 1.5;
 }
+.hero__aside {
+  margin: var(--space-5) 0 0;
+  max-width: 34rem;
+  font-family: var(--font-sans);
+  font-size: var(--step--1);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.hero__aside a { font-weight: 600; }
 
 /* ---------- Home: controls ---------- */
 .controls {
@@ -576,6 +589,15 @@ a.tag-pill:hover { color: var(--accent); border-color: var(--accent); text-decor
 .site-footer__links a:hover { color: var(--accent); text-decoration: none; }
 
 /* ---------- Responsive ---------- */
+@media (max-width: 760px) {
+  .site-header__inner {
+    height: auto;
+    min-height: 60px;
+    padding-block: 0.35rem;
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 640px) {
   .wrap { padding-inline: var(--space-4); }
   .site-header__name { display: none; }

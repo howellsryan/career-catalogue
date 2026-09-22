@@ -100,6 +100,7 @@ CI (`.github/workflows/ci.yml`) runs all three on every pull request.
 | Design system / CSS   | `assets/css/styles.scss` (light + dark themes)    |
 | Theme toggle          | `assets/js/theme.js`                              |
 | Home (search + list)  | `index.html` — rendered at build time, filtered client-side |
+| Practice              | `practice.html` — retro, forecast, health, one-to-ones (not a post) |
 | Topics                | `tags.html`                                       |
 | Config & plugins      | `_config.yml`                                     |
 

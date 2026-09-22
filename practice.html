@@ -1,0 +1,259 @@
+---
+layout: default
+title: Practice
+permalink: /practice/
+description: "Tools for engineering leads — a fortnightly retro opener, a Monte Carlo forecast, a team health check and one-to-one questions."
+extra_css: /assets/css/practice.css
+---
+
+<section class="px-hero wrap">
+  <p class="px-eyebrow">Practice</p>
+  <h1 class="px-title">For the room, not the archive.</h1>
+  <p class="px-lead">The writing is where I think a thing through. This is what I want in front of me on the fortnight: a way to get people talking, a range instead of a date, and a check on whether the team is actually alright. The essays on <a href="{{ '/closing-the-feedback-loop/' | relative_url }}">closing the feedback loop</a> and <a href="{{ '/project-deadlines/' | relative_url }}">project deadlines</a> sit behind it.</p>
+</section>
+
+<div class="wrap px">
+  <div class="px-switch-wrap">
+    <div class="px-switch" role="tablist" aria-label="Practice tools">
+      <button type="button" class="px-tab" role="tab" id="tab-retro" aria-controls="panel-retro" aria-selected="true">Retro</button>
+      <button type="button" class="px-tab" role="tab" id="tab-forecast" aria-controls="panel-forecast" aria-selected="false" tabindex="-1">Forecast</button>
+      <button type="button" class="px-tab" role="tab" id="tab-health" aria-controls="panel-health" aria-selected="false" tabindex="-1">Health</button>
+      <button type="button" class="px-tab" role="tab" id="tab-one-to-ones" aria-controls="panel-one-to-ones" aria-selected="false" tabindex="-1">One-to-ones</button>
+      <button type="button" class="px-tab" role="tab" id="tab-room" aria-controls="panel-room" aria-selected="false" tabindex="-1">The room</button>
+    </div>
+  </div>
+
+  <section class="px-panel" id="panel-retro" role="tabpanel" aria-labelledby="tab-retro">
+    <div class="px-layout">
+      <aside class="px-side">
+        <fieldset class="px-field">
+          <legend>Depth</legend>
+          <label class="px-choice"><input type="radio" name="warmth" value="1" checked> Ease people in</label>
+          <label class="px-choice"><input type="radio" name="warmth" value="2"> The work itself</label>
+          <label class="px-choice"><input type="radio" name="warmth" value="3"> Once the room is warm</label>
+          <label class="px-choice"><input type="radio" name="warmth" value="any"> Any depth</label>
+        </fieldset>
+
+        <div class="px-field">
+          <p class="px-legend" id="theme-label">Theme</p>
+          <div class="px-chips" role="group" aria-labelledby="theme-label">
+            <button type="button" class="px-chip" data-theme="any" aria-pressed="true">Any</button>
+            <button type="button" class="px-chip" data-theme="ease" aria-pressed="false">Getting started</button>
+            <button type="button" class="px-chip" data-theme="work" aria-pressed="false">How work moved</button>
+            <button type="button" class="px-chip" data-theme="felt" aria-pressed="false">How it felt</button>
+            <button type="button" class="px-chip" data-theme="craft" aria-pressed="false">Quality</button>
+            <button type="button" class="px-chip" data-theme="value" aria-pressed="false">Value</button>
+            <button type="button" class="px-chip" data-theme="together" aria-pressed="false">Together</button>
+            <button type="button" class="px-chip" data-theme="learn" aria-pressed="false">Learning</button>
+            <button type="button" class="px-chip" data-theme="next" aria-pressed="false">Next fortnight</button>
+            <button type="button" class="px-chip" data-theme="shape" aria-pressed="false">A shape for the hour</button>
+          </div>
+        </div>
+
+        <button type="button" class="px-btn px-btn--ghost px-btn--block" id="retro-round-btn">Suggest a full round</button>
+        <p class="px-hint">A round ignores the filters: a warm open, a shape for the middle, one deeper question, then a close.</p>
+      </aside>
+
+      <div class="px-stage">
+        <article class="px-card" id="retro-card" aria-live="polite">
+          <p class="px-kicker" id="retro-kicker"></p>
+          <h2 class="px-question" id="retro-question"></h2>
+          <p class="px-intro" id="retro-intro" hidden></p>
+          <ol class="px-beats" id="retro-beats" hidden></ol>
+          <p class="px-facilitate" id="retro-facilitate"></p>
+          <p class="px-follow" id="retro-follow" hidden></p>
+        </article>
+
+        <p class="px-empty" id="retro-empty" hidden>Nothing sits in that combination. Ease-in questions stay light on purpose — try another theme, or let the depth go one step further.</p>
+
+        <div class="px-actions">
+          <button type="button" class="px-btn px-btn--primary" id="retro-draw">Another question</button>
+          <button type="button" class="px-btn" id="retro-copy">Copy</button>
+          <p class="px-keys"><kbd>N</kbd> next <span aria-hidden="true">·</span> <kbd>C</kbd> copy</p>
+        </div>
+
+        <div class="px-timer" id="retro-timer">
+          <svg class="px-timer__ring" viewBox="0 0 80 80" aria-hidden="true">
+            <circle class="px-timer__track" cx="40" cy="40" r="34"></circle>
+            <circle class="px-timer__value" id="timer-ring" cx="40" cy="40" r="34"></circle>
+          </svg>
+          <div class="px-timer__body">
+            <p class="px-timer__clock" id="timer-clock">08:00</p>
+            <p class="px-timer__status" id="timer-status" aria-live="polite">Give the question a little silence before you fill it.</p>
+            <div class="px-timer__row">
+              <div class="px-seg" role="group" aria-label="Minutes for this question">
+                <button type="button" data-mins="4">4</button>
+                <button type="button" data-mins="8" aria-pressed="true">8</button>
+                <button type="button" data-mins="12">12</button>
+              </div>
+              <button type="button" class="px-btn px-btn--small" id="timer-toggle">Start</button>
+              <button type="button" class="px-btn px-btn--small px-btn--ghost" id="timer-reset">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <section class="px-round" id="retro-round" hidden>
+          <h3 class="px-round__title">A round for this retro</h3>
+          <ol class="px-round__list" id="retro-round-list"></ol>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section class="px-panel" id="panel-forecast" role="tabpanel" aria-labelledby="tab-forecast" hidden>
+    <div class="px-layout">
+      <aside class="px-side">
+        <div class="px-field">
+          <label class="px-legend" for="tp-paste">Items finished, one fortnight at a time</label>
+          <textarea id="tp-paste" rows="3" spellcheck="false" aria-describedby="tp-hint">6, 9, 7, 4, 8, 11, 5, 8, 6, 10</textarea>
+          <p class="px-hint" id="tp-hint">Oldest to newest. Include the quiet fortnights, and the zeros. Leave out the one you are in. Counts of similarly sized items beat story points.</p>
+        </div>
+        <div class="px-field">
+          <label class="px-legend" for="remaining">Still to finish</label>
+          <input id="remaining" type="number" min="1" max="5000" step="1" value="24" inputmode="numeric">
+        </div>
+        <div class="px-field">
+          <label class="px-legend" for="cadence">Length of a period</label>
+          <select id="cadence">
+            <option value="14" selected>Fortnight · 14 days</option>
+            <option value="7">Week · 7 days</option>
+            <option value="10">Ten days</option>
+            <option value="21">Three weeks</option>
+          </select>
+        </div>
+        <div class="px-field">
+          <label class="px-legend" for="start-date">Next period starts</label>
+          <input id="start-date" type="date">
+          <p class="px-hint">The first day of the next period, not halfway through this one. Dates below are the last day of the period the simulation landed on.</p>
+        </div>
+        <div class="px-actions px-actions--stack">
+          <button type="button" class="px-btn" id="forecast-rerun">Run it again</button>
+          <button type="button" class="px-btn px-btn--ghost" id="forecast-sample">Use the sample history</button>
+        </div>
+      </aside>
+
+      <div class="px-stage">
+        <p class="px-say" id="forecast-say"></p>
+        <div class="px-pcts" id="forecast-pcts"></div>
+        <figure class="px-chart">
+          <figcaption class="px-legend" id="forecast-caption">How often each finish landed, across 10,000 runs</figcaption>
+          <svg id="forecast-chart" role="img" aria-labelledby="forecast-caption" viewBox="0 0 640 220" preserveAspectRatio="xMidYMid meet"></svg>
+        </figure>
+        <p class="px-note" id="forecast-note"></p>
+        <div class="px-actions">
+          <button type="button" class="px-btn" id="forecast-copy">Copy for a stakeholder</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="px-panel" id="panel-health" role="tabpanel" aria-labelledby="tab-health" hidden>
+    <p class="px-section-lead">Pass it round, or tally the room out loud. Three votes is enough to see a shape. This is a conversation, not a score you keep on a person.</p>
+    <div class="px-health">
+      <div class="px-health__chart">
+        <svg id="health-radar" viewBox="0 0 400 400" role="img" aria-labelledby="health-read"></svg>
+        <p class="px-say px-say--small" id="health-read">Add a few votes and the shape appears.</p>
+        <div class="px-actions">
+          <button type="button" class="px-btn" id="health-copy">Copy the picture</button>
+          <button type="button" class="px-btn px-btn--ghost" id="health-reset">Clear votes</button>
+        </div>
+      </div>
+      <div id="health-rows" class="px-health__rows"></div>
+    </div>
+  </section>
+
+  <section class="px-panel" id="panel-one-to-ones" role="tabpanel" aria-labelledby="tab-one-to-ones" hidden>
+    <div class="px-layout">
+      <aside class="px-side">
+        <div class="px-field">
+          <p class="px-legend" id="one-label">What you are actually there for</p>
+          <div class="px-chips" role="group" aria-labelledby="one-label" id="one-chips">
+            <button type="button" class="px-chip" data-one="any" aria-pressed="true">Any</button>
+            <button type="button" class="px-chip" data-one="ease" aria-pressed="false">Ease in</button>
+            <button type="button" class="px-chip" data-one="work" aria-pressed="false">The work</button>
+            <button type="button" class="px-chip" data-one="growth" aria-pressed="false">Growth</button>
+            <button type="button" class="px-chip" data-one="feedback" aria-pressed="false">Feedback</button>
+            <button type="button" class="px-chip" data-one="energy" aria-pressed="false">Energy</button>
+            <button type="button" class="px-chip" data-one="new" aria-pressed="false">New to the team</button>
+          </div>
+        </div>
+        <p class="px-hint">Ask one. Then stop talking. The follow-up is there for when the first answer was polite rather than true.</p>
+      </aside>
+      <div class="px-stage">
+        <article class="px-card" id="one-card" aria-live="polite">
+          <p class="px-kicker" id="one-kicker"></p>
+          <h2 class="px-question" id="one-question"></h2>
+          <p class="px-facilitate" id="one-why"></p>
+          <p class="px-follow" id="one-follow"></p>
+        </article>
+        <div class="px-actions">
+          <button type="button" class="px-btn px-btn--primary" id="one-draw">Another question</button>
+          <button type="button" class="px-btn" id="one-copy">Copy</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="px-panel" id="panel-room" role="tabpanel" aria-labelledby="tab-room" hidden>
+    <div class="px-room">
+      <article class="px-card px-card--tool">
+        <p class="px-kicker">Before you send the invite</p>
+        <h2 class="px-tool-title">What the meeting costs</h2>
+        <div class="px-form">
+          <label class="px-legend" for="meet-people">People in the room</label>
+          <input id="meet-people" type="number" min="1" max="200" step="1" value="6" inputmode="numeric">
+
+          <label class="px-legend" for="meet-mins">Minutes</label>
+          <input id="meet-mins" type="number" min="5" max="480" step="5" value="50" inputmode="numeric">
+
+          <label class="px-legend" for="meet-rate">Fully loaded hourly cost, per person</label>
+          <div class="px-money">
+            <select id="meet-currency" aria-label="Currency">
+              <option value="GBP" selected>£</option>
+              <option value="USD">$</option>
+              <option value="EUR">€</option>
+            </select>
+            <input id="meet-rate" type="number" min="0" max="1000" step="1" value="70" inputmode="decimal">
+          </div>
+          <p class="px-hint">Salary is not the cost. A rough fully loaded rate is enough — the point is the order of magnitude, said before the invite goes out.</p>
+        </div>
+        <p class="px-say px-say--small" id="meet-say"></p>
+      </article>
+
+      <article class="px-card px-card--tool">
+        <p class="px-kicker">After the calendar is honest</p>
+        <h2 class="px-tool-title">What is left to make something</h2>
+        <div class="px-form">
+          <label class="px-legend" for="focus-people">People on the team</label>
+          <input id="focus-people" type="number" min="1" max="200" step="1" value="6" inputmode="numeric">
+
+          <label class="px-legend" for="focus-meetings">Meeting hours per person, this week</label>
+          <input id="focus-meetings" type="number" min="0" max="60" step="0.5" value="12" inputmode="decimal">
+
+          <label class="px-legend" for="focus-available">Hours you are willing to call available</label>
+          <input id="focus-available" type="number" min="1" max="60" step="0.5" value="30" inputmode="decimal">
+          <p class="px-hint">A five-day week minus lunch, slack and the odd interruption is closer to 30 hours than 40. Pretending otherwise is how focus disappears on paper last.</p>
+        </div>
+        <p class="px-say px-say--small" id="focus-say"></p>
+      </article>
+    </div>
+  </section>
+
+  <p class="px-foot">Runs in the browser. History, votes and rates stay in local storage on this device. Nothing is sent anywhere.</p>
+</div>
+
+<script>
+  (function () {
+    var map = { forecast: "forecast", health: "health", "one-to-ones": "one-to-ones", room: "room" };
+    var id = map[(location.hash || "").replace("#", "")];
+    if (!id) return;
+    document.getElementById("panel-retro").hidden = true;
+    document.getElementById("tab-retro").setAttribute("aria-selected", "false");
+    document.getElementById("tab-retro").setAttribute("tabindex", "-1");
+    document.getElementById("panel-" + id).hidden = false;
+    var tab = document.getElementById("tab-" + id);
+    tab.setAttribute("aria-selected", "true");
+    tab.setAttribute("tabindex", "0");
+  })();
+</script>
+<script src="{{ '/assets/js/practice.js' | relative_url }}" defer></script>

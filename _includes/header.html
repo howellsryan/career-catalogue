@@ -6,9 +6,10 @@
     </a>
 
     <nav class="site-nav" aria-label="Primary">
-      <a href="{{ '/' | relative_url }}">Writing</a>
-      <a href="{{ '/tags/' | relative_url }}">Topics</a>
-      <a href="{{ '/about/' | relative_url }}">About</a>
+      <a href="{{ '/' | relative_url }}" {% if page.url == "/" %}aria-current="page"{% endif %}>Writing</a>
+      <a href="{{ '/practice/' | relative_url }}" {% if page.url == "/practice/" %}aria-current="page"{% endif %}>Practice</a>
+      <a href="{{ '/tags/' | relative_url }}" {% if page.url == "/tags/" %}aria-current="page"{% endif %}>Topics</a>
+      <a href="{{ '/about/' | relative_url }}" {% if page.url == "/about/" %}aria-current="page"{% endif %}>About</a>
       <a href="{{ '/feed.xml' | relative_url }}" aria-label="RSS feed">RSS</a>
       <button id="theme-toggle" class="theme-toggle" type="button"
               aria-label="Toggle colour theme" title="Toggle light / dark">
