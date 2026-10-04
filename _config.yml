@@ -62,3 +62,4 @@ exclude:
   - docs
   - wrangler.toml
   - _config.cloudflare.yml
+  - services
