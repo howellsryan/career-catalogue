@@ -11,6 +11,8 @@ author:
 baseurl: "/career-catalogue"
 url: "https://howellsryan.github.io"
 
+daily_fact_api_url: "https://fascinating-fact.rlh.workers.dev/v1/fact"
+
 # Pretty, stable post URLs: /career-catalogue/radical-candour/
 permalink: /:title/
 
