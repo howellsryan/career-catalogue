@@ -169,4 +169,44 @@ test("publication storage failure cannot expose an uncommitted candidate",async(
   });
   await s.job.alarm();
   assert.equal(s.store.state.publication,undefined);assert.equal(s.store.state.job.status,"retry");
+  assert.equal(await s.store.get("fact:"+s.day),undefined);
+});
+
+test("each successful day is archived while the latest publication advances",async()=>{
+  const s=setup();await s.job.queue(s.day);await s.job.alarm();
+  const first=structuredClone(s.store.state.publication);
+  s.setTime(Date.parse("2026-10-05T01:00:00Z"));
+  await s.job.queue("2026-10-05");await s.job.alarm();
+  assert.deepEqual(await s.store.get("fact:2026-10-04"),first);
+  assert.deepEqual(await s.store.get("fact:2026-10-05"),s.store.state.publication);
+  assert.equal(s.store.state.publication.public.fact_date,"2026-10-05");
+  await s.job.alarm();assert.equal((await s.store.list({prefix:"fact:"})).size,2);
+});
+test("failed next-day generation retains the latest fact and never archives a candidate",async()=>{
+  let reject=false;
+  const s=setup({generate:async()=>candidate,review:async()=>({...review,factual:!reject})});
+  await s.job.queue(s.day);await s.job.alarm();
+  const first=structuredClone(s.store.state.publication);reject=true;
+  s.setTime(Date.parse("2026-10-05T01:00:00Z"));
+  await s.job.queue("2026-10-05");await s.job.alarm();
+  assert.deepEqual(s.store.state.publication,first);assert.deepEqual(await s.store.get("fact:2026-10-04"),first);
+  assert.equal(await s.store.get("fact:2026-10-05"),undefined);
+});
+test("archive storage failure rolls back latest publication and retries within allowance",async()=>{
+  const s=setup();await s.job.queue(s.day);
+  const transaction=s.store.transaction.bind(s.store);let fail=true;
+  s.store.transaction=cb=>transaction(async tx=>{
+    const put=tx.put;
+    tx.put=async(key,value)=>{
+      if(key.startsWith("fact:") && fail){fail=false;throw new Error("archive disk failure");}
+      return put(key,value);
+    };
+    return cb(tx);
+  });
+  await s.job.alarm();
+  assert.equal(s.store.state.publication,undefined);assert.equal(await s.store.get("fact:"+s.day),undefined);
+  assert.equal(s.store.state.job.status,"retry");
+  s.tick(300000);await s.job.alarm();
+  assert.equal(s.store.state.job.status,"succeeded");assert.equal(s.store.state.job.attempts,2);
+  assert.deepEqual(await s.store.get("fact:"+s.day),s.store.state.publication);
 });

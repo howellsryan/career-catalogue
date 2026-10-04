@@ -11,6 +11,18 @@ permalink: /daily-fact/
     <p class="daily-fact__lead">One fascinating fact. A fresh perspective.</p>
   </header>
 
+  <div id="fact-browser" class="daily-fact__browser" aria-label="Browse daily facts" hidden>
+    <div class="daily-fact__browse-controls">
+      <button id="fact-today" class="daily-fact__button" type="button" aria-pressed="true">Today</button>
+      <div class="daily-fact__date-control">
+        <label for="fact-history">Explore another day</label>
+        <select id="fact-history"><option value="">Today · latest fact</option></select>
+      </div>
+      <button id="fact-earlier" class="daily-fact__button" type="button" hidden>Earlier dates</button>
+    </div>
+    <p id="fact-history-status" class="daily-fact__history-status" role="status" aria-live="polite">Loading available dates…</p>
+  </div>
+
   <div id="daily-fact" class="daily-fact__panel" data-endpoint="{{ site.daily_fact_api_url | escape }}" aria-busy="false">
     <div id="fact-state" class="daily-fact__state" hidden>
       <span class="daily-fact__symbol" aria-hidden="true">✳</span>
@@ -20,6 +32,7 @@ permalink: /daily-fact/
     </div>
 
     <article id="fact-content" class="daily-fact__article" aria-labelledby="fact-title" hidden>
+      <p id="fact-view" class="daily-fact__view">Today’s discovery</p>
       <div class="daily-fact__meta">
         <span id="fact-category" class="daily-fact__category"></span>
         <span>Published <time id="fact-date"></time></span>

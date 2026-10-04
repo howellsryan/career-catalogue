@@ -1,3 +1,4 @@
+import { archiveKey } from "./archive.js";
 import { CATEGORIES, FactError, approved, publication, utcDate, validateCandidate, validateReview } from "./domain.js";
 import type { Candidate, Category, Publication, Review } from "./domain.js";
 
@@ -148,6 +149,7 @@ export class DailyJob {
         if (state.publication?.public.id === attempt.day) return false;
         state.publication = publication(candidate, review, now);
         state.job!.status = "succeeded"; state.job!.active = undefined;
+        await tx.put(archiveKey(attempt.day), state.publication);
         await tx.put("state", state); await tx.deleteAlarm(); return true;
       });
       if (published) this.log("fact_published", { day: attempt.day, attempt_id: attempt.id, duration_ms: this.now() - started });

@@ -4,15 +4,23 @@ One shared English fact, generated internally at 01:00 UTC and published only af
 
 ## Architecture
 
-The TypeScript Worker owns HTTP routes and the daily cron. One SQLite-backed Durable Object named daily-fact owns the publication and transactional job state. Generation and review call the configured OpenAI model with web search. Evidence stays internal. Workers Caching stores successful reads for 60 seconds; publication changes may take up to one minute to appear at every edge location.
+The TypeScript Worker owns HTTP routes and the daily cron. One SQLite-backed Durable Object named daily-fact owns the latest publication, immutable daily archive records, and transactional job state. Generation and review call the configured OpenAI model with web search. Evidence stays internal. Workers Caching stores successful reads for 60 seconds; publication changes may take up to one minute to appear at every edge location.
 
-No fact archive, historical endpoint, repetition index, UI, or separate database is included.
+The Daily Fact page in Career Catalogue defaults to the latest fact and lets readers select an archived date. No separate database or historical deduplication index is needed.
+
+Approved publications are retained under fact:YYYY-MM-DD in the existing Durable Object. The archive and latest pointer are committed in the same transaction. Failed or rejected generations never enter the archive. Dates are UTC publication dates, not dates mentioned in the content; days without a successful publication have no record.
+
+On startup, an idempotent transaction archives the existing latest publication without changing job state or alarms. Older facts overwritten before this feature cannot be recovered. The existing class, singleton, namespace, and v1 migration remain unchanged. A rollback to older code keeps archive records but stops archiving new publications while that code runs.
 
 ## API
 
 GET /v1/fact returns schema_version, id, title, fact, explanation, category, fact_date, and published_at. Dates describe the actual publication, including when a previous day's fact remains available. There is no stale flag and no citation field.
 
-HEAD and public CORS preflights are supported. Queries are rejected. Before any publication or when a canonical read fails, return 503 {"error":"fact_unavailable"}, never an AI request. Successful reads use Cache-Control: public, max-age=0, s-maxage=60, must-revalidate. Errors are not cached.
+GET /v1/facts returns {"schema_version":1,"facts":[...],"next_before":null}. Each entry contains id, fact_date, title, category, and published_at only. Results are newest first, with up to 50 dates per page. If next_before is a date, request GET /v1/facts?before=YYYY-MM-DD to read the next page; the cursor is exclusive. All approved days are retained, with no archive expiry.
+
+GET /v1/facts/YYYY-MM-DD returns the same public schema as GET /v1/fact for that date. Unpublished dates return 404 {"error":"fact_not_found"}. Invalid calendar dates or malformed/unknown/duplicate queries return 400. Only the history list accepts the optional before parameter. Archive responses contain no internal evidence, citations, or stale flags.
+
+HEAD and public CORS preflights are supported for all three routes. Public write methods are rejected and browsing history never queues a job. Dated facts use Cache-Control: public, max-age=86400, immutable; latest and date-list responses use the existing 60-second shared cache. Storage failures return uncached 503 responses. Before any publication or when a canonical read fails, return 503 {"error":"fact_unavailable"}, never an AI request. Successful reads use Cache-Control: public, max-age=0, s-maxage=60, must-revalidate. Errors are not cached.
 
 ## Setup and release prerequisites
 
@@ -88,4 +96,4 @@ Records include job date, attempt identifier, phase, duration, provider request 
 
 ## Verification
 
-npm run check generates runtime types, type-checks the service, runs the behaviour suite and a real local Workers runtime smoke test, then runs a Wrangler deployment dry run. Tests use fake provider responses and never require or call a live OpenAI key. No browser UI exists to inspect; interaction checks exercise JSON, status codes, CORS, authentication and scheduled delivery.
+npm run check generates runtime types, type-checks the service, runs the behaviour suite and a real local Workers runtime smoke test, then runs a Wrangler deployment dry run. Tests use fake provider responses and never require or call a live OpenAI key. Native runtime tests seed an isolated local Durable Object, restart it with production code, and verify migration, retained facts, exclusive pagination, and restart persistence. The seed fixture is not included in the production entrypoint. Page checks cover date selection, Today, shared links, browser navigation, rapid changes, history failures, mobile layout, and both themes. Live verification uses read-only requests; no archive or deployment check invokes OpenAI.

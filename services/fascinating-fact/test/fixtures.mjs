@@ -11,20 +11,28 @@ export const review = {
   sources:structuredClone(candidate.sources)
 };
 export class MemoryStore {
-  state; alarmTime; serial=Promise.resolve();
+  records=new Map(); alarmTime; serial=Promise.resolve();
+  get state() { return this.records.get("state"); }
+  set state(value) { this.records.set("state", value); }
+  async get(key) { return structuredClone(this.records.get(key)); }
+  async list({prefix="", end, reverse=false, limit=1000}={}) {
+    const entries=[...this.records].filter(([key])=>key.startsWith(prefix) && (!end || key<end)).sort(([a],[b])=>a.localeCompare(b));
+    if(reverse)entries.reverse();
+    return new Map(structuredClone(entries.slice(0,limit)));
+  }
   async transaction(callback) {
     const previous=this.serial;
     let release; this.serial=new Promise(resolve=>{release=resolve;});
     await previous;
-    let state=structuredClone(this.state), alarmTime=this.alarmTime;
+    const records=structuredClone(this.records); let alarmTime=this.alarmTime;
     try {
       const result=await callback({
-        get:async()=>structuredClone(state),
-        put:async(key,value)=>{state=structuredClone(value);},
+        get:async key=>structuredClone(records.get(key)),
+        put:async(key,value)=>{records.set(key,structuredClone(value));},
         setAlarm:async time=>{alarmTime=time;},
         deleteAlarm:async()=>{alarmTime=undefined;}
       });
-      this.state=state; this.alarmTime=alarmTime;
+      this.records=records; this.alarmTime=alarmTime;
       return result;
     } finally { release(); }
   }
