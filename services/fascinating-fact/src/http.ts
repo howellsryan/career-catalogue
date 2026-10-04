@@ -15,6 +15,22 @@ async function authorised(request: Request, token: string | undefined) {
   for (let i = 0; i < left.length; i++) different |= left[i] ^ right[i];
   return different === 0;
 }
+// Network transports may represent an empty POST as a non-null body stream.
+async function hasBody(request: Request) {
+  if (!request.body) return false;
+  const reader = request.body.getReader();
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) return false;
+      if (value.byteLength > 0) return true;
+    }
+  } catch { return true; }
+  finally {
+    await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+}
 function json(request: Request, value: unknown, status: number, headers: Record<string, string> = {}) {
   return new Response(request.method === "HEAD" ? null : JSON.stringify(value), {
     status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...headers }
@@ -47,7 +63,7 @@ export const handler = {
     if (url.pathname === "/internal/bootstrap") {
       if (!await authorised(request, env.BOOTSTRAP_TOKEN)) return json(request, { error: "unauthorised" }, 401);
       if (request.method !== "POST") return json(request, { error: "method_not_allowed" }, 405, { Allow: "POST" });
-      if (url.search || request.body !== null) return json(request, { error: "parameters_not_supported" }, 400);
+      if (url.search || await hasBody(request)) return json(request, { error: "parameters_not_supported" }, 400);
       try {
         const status = await singleton(env).start(utcDate(Date.now()), true);
         if (status === "unconfigured") return json(request, { error: "generation_not_configured" }, 503);
