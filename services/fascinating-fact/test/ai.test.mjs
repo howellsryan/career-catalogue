@@ -41,10 +41,12 @@ test("a response without evidence retrieval is rejected",async()=>{
 });
 test("quota rejection is permanent; throttling is retryable and never retried inside adapter",async()=>{
   for(const [status,code,expected,permanent] of [[429,"insufficient_quota","openai_quota_or_billing",true],[429,"rate_limit_exceeded","openai_transient",false],[400,"model_not_found","openai_configuration_rejected",true]]) {
-    let calls=0;
+    let calls=0;const events=[];
     const send=async()=>{calls++;return Response.json({error:{code}},{status});};
-    await assert.rejects(()=>new OpenAI("key","model",send,quiet).generate("science","2026-10-04"),{code:expected,permanent});
+    const log=(event,data)=>events.push({event,...data});
+    await assert.rejects(()=>new OpenAI("key","model",send,log).generate("science","2026-10-04"),{code:expected,permanent});
     assert.equal(calls,1);
+    assert.deepEqual(events,[{event:"openai_request_rejected",phase:"daily_fact_candidate",day:"2026-10-04",status,code,request_id:null}]);
   }
 });
 test("refusal and malformed output are rejected",async()=>{
@@ -60,4 +62,15 @@ test("disabled budget verification blocks persisted alarm work before an externa
   await assert.rejects(()=>ai.generate("science","2026-10-04"),{code:"openai_configuration_missing",permanent:true});
   await assert.rejects(()=>ai.review(candidate,"2026-10-04"),{code:"openai_configuration_missing",permanent:true});
   assert.equal(calls,0);
+});
+
+test("transport is called without an adapter receiver in generation and review",async()=>{
+  const send=async function(url,options) {
+    assert.equal(this,undefined);
+    const phase=JSON.parse(options.body).text.format.name;
+    return Response.json(envelope(phase==="daily_fact_candidate"?candidate:review));
+  };
+  const ai=new OpenAI("key","model",send,quiet);
+  assert.deepEqual(await ai.generate("science","2026-10-04"),candidate);
+  assert.deepEqual(await ai.review(candidate,"2026-10-04"),review);
 });
