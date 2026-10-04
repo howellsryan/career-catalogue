@@ -25,20 +25,62 @@ test("simultaneous queue requests share a single job",async()=>{
   assert.equal(results.filter(x=>x==="accepted").length,1);
   assert.equal(s.store.state.job.attempts,0);
 });
-test("rejections stop after exactly three attempts and preserve the previous fact",async()=>{
+test("rejections stop after exactly ten attempts and preserve the previous fact",async()=>{
   let calls=0;
   const s=setup({generate:async()=>{calls++;return candidate;},review:async()=>({...review,factual:false})});
   const previous=publication(candidate,review,Date.parse("2026-10-03T01:00:00Z"));
   s.store.state={publication:previous};
   await s.job.queue(s.day);
+  for(let attempt=1;attempt<=10;attempt++) {
+    await s.job.alarm();
+    assert.equal(calls,attempt);
+    if(attempt<10) {
+      const delay=attempt===1?300000:600000;
+      assert.equal(s.store.state.job.status,"retry");
+      assert.equal(s.store.alarmTime,s.now()+delay);
+      s.tick(delay);
+    }
+  }
   await s.job.alarm();
-  assert.equal(s.store.alarmTime,s.now()+300000);
-  s.tick(300000);await s.job.alarm();
-  assert.equal(s.store.alarmTime,s.now()+600000);
-  s.tick(600000);await s.job.alarm();await s.job.alarm();
-  assert.equal(calls,3);assert.equal(s.store.state.job.status,"stopped");
+  assert.equal(calls,10);assert.equal(s.store.state.job.attempts,10);
+  assert.equal(s.store.state.job.status,"stopped");assert.equal(s.store.alarmTime,undefined);
   assert.deepEqual(s.store.state.publication,previous);
-  assert.equal(s.events.filter(x=>x.event==="candidate_rejected").length,3);
+  assert.equal(s.events.filter(x=>x.event==="candidate_rejected").length,10);
+});
+test("bootstrap resumes the legacy exhausted job without resetting its three attempts",async()=>{
+  const s=setup();
+  s.store.state={job:{day:s.day,attempts:3,status:"stopped",nextAt:s.now(),failure:"evidence_not_retrieved"}};
+  assert.equal(await s.job.queue(s.day),"stopped");
+  const results=await Promise.all(Array.from({length:20},()=>s.job.queue(s.day,true)));
+  assert.equal(results.filter(x=>x==="accepted").length,1);
+  assert.equal(results.filter(x=>x==="pending").length,19);
+  assert.equal(s.store.state.job.attempts,3);
+  await Promise.all([s.job.alarm(),s.job.alarm()]);
+  assert.equal(s.store.state.job.attempts,4);assert.equal(s.store.state.job.status,"succeeded");
+  assert.equal(s.events.filter(x=>x.event==="attempt_started").length,1);
+  assert.equal(await s.job.queue(s.day,true),"published");
+});
+test("bootstrap never resumes billing, permanent, unknown legacy, or fully exhausted jobs",async()=>{
+  for(const patch of [
+    {failure:"openai_quota_or_billing"}, {failure:"openai_configuration_rejected"},
+    {failure:"openai_configuration_missing"}, {failure:"unknown_legacy_failure"},
+    {failure:undefined}, {failure:"day_expired"},
+    {failure:"evidence_not_retrieved",failurePermanent:true},
+    {attempts:10,failure:"review_rejected",failurePermanent:false}
+  ]) {
+    const s=setup();
+    s.store.state={job:{day:s.day,attempts:3,status:"stopped",nextAt:s.now(),...patch}};
+    const previous=structuredClone(s.store.state);
+    assert.equal(await s.job.queue(s.day,true),"stopped");
+    assert.deepEqual(s.store.state,previous);assert.equal(s.store.alarmTime,undefined);
+  }
+});
+test("persisted retryability allows recovery within the larger allowance",async()=>{
+  const s=setup();
+  s.store.state={job:{day:s.day,attempts:7,status:"stopped",nextAt:s.now(),failure:"new_retryable_failure",failurePermanent:false}};
+  assert.equal(await s.job.queue(s.day,true),"accepted");
+  await s.job.alarm();assert.equal(s.store.state.job.attempts,8);
+  assert.equal(s.store.state.job.status,"succeeded");
 });
 test("network failure can recover on the next attempt",async()=>{
   let calls=0;
@@ -47,10 +89,12 @@ test("network failure can recover on the next attempt",async()=>{
   assert.equal(s.store.state.job.status,"succeeded");assert.equal(calls,2);
 });
 test("billing or permanent model error stops remaining attempts",async()=>{
-  for(const code of ["openai_quota_or_billing","openai_configuration_rejected"]) {
+  for(const code of ["openai_quota_or_billing","openai_configuration_rejected","future_permanent_failure"]) {
     const s=setup({generate:async()=>{throw new FactError(code,true);},review:async()=>review});
     await s.job.queue(s.day);await s.job.alarm();s.tick(1000000);await s.job.alarm();
     assert.equal(s.store.state.job.attempts,1);assert.equal(s.store.state.job.status,"stopped");
+    assert.equal(s.store.state.job.failurePermanent,true);
+    assert.equal(await s.job.queue(s.day,true),"stopped");
   }
 });
 test("a duplicate alarm while generation is pending does not resubmit",async()=>{
