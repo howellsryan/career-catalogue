@@ -48,11 +48,11 @@ Bootstrap shares the daily attempt limit with cron and becomes permanently unava
 
     npx wrangler secret delete BOOTSTRAP_TOKEN
 
-A stopped initial job remains stopped for its UTC day. Wait until the next scheduled day rather than resetting its allowance. Deployments do not bootstrap or erase state.
+A protected bootstrap can resume a retryable stopped initial job when its recorded attempt count is below the current daily limit, for example after increasing that limit. It preserves the existing count; it cannot restart billing/permanent failures or a job that has used all ten attempts. Older jobs without a persisted failure classification resume only for known retryable failures. Deployments do not bootstrap or erase state.
 
 ## Retry and recovery
 
-Three TOTAL attempts per UTC day, not three retries in addition to the first attempt. Each attempt has one generation request and at most one separate review request. Automatic SDK retries are absent. Retry after 5 minutes following attempt one and 10 minutes following attempt two.
+Ten TOTAL attempts per UTC day, not ten retries in addition to the first attempt. Each attempt has one generation request and at most one separate review request. Automatic SDK retries are absent. Retry after 5 minutes following attempt one and 10 minutes after every subsequent retryable failure while allowance remains.
 
 Each model request has a 180-second deadline, a 4,000-output-token limit and at most four hosted search/tool calls. Provider usage includes those tools. Duplicate alarms, concurrent schedules, and restart recovery obey durable ownership markers. Interrupted requests are not replayed within an attempt; their watchdog consumes the attempt and schedules the next allowed one. Superseded or previous-day responses cannot publish.
 

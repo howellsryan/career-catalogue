@@ -17,11 +17,20 @@ export interface Job {
   nextAt: number;
   active?: { id: string; phase: "generation" | "review"; deadline: number };
   failure?: string;
+  failurePermanent?: boolean;
 }
 export interface State { publication?: Publication; job?: Job }
-export const MAX_ATTEMPTS = 3;
+export const MAX_ATTEMPTS = 10;
 export const REQUEST_TIMEOUT_MS = 180_000;
 const RECOVERY_GRACE_MS = 15_000;
+// Older jobs did not persist failure permanence; only known retryable failures may resume.
+const LEGACY_RETRYABLE_FAILURES = new Set([
+  "openai_timeout", "openai_network_failure", "openai_transient", "openai_invalid_response",
+  "openai_incomplete", "evidence_search_missing", "openai_refusal", "openai_invalid_json",
+  "evidence_not_retrieved", "invalid_candidate", "invalid_review", "category_mismatch",
+  "review_rejected", "interrupted_attempt", "expired_generation", "expired_review",
+  "unexpected_failure", "attempts_exhausted"
+]);
 export class DailyJob {
   constructor(
     private readonly store: Store,
@@ -42,7 +51,16 @@ export class DailyJob {
       if (bootstrap && state.publication) return "published";
       if (day !== utcDate(now)) return "obsolete";
       if (state.publication?.public.id === day) return "published";
-      if (state.job?.day === day) return state.job.status === "stopped" ? "stopped" : "pending";
+      if (state.job?.day === day) {
+        const job = state.job;
+        if (job.status !== "stopped") return "pending";
+        const retryable = job.failurePermanent === false ||
+          (job.failurePermanent === undefined && LEGACY_RETRYABLE_FAILURES.has(job.failure ?? ""));
+        if (!bootstrap || !retryable || job.attempts >= MAX_ATTEMPTS) return "stopped";
+        job.status = "queued"; job.nextAt = now; job.active = undefined;
+        await tx.put("state", state); await tx.setAlarm(now + 1);
+        return "accepted";
+      }
       state.job = { day, attempts: 0, status: "queued", nextAt: now };
       await tx.put("state", state);
       await tx.setAlarm(now + 1);
@@ -58,6 +76,7 @@ export class DailyJob {
     const job = state.job!;
     job.active = undefined;
     job.failure = code;
+    job.failurePermanent = permanent;
     if (permanent || job.attempts >= MAX_ATTEMPTS || job.day !== utcDate(now)) {
       job.status = "stopped"; await tx.deleteAlarm();
     } else {
