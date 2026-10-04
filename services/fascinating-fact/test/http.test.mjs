@@ -64,3 +64,33 @@ test("storage failure returns 503 and never invokes generation",async()=>{
   assert.equal((await handler.fetch(new Request("https://facts.example/v1/fact"),s.value)).status,503);
   assert.equal(s.calls.starts,0);
 });
+
+test("bootstrap accepts an empty POST body stream",async()=>{
+  const s=env();
+  const request=new Request("https://facts.example/internal/bootstrap",{
+    method:"POST",headers:{Authorization:"Bearer "+token,"Content-Length":"0"},body:new Uint8Array()
+  });
+  assert.notEqual(request.body,null);
+  const response=await handler.fetch(request,s.value);
+  assert.equal(response.status,202);assert.equal(s.calls.starts,1);
+});
+test("bootstrap rejects streamed payloads despite a zero content length",async()=>{
+  const s=env();let cancelled=false;
+  const body=new ReadableStream({
+    start(controller){controller.enqueue(new Uint8Array());controller.enqueue(new TextEncoder().encode('{"prompt":"override"}'));},
+    cancel(){cancelled=true;}
+  });
+  const request=new Request("https://facts.example/internal/bootstrap",{
+    method:"POST",headers:{Authorization:"Bearer "+token,"Content-Length":"0"},body,duplex:"half"
+  });
+  const response=await handler.fetch(request,s.value);
+  assert.equal(response.status,400);assert.equal(s.calls.starts,0);assert.equal(cancelled,true);
+});
+test("bootstrap rejects query parameters with an empty body stream",async()=>{
+  const s=env();
+  const request=new Request("https://facts.example/internal/bootstrap?refresh=true",{
+    method:"POST",headers:{Authorization:"Bearer "+token},body:new Uint8Array()
+  });
+  const response=await handler.fetch(request,s.value);
+  assert.equal(response.status,400);assert.equal(s.calls.starts,0);
+});
