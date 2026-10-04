@@ -68,7 +68,8 @@ export class OpenAI implements AI {
     const signal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
     let response: Response;
     try {
-      response = await this.send("https://api.openai.com/v1/responses", {
+      const send = this.send;
+      response = await send("https://api.openai.com/v1/responses", {
         method: "POST", signal,
         headers: { Authorization: "Bearer " + this.key, "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -82,6 +83,8 @@ export class OpenAI implements AI {
     if (!response.ok) {
       let providerCode = "";
       try { providerCode = (await response.json() as { error?: { code?: string } }).error?.code ?? ""; } catch {}
+      this.log("openai_request_rejected", { phase, day, status: response.status,
+        code: providerCode || null, request_id: response.headers.get("x-request-id") });
       if (["insufficient_quota", "billing_hard_limit_reached", "billing_not_active", "usage_limit_reached"].includes(providerCode) ||
           response.status === 402) throw new FactError("openai_quota_or_billing", true);
       if (response.status === 429 || response.status >= 500) throw new FactError("openai_transient");
