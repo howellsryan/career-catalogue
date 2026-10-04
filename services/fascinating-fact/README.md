@@ -30,7 +30,7 @@ OPENAI_API_KEY must be the dedicated credential agreed for this service. BOOTSTR
 
 OPENAI_MODEL is gpt-6.1-sol. Do not substitute another model silently. Run npm run verify-model in a securely configured operator environment to check availability. That read-only check does not prove web-search/structured-output capability; the initial bootstrap verifies the complete integration.
 
-OPENAI_BUDGET_ENFORCED defaults to false. Set it to true in wrangler.jsonc only after verifying that the actual OpenAI spending control blocks requests when the allowance is exhausted. Budget alerts alone are insufficient. The application implements no monetary cap and cannot track unrelated shared-plan spending. This release prerequisite belongs to the operator; do not enable generation merely because an alert exists.
+OPENAI_BUDGET_ENFORCED is enabled for this deployment following operator confirmation of a blocking OpenAI spending control. For any new account or project, keep it false until verifying that the actual OpenAI spending control blocks requests when the allowance is exhausted. Budget alerts alone are insufficient. The application implements no monetary cap and cannot track unrelated shared-plan spending. This release prerequisite belongs to the operator; do not enable generation merely because an alert exists.
 
 Missing credentials or an unconfirmed spending control leaves generation disabled. Public stored reads still work.
 
