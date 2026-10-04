@@ -648,7 +648,7 @@ a.tag-pill:hover { color: var(--accent); border-color: var(--accent); text-decor
   border-top: 3px solid var(--accent); border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg); overflow: hidden;
 }
-.daily-fact__panel [hidden] { display: none !important; }
+.daily-fact [hidden] { display: none !important; }
 .daily-fact__article { padding: clamp(1.5rem, 5vw, 3.5rem); overflow-wrap: anywhere; }
 .daily-fact__meta {
   display: flex; align-items: center; justify-content: space-between;
@@ -722,4 +722,33 @@ a.tag-pill:hover { color: var(--accent); border-color: var(--accent); text-decor
   .daily-fact { padding-top: var(--space-7); }
   .daily-fact__intro { margin-bottom: var(--space-6); }
   .daily-fact__context { padding: var(--space-4); }
+}
+
+/* Browse published facts without leaving the page. */
+.daily-fact__browser { margin-bottom: var(--space-5); }
+.daily-fact__browse-controls { display: flex; align-items: end; flex-wrap: wrap; gap: var(--space-3); }
+.daily-fact__date-control { flex: 1 1 16rem; min-width: 0; }
+.daily-fact__date-control label {
+  display: block; margin-bottom: var(--space-2); color: var(--text-muted);
+  font-family: var(--font-sans); font-size: .75rem; font-weight: 500;
+}
+.daily-fact__date-control select {
+  width: 100%; min-width: 0; min-height: 44px; padding: .65rem .8rem;
+  background: var(--surface); color: var(--text); border: 1px solid var(--border-strong);
+  border-radius: var(--radius); font-family: var(--font-sans); font-size: var(--step--1);
+  cursor: pointer; color-scheme: light;
+}
+.daily-fact__button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-hover); }
+.daily-fact__history-status, .daily-fact__view {
+  color: var(--text-muted); font-family: var(--font-sans); font-size: .75rem;
+}
+.daily-fact__history-status { margin: var(--space-2) 0 0; }
+.daily-fact__view { margin: 0 0 var(--space-4); text-transform: uppercase; letter-spacing: .08em; }
+@media (max-width: 480px) {
+  .daily-fact__date-control { flex-basis: 100%; order: -1; }
+}
+
+:root[data-theme="dark"] .daily-fact__date-control select { color-scheme: dark; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .daily-fact__date-control select { color-scheme: dark; }
 }

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
 test("real Workers runtime routes reads through the Durable Object without AI credentials",{timeout:90000},async()=>{
-  const proc=spawn("node_modules/.bin/wrangler",["dev","--local","--ip","127.0.0.1","--port","8793","--test-scheduled","--var","OPENAI_BUDGET_ENFORCED:false"],{env:{...process.env,CI:"true"},stdio:["ignore","pipe","pipe"]});
+  const proc=spawn("node_modules/.bin/wrangler",["dev","--local","--ip","127.0.0.1","--port","8793","--inspector-port","8795","--test-scheduled","--var","OPENAI_BUDGET_ENFORCED:false"],{env:{...process.env,CI:"true"},stdio:["ignore","pipe","pipe"]});
   let logs="";proc.stdout.on("data",chunk=>{logs+=chunk;});proc.stderr.on("data",chunk=>{logs+=chunk;});
   try {
     let response;
@@ -17,6 +17,10 @@ test("real Workers runtime routes reads through the Durable Object without AI cr
     assert.equal((await fetch("http://127.0.0.1:8793/internal/bootstrap",{method:"POST"})).status,401);
     assert.equal((await fetch("http://127.0.0.1:8793/v1/fact?refresh=1")).status,400);
     assert.equal((await fetch("http://127.0.0.1:8793/v1/fact",{method:"HEAD"})).status,503);
+    const history=await fetch("http://127.0.0.1:8793/v1/facts");
+    assert.equal(history.status,200);assert.deepEqual(await history.json(),{schema_version:1,facts:[],next_before:null});
+    assert.equal((await fetch("http://127.0.0.1:8793/v1/facts/2026-10-03")).status,404);
+    assert.equal((await fetch("http://127.0.0.1:8793/v1/facts?before=2026-02-30")).status,400);
     const scheduled=await fetch("http://127.0.0.1:8793/cdn-cgi/handler/scheduled");
     assert.equal(scheduled.status,200);
     assert.equal((await fetch("http://127.0.0.1:8793/v1/fact")).status,503);

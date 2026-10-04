@@ -11,6 +11,13 @@ export interface PublicFact {
   schema_version: 1; id: string; title: string; fact: string; explanation: string;
   category: Category; fact_date: string; published_at: string;
 }
+export interface FactSummary { id: string; fact_date: string; title: string; category: Category; published_at: string }
+export interface FactHistory { schema_version: 1; facts: FactSummary[]; next_before: string | null }
+export function validFactDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(value + "T00:00:00Z");
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
 export interface Publication { public: PublicFact; candidate: Candidate; review: Review }
 export class FactError extends Error {
   constructor(public readonly code: string, public readonly permanent = false) { super(code); }

@@ -5,9 +5,12 @@ import { publication } from "../dist/domain.js";
 import { candidate,review } from "./fixtures.mjs";
 const token="bootstrap-token-with-at-least-thirty-two-characters";
 function env(fact=null,status="accepted") {
-  const calls={reads:0,starts:0};
+  const calls={reads:0,starts:0,dates:[],pages:[]};
   return {calls,value:{BOOTSTRAP_TOKEN:token,DAILY_FACT:{getByName(name){
-    assert.equal(name,"daily-fact");return {getFact:async()=>{calls.reads++;return fact;},start:async()=>{calls.starts++;return status;}};
+    assert.equal(name,"daily-fact");return {getFact:async()=>{calls.reads++;return fact;},
+      getFactByDate:async day=>{calls.dates.push(day);return fact?.fact_date===day?fact:null;},
+      listFacts:async before=>{calls.pages.push(before);return {schema_version:1,facts:[],next_before:null};},
+      start:async()=>{calls.starts++;return status;}};
   }}}};
 }
 test("public reads never start jobs; missing fact returns uncached 503",async()=>{
@@ -93,4 +96,55 @@ test("bootstrap rejects query parameters with an empty body stream",async()=>{
   });
   const response=await handler.fetch(request,s.value);
   assert.equal(response.status,400);assert.equal(s.calls.starts,0);
+});
+
+test("archived reads expose public fields only and immutable caching",async()=>{
+  const expected=publication(candidate,review,Date.parse("2026-10-03T01:00:00Z")).public;
+  const s=env(expected);
+  const response=await handler.fetch(new Request("https://facts.example/v1/facts/2026-10-03"),s.value);
+  assert.equal(response.status,200);assert.deepEqual(await response.json(),expected);
+  assert.match(response.headers.get("Cache-Control"),/max-age=86400, immutable/);
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"),"*");
+  const missing=await handler.fetch(new Request("https://facts.example/v1/facts/2026-10-02"),s.value);
+  assert.equal(missing.status,404);assert.deepEqual(await missing.json(),{error:"fact_not_found"});
+  assert.equal(missing.headers.get("Cache-Control"),"no-store");
+  assert.equal(s.calls.reads,0);assert.equal(s.calls.starts,0);
+});
+test("history passes the exclusive pagination cursor and caches metadata briefly",async()=>{
+  const s=env();
+  for(const suffix of ["","?before=2026-10-03"]) {
+    const response=await handler.fetch(new Request("https://facts.example/v1/facts"+suffix),s.value);
+    assert.equal(response.status,200);assert.deepEqual(await response.json(),{schema_version:1,facts:[],next_before:null});
+    assert.match(response.headers.get("Cache-Control"),/s-maxage=60/);
+  }
+  assert.deepEqual(s.calls.pages,[undefined,"2026-10-03"]);assert.equal(s.calls.starts,0);
+});
+test("invalid archive dates and queries never access storage or generation",async()=>{
+  const s=env();
+  for(const suffix of ["/2026-02-30","/2026-2-01","/2025-02-29","/2026-10-03/extra","/2026-10-03?refresh=1",
+    "?before=2026-02-30","?before=","?before=2026-10-03&before=2026-10-02","?refresh=1"]) {
+    assert.equal((await handler.fetch(new Request("https://facts.example/v1/facts"+suffix),s.value)).status,400,suffix);
+  }
+  assert.deepEqual(s.calls.dates,[]);assert.deepEqual(s.calls.pages,[]);assert.equal(s.calls.starts,0);
+});
+test("archive HEAD, OPTIONS and rejected write methods never start generation",async()=>{
+  const s=env(publication(candidate,review,Date.parse("2026-10-03T01:00:00Z")).public);
+  for(const path of ["/v1/facts","/v1/facts/2026-10-03"]) {
+    const head=await handler.fetch(new Request("https://facts.example"+path,{method:"HEAD"}),s.value);
+    assert.equal(head.status,200);assert.equal(await head.text(),"");
+    const options=await handler.fetch(new Request("https://facts.example"+path,{method:"OPTIONS"}),s.value);
+    assert.equal(options.status,204);
+    const write=await handler.fetch(new Request("https://facts.example"+path,{method:"POST"}),s.value);
+    assert.equal(write.status,405);
+  }
+  assert.equal(s.calls.pages.length,1);assert.equal(s.calls.dates.length,1);assert.equal(s.calls.starts,0);
+});
+test("archive storage errors are uncached 503s without AI work",async()=>{
+  const s=env();const fail=async()=>{throw new Error("storage");};
+  s.value.DAILY_FACT.getByName=()=>({getFactByDate:fail,listFacts:fail});
+  for(const path of ["/v1/facts","/v1/facts/2026-10-03"]) {
+    const response=await handler.fetch(new Request("https://facts.example"+path),s.value);
+    assert.equal(response.status,503);assert.equal(response.headers.get("Cache-Control"),"no-store");
+  }
+  assert.equal(s.calls.starts,0);
 });
