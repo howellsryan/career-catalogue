@@ -78,6 +78,7 @@ bundle exec jekyll serve --drafts   # include work-in-progress drafts
 ### Checks
 
 ```bash
+node --test scripts/*.test.mjs      # Daily Fact interactions and Practice calculations
 ruby scripts/lint-posts.rb          # validates front matter + tags
 bundle exec jekyll build
 
@@ -100,7 +101,7 @@ CI (`.github/workflows/ci.yml`) runs all three on every pull request.
 | Design system / CSS   | `assets/css/styles.scss` (light + dark themes)    |
 | Theme toggle          | `assets/js/theme.js`                              |
 | Home (search + list)  | `index.html` — rendered at build time, filtered client-side |
-| Practice              | `practice.html` — retro, forecast, health, one-to-ones (not a post) |
+| Practice              | `practice.html` — retro, forecast, health, one-to-ones and room tools |
 | Topics                | `tags.html`                                       |
 | Config & plugins      | `_config.yml`                                     |
 

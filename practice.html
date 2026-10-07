@@ -13,6 +13,8 @@ extra_css: /assets/css/practice.css
 </section>
 
 <div class="wrap px">
+  <noscript><p class="px-empty">These tools need JavaScript enabled in your browser. You can still browse the writing using the navigation above.</p></noscript>
+  <p id="practice-status" class="visually-hidden" role="status" aria-live="polite"></p>
   <div class="px-switch-wrap">
     <div class="px-switch" role="tablist" aria-label="Practice tools">
       <button type="button" class="px-tab" role="tab" id="tab-retro" aria-controls="panel-retro" aria-selected="true">Retro</button>
@@ -55,7 +57,7 @@ extra_css: /assets/css/practice.css
       </aside>
 
       <div class="px-stage">
-        <article class="px-card" id="retro-card" aria-live="polite">
+        <article class="px-card" id="retro-card" tabindex="0" aria-keyshortcuts="N C" aria-live="polite">
           <p class="px-kicker" id="retro-kicker"></p>
           <h2 class="px-question" id="retro-question"></h2>
           <p class="px-intro" id="retro-intro" hidden></p>
@@ -64,12 +66,12 @@ extra_css: /assets/css/practice.css
           <p class="px-follow" id="retro-follow" hidden></p>
         </article>
 
-        <p class="px-empty" id="retro-empty" hidden>Nothing sits in that combination. Ease-in questions stay light on purpose — try another theme, or let the depth go one step further.</p>
+        <p class="px-empty" id="retro-empty" role="status" aria-live="polite" hidden>Nothing sits in that combination. Ease-in questions stay light on purpose — try another theme, or let the depth go one step further.</p>
 
         <div class="px-actions">
           <button type="button" class="px-btn px-btn--primary" id="retro-draw">Another question</button>
           <button type="button" class="px-btn" id="retro-copy">Copy</button>
-          <p class="px-keys"><kbd>N</kbd> next <span aria-hidden="true">·</span> <kbd>C</kbd> copy</p>
+          <p class="px-keys">On the question: <kbd>N</kbd> next <span aria-hidden="true">·</span> <kbd>C</kbd> copy</p>
         </div>
 
         <div class="px-timer" id="retro-timer">
@@ -105,25 +107,29 @@ extra_css: /assets/css/practice.css
       <aside class="px-side">
         <div class="px-field">
           <label class="px-legend" for="tp-paste">Items finished, one fortnight at a time</label>
-          <textarea id="tp-paste" rows="3" spellcheck="false" aria-describedby="tp-hint">6, 9, 7, 4, 8, 11, 5, 8, 6, 10</textarea>
-          <p class="px-hint" id="tp-hint">Oldest to newest. Include the quiet fortnights, and the zeros. Leave out the one you are in. Counts of similarly sized items beat story points.</p>
+          <textarea id="tp-paste" rows="3" spellcheck="false" aria-describedby="tp-hint tp-paste-error" name="tp-paste" autocomplete="off">6, 9, 7, 4, 8, 11, 5, 8, 6, 10</textarea>
+          <p class="px-error" id="tp-paste-error" hidden></p>
+          <p class="px-hint" id="tp-hint">Oldest to newest. Include the quiet fortnights, and the zeros. Leave out the one you are in. Use whole counts from 0 to 1,000, with up to 60 periods. Counts of similarly sized items beat story points.</p>
         </div>
         <div class="px-field">
           <label class="px-legend" for="remaining">Still to finish</label>
-          <input id="remaining" type="number" min="1" max="5000" step="1" value="24" inputmode="numeric">
+          <input id="remaining" type="number" min="1" max="5000" step="1" value="24" inputmode="numeric" aria-describedby="remaining-error" name="remaining" autocomplete="off">
+          <p class="px-error" id="remaining-error" hidden></p>
         </div>
         <div class="px-field">
           <label class="px-legend" for="cadence">Length of a period</label>
-          <select id="cadence">
+          <select id="cadence" aria-describedby="cadence-error" name="cadence" autocomplete="off">
             <option value="14" selected>Fortnight · 14 days</option>
             <option value="7">Week · 7 days</option>
             <option value="10">Ten days</option>
             <option value="21">Three weeks</option>
           </select>
+          <p class="px-error" id="cadence-error" hidden></p>
         </div>
         <div class="px-field">
           <label class="px-legend" for="start-date">Next period starts</label>
-          <input id="start-date" type="date">
+          <input id="start-date" type="date" aria-describedby="start-date-error" name="start-date" autocomplete="off">
+          <p class="px-error" id="start-date-error" hidden></p>
           <p class="px-hint">The first day of the next period, not halfway through this one. Dates below are the last day of the period the simulation landed on.</p>
         </div>
         <div class="px-actions px-actions--stack">
@@ -133,7 +139,7 @@ extra_css: /assets/css/practice.css
       </aside>
 
       <div class="px-stage">
-        <p class="px-say" id="forecast-say"></p>
+        <p class="px-say" id="forecast-say" aria-live="polite" aria-atomic="true"></p>
         <div class="px-pcts" id="forecast-pcts"></div>
         <figure class="px-chart">
           <figcaption class="px-legend" id="forecast-caption">How often each finish landed, across 10,000 runs</figcaption>
@@ -141,20 +147,21 @@ extra_css: /assets/css/practice.css
         </figure>
         <p class="px-note" id="forecast-note"></p>
         <div class="px-actions">
-          <button type="button" class="px-btn" id="forecast-copy">Copy for a stakeholder</button>
+          <button type="button" class="px-btn" id="forecast-copy" disabled>Copy for a stakeholder</button>
         </div>
       </div>
     </div>
   </section>
 
   <section class="px-panel" id="panel-health" role="tabpanel" aria-labelledby="tab-health" hidden>
+    <h2 class="visually-hidden">Team health</h2>
     <p class="px-section-lead">Pass it round, or tally the room out loud. Three votes is enough to see a shape. This is a conversation, not a score you keep on a person.</p>
     <div class="px-health">
       <div class="px-health__chart">
         <svg id="health-radar" viewBox="0 0 400 400" role="img" aria-labelledby="health-read"></svg>
-        <p class="px-say px-say--small" id="health-read">Add a few votes and the shape appears.</p>
+        <p class="px-say px-say--small" id="health-read" aria-live="polite">Add a few votes and the shape appears.</p>
         <div class="px-actions">
-          <button type="button" class="px-btn" id="health-copy">Copy the picture</button>
+          <button type="button" class="px-btn" id="health-copy">Copy the summary</button>
           <button type="button" class="px-btn px-btn--ghost" id="health-reset">Clear votes</button>
         </div>
       </div>
@@ -201,23 +208,23 @@ extra_css: /assets/css/practice.css
         <h2 class="px-tool-title">What the meeting costs</h2>
         <div class="px-form">
           <label class="px-legend" for="meet-people">People in the room</label>
-          <input id="meet-people" type="number" min="1" max="200" step="1" value="6" inputmode="numeric">
+          <input id="meet-people" type="number" min="1" max="200" step="1" value="6" inputmode="numeric" name="meet-people" autocomplete="off">
 
           <label class="px-legend" for="meet-mins">Minutes</label>
-          <input id="meet-mins" type="number" min="5" max="480" step="5" value="50" inputmode="numeric">
+          <input id="meet-mins" type="number" min="5" max="480" step="1" value="50" inputmode="numeric" name="meet-mins" autocomplete="off">
 
           <label class="px-legend" for="meet-rate">Fully loaded hourly cost, per person</label>
           <div class="px-money">
-            <select id="meet-currency" aria-label="Currency">
+            <select id="meet-currency" aria-label="Currency" name="meet-currency" autocomplete="off">
               <option value="GBP" selected>£</option>
               <option value="USD">$</option>
               <option value="EUR">€</option>
             </select>
-            <input id="meet-rate" type="number" min="0" max="1000" step="1" value="70" inputmode="decimal">
+            <input id="meet-rate" type="number" min="0" max="1000" step="any" value="70" inputmode="decimal" name="meet-rate" autocomplete="off">
           </div>
           <p class="px-hint">Salary is not the cost. A rough fully loaded rate is enough — the point is the order of magnitude, said before the invite goes out.</p>
         </div>
-        <p class="px-say px-say--small" id="meet-say"></p>
+        <p class="px-say px-say--small" id="meet-say" aria-live="polite"></p>
       </article>
 
       <article class="px-card px-card--tool">
@@ -225,16 +232,16 @@ extra_css: /assets/css/practice.css
         <h2 class="px-tool-title">What is left to make something</h2>
         <div class="px-form">
           <label class="px-legend" for="focus-people">People on the team</label>
-          <input id="focus-people" type="number" min="1" max="200" step="1" value="6" inputmode="numeric">
+          <input id="focus-people" type="number" min="1" max="200" step="1" value="6" inputmode="numeric" name="focus-people" autocomplete="off">
 
           <label class="px-legend" for="focus-meetings">Meeting hours per person, this week</label>
-          <input id="focus-meetings" type="number" min="0" max="60" step="0.5" value="12" inputmode="decimal">
+          <input id="focus-meetings" type="number" min="0" max="60" step="any" value="12" inputmode="decimal" name="focus-meetings" autocomplete="off">
 
           <label class="px-legend" for="focus-available">Hours you are willing to call available</label>
-          <input id="focus-available" type="number" min="1" max="60" step="0.5" value="30" inputmode="decimal">
+          <input id="focus-available" type="number" min="1" max="60" step="any" value="30" inputmode="decimal" name="focus-available" autocomplete="off">
           <p class="px-hint">A five-day week minus lunch, slack and the odd interruption is closer to 30 hours than 40. Pretending otherwise is how focus disappears on paper last.</p>
         </div>
-        <p class="px-say px-say--small" id="focus-say"></p>
+        <p class="px-say px-say--small" id="focus-say" aria-live="polite"></p>
       </article>
     </div>
   </section>
@@ -242,18 +249,5 @@ extra_css: /assets/css/practice.css
   <p class="px-foot">Runs in the browser. History, votes and rates stay in local storage on this device. Nothing is sent anywhere.</p>
 </div>
 
-<script>
-  (function () {
-    var map = { forecast: "forecast", health: "health", "one-to-ones": "one-to-ones", room: "room" };
-    var id = map[(location.hash || "").replace("#", "")];
-    if (!id) return;
-    document.getElementById("panel-retro").hidden = true;
-    document.getElementById("tab-retro").setAttribute("aria-selected", "false");
-    document.getElementById("tab-retro").setAttribute("tabindex", "-1");
-    document.getElementById("panel-" + id).hidden = false;
-    var tab = document.getElementById("tab-" + id);
-    tab.setAttribute("aria-selected", "true");
-    tab.setAttribute("tabindex", "0");
-  })();
-</script>
-<script src="{{ '/assets/js/practice.js' | relative_url }}" defer></script>
+<script src="{{ '/assets/js/practice-core.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+<script src="{{ '/assets/js/practice.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

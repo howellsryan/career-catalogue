@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  var Core = window.PracticeCore;
+
   var THEME_LABEL = {
     ease: "Getting started",
     work: "How the work moved",
@@ -200,6 +202,9 @@
   var lastForecast = null;
   var votes = emptyVotes();
   var clearArmed = false;
+  var clearTimeoutId = null;
+  var forecastTimeoutId = null;
+  var forecastReady = false;
 
   var timer = {
     running: false,
@@ -230,7 +235,7 @@
 
   function loadRecent() {
     var raw = storageGet("cc-practice-retro-recent");
-    return Array.isArray(raw) ? raw : [];
+    return Array.isArray(raw) ? raw.filter(function (id) { return typeof id === "string"; }).slice(0, 20) : [];
   }
 
   function remember(id) {
@@ -257,7 +262,10 @@
     return found;
   }
 
-  function selectTab(id) {
+  function selectTab(id, updateURL) {
+    if (TABS.indexOf(id) < 0) id = "retro";
+    var previous = activeTab();
+    var focused = document.activeElement;
     TABS.forEach(function (name) {
       var on = name === id;
       var tab = $("tab-" + name);
@@ -265,8 +273,20 @@
       tab.tabIndex = on ? 0 : -1;
       $("panel-" + name).hidden = !on;
     });
-    var hash = id === "retro" ? "" : "#" + id;
-    history.replaceState(null, "", location.pathname + location.search + hash);
+    if (previous !== id && focused && $("panel-" + previous).contains(focused)) $("tab-" + id).focus();
+    if (updateURL !== false && previous !== id) {
+      var hash = id === "retro" ? "" : "#" + id;
+      history.pushState(null, "", location.pathname + location.search + hash);
+    }
+    if (id === "forecast" && !forecastReady) {
+      forecastReady = true;
+      runForecast();
+    }
+  }
+
+  function syncTabFromURL() {
+    var id = location.hash.replace(/^#/, "");
+    selectTab(TABS.indexOf(id) < 0 ? "retro" : id, false);
   }
 
   function currentPool() {
@@ -283,6 +303,9 @@
 
   function renderRetro(item) {
     currentRetro = item;
+    $("retro-card").hidden = false;
+    $("retro-empty").hidden = true;
+    $("retro-copy").disabled = false;
     var card = $("retro-card");
     card.classList.remove("is-in");
     void card.offsetWidth;
@@ -332,11 +355,14 @@
   function drawRetro() {
     var pool = currentPool();
     if (!pool.length) {
+      currentRetro = null;
+      $("retro-card").hidden = true;
       $("retro-empty").hidden = false;
+      $("retro-copy").disabled = true;
       return;
     }
     $("retro-empty").hidden = true;
-    var item = pickFrom(pool);
+    var item = pickFrom(pool, currentRetro ? [currentRetro.id] : []);
     remember(item.id);
     renderRetro(item);
   }
@@ -373,17 +399,24 @@
   }
 
   function copyWithButton(text, button) {
+    if (!text || button.disabled) return;
+    var original = button.getAttribute("data-label") || button.textContent;
+    button.setAttribute("data-label", original);
     function done() {
-      var original = button.getAttribute("data-label") || button.textContent;
-      button.setAttribute("data-label", original);
+      window.clearTimeout(button._copyResetTimeout);
       button.textContent = "Copied";
       button.classList.add("is-copied");
-      window.setTimeout(function () {
+      $("practice-status").textContent = "Copied to your clipboard.";
+      button._copyResetTimeout = window.setTimeout(function () {
         button.textContent = original;
         button.classList.remove("is-copied");
       }, 1600);
     }
+    function failed() {
+      $("practice-status").textContent = "Could not copy. Select the text and copy it using your browser.";
+    }
     function fallback() {
+      var focused = document.activeElement;
       var area = document.createElement("textarea");
       area.value = text;
       area.setAttribute("readonly", "");
@@ -391,8 +424,11 @@
       area.style.left = "-9999px";
       document.body.appendChild(area);
       area.select();
-      try { document.execCommand("copy"); done(); } catch (e) {}
+      var copied = false;
+      try { copied = document.execCommand("copy"); } catch (e) {}
       document.body.removeChild(area);
+      if (focused && focused.isConnected) focused.focus({ preventScroll: true });
+      if (copied) done(); else failed();
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(done).catch(fallback);
@@ -442,35 +478,9 @@
     renderClock(left);
   }
 
-  function mulberry32(seed) {
-    var a = seed >>> 0;
-    return function () {
-      a |= 0;
-      a = (a + 0x6D2B79F5) | 0;
-      var t = Math.imul(a ^ (a >>> 15), 1 | a);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-
-  function parseHistory(text) {
-    return String(text).split(/[^0-9.]+/).filter(Boolean).map(function (part) {
-      return Math.round(Number(part) * 10) / 10;
-    }).filter(function (n) {
-      return Number.isFinite(n) && n >= 0 && n <= 1000;
-    }).slice(0, 60);
-  }
-
   function periodWord(count, cadence) {
     var name = cadence === 7 ? "week" : cadence === 14 ? "fortnight" : "period";
     return count === 1 ? name : name + "s";
-  }
-
-  function percentile(sorted, p) {
-    var idx = Math.ceil(p * sorted.length) - 1;
-    if (idx < 0) idx = 0;
-    if (idx > sorted.length - 1) idx = sorted.length - 1;
-    return sorted[idx];
   }
 
   function localISO(date) {
@@ -479,19 +489,13 @@
     return date.getFullYear() + "-" + m + "-" + d;
   }
 
-  function doneDate(iso, periods, cadenceDays) {
-    var parts = iso.split("-").map(Number);
-    var date = new Date(parts[0], parts[1] - 1, parts[2]);
-    date.setDate(date.getDate() + periods * cadenceDays - 1);
-    return date;
-  }
-
   function formatDate(date) {
     return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
   }
 
   function showForecastMessage(message) {
     lastForecast = null;
+    $("forecast-copy").disabled = true;
     $("forecast-say").textContent = message;
     $("forecast-pcts").innerHTML = "";
     $("forecast-chart").innerHTML = "";
@@ -500,6 +504,7 @@
 
   function drawHistogram(durations, p50, p85) {
     var svg = $("forecast-chart");
+    if (!durations.length) { svg.innerHTML = ""; return; }
     var min = durations[0];
     var max = durations[durations.length - 1];
     var span = max - min;
@@ -544,99 +549,89 @@
     svg.innerHTML = markup;
   }
 
+  function forecastError(id, message) {
+    $(id).setAttribute("aria-invalid", "true");
+    $(id + "-error").textContent = message;
+    $(id + "-error").hidden = false;
+    showForecastMessage(message);
+  }
+
+  function queueForecast() {
+    window.clearTimeout(forecastTimeoutId);
+    showForecastMessage("Updating forecast…");
+    forecastTimeoutId = window.setTimeout(runForecast, 200);
+  }
+
   function runForecast() {
-    var history = parseHistory($("tp-paste").value);
-    var remaining = Math.round(Number($("remaining").value));
+    window.clearTimeout(forecastTimeoutId);
+    ["tp-paste", "remaining", "cadence", "start-date"].forEach(function (id) {
+      $(id).removeAttribute("aria-invalid");
+      $(id + "-error").hidden = true;
+    });
+    var parsed = Core.parseHistory($("tp-paste").value);
+    var history = parsed.values;
+    var remaining = Core.numberInRange($("remaining").value, 1, 5000, true);
     var cadence = Number($("cadence").value);
     var start = $("start-date").value;
     storageSet("cc-practice-forecast", {
-      history: history,
-      remaining: remaining,
-      cadence: String(cadence),
+      text: $("tp-paste").value,
+      remaining: $("remaining").value,
+      cadence: $("cadence").value,
       start: start
     });
+    if (parsed.error) { forecastError("tp-paste", parsed.error); return; }
+    if (remaining === null) { forecastError("remaining", "Use a whole number of remaining items from 1 to 5,000."); return; }
+    if ([7, 10, 14, 21].indexOf(cadence) < 0) { forecastError("cadence", "Choose one of the available period lengths."); return; }
+    if (start && !Core.localDate(start)) { forecastError("start-date", "Choose a valid start date, or clear it to use periods only."); return; }
 
-    if (!history.length) {
-      showForecastMessage("Add at least one period. Include a zero if a fortnight shipped nothing.");
-      return;
-    }
-    if (!history.some(function (n) { return n > 0; })) {
-      showForecastMessage("Every period in that history finished nothing, so the work never completes.");
-      return;
-    }
-    if (!Number.isFinite(remaining) || remaining <= 0) {
-      showForecastMessage("Say how many items are still to finish.");
-      return;
-    }
-
-    var rand = mulberry32(forecastSeed);
-    var durations = new Array(TRIALS);
-    var capped = 0;
-    var t;
-    for (t = 0; t < TRIALS; t++) {
-      var left = remaining;
-      var periods = 0;
-      while (left > 0 && periods < MAX_PERIODS) {
-        left -= history[(rand() * history.length) | 0];
-        periods += 1;
-      }
-      if (left > 0) capped += 1;
-      durations[t] = periods;
-    }
-    durations.sort(function (a, b) { return a - b; });
-
-    var marks = [
-      { p: 0.5, k: "50% · a coin flip", plan: false },
-      { p: 0.7, k: "70%", plan: false },
-      { p: 0.85, k: "85% · plan with this", plan: true },
-      { p: 0.95, k: "95% · a promise", plan: false }
-    ];
-    var dated = /^\d{4}-\d{2}-\d{2}$/.test(start);
-    var results = marks.map(function (mark) {
-      var periods = percentile(durations, mark.p);
-      var when = dated ? formatDate(doneDate(start, periods, cadence)) : null;
-      return { p: mark.p, k: mark.k, plan: mark.plan, periods: periods, when: when };
+    var simulation = Core.simulate(history, remaining, forecastSeed);
+    var labels = ["50% · a coin flip", "70%", "85% · plan with this", "95% · higher confidence"];
+    var results = simulation.results.map(function (row, index) {
+      var date = row.periods !== null && start ? Core.doneDate(start, row.periods, cadence) : null;
+      return { p: row.p, k: labels[index], plan: index === 2, periods: row.periods, when: date ? formatDate(date) : null };
     });
+    if (start && results.some(function (row) { return row.periods !== null && !Core.doneDate(start, row.periods, cadence); })) {
+      forecastError("start-date", "This forecast extends beyond year 9999. Choose an earlier start date or clear it.");
+      return;
+    }
     var plan = results[2];
     var avg = history.reduce(function (sum, n) { return sum + n; }, 0) / history.length;
     var naive = Math.ceil(remaining / avg);
-
     lastForecast = {
-      history: history,
-      remaining: remaining,
-      cadence: cadence,
-      start: dated ? start : null,
-      results: results,
-      avg: avg,
-      naive: naive,
-      capped: capped
+      history: history, remaining: remaining, cadence: cadence, start: start || null,
+      results: results, unfinished: simulation.unfinished, maxPeriods: simulation.maxPeriods
     };
+    $("forecast-copy").disabled = false;
 
-    var say = plan.when
-      ? "Plan on " + plan.when + ". That is " + plan.periods + " " + periodWord(plan.periods, cadence) + " — the date 85% of runs finished by. Half of them finish sooner. Don't promise the half."
-      : "Plan on " + plan.periods + " " + periodWord(plan.periods, cadence) + ". That is the 85% outcome. Add a start date if you want it on the calendar.";
-    if (results[0].periods === results[3].periods) {
-      say += " Even 95% of runs land in that same period. The fortnights you entered look alike, so the range is tight — it will open up as soon as a slow period is in the history.";
-    } else if (results[0].periods === plan.periods) {
-      say += " The coin-flip and the plan fall in the same period, because the history is steady. The date you would actually promise, at 95%, is " +
-        (results[3].when ? results[3].when + ", " : "") + results[3].periods + " " + periodWord(results[3].periods, cadence) + ".";
+    var say;
+    if (plan.periods === null) {
+      say = "The 85% finish is beyond " + simulation.maxPeriods + " " + periodWord(simulation.maxPeriods, cadence) +
+        ". Not enough runs completed within the simulation horizon to give that date. Check the backlog and whether this history represents the work.";
+    } else {
+      say = plan.when
+        ? "Plan on " + plan.when + ". That is " + plan.periods + " " + periodWord(plan.periods, cadence) + " — at least 85% of runs finished by then."
+        : "Plan on " + plan.periods + " " + periodWord(plan.periods, cadence) + ". That is the 85% outcome. Add a start date to put it on the calendar.";
+      say += " This is a forecast, not a commitment.";
+      if (results[0].periods === results[3].periods) {
+        say += " The history produces a tight range; a slow period or a change in the work can widen it.";
+      }
     }
     $("forecast-say").textContent = say;
-
     $("forecast-pcts").innerHTML = results.map(function (row) {
+      var value = row.periods === null ? "Beyond horizon" : row.when || row.periods + " " + periodWord(row.periods, cadence);
+      var detail = row.periods === null ? "More than " + simulation.maxPeriods + " periods" : row.periods + " " + periodWord(row.periods, cadence);
       return '<article class="px-pct' + (row.plan ? " px-pct--plan" : "") + '"><span class="px-pct__k">' + escapeHtml(row.k) +
-        '</span><span class="px-pct__n">' + (row.when ? escapeHtml(row.when) : row.periods + " " + periodWord(row.periods, cadence)) +
-        '</span><span class="px-pct__s">' + row.periods + " " + periodWord(row.periods, cadence) + "</span></article>";
+        '</span><span class="px-pct__n">' + escapeHtml(value) + '</span><span class="px-pct__s">' + escapeHtml(detail) + "</span></article>";
     }).join("");
 
-    drawHistogram(durations, results[0].periods, results[2].periods);
-
-    var note = "Each run samples your history at random, with replacement, until " + remaining +
-      " items are finished. Same idea as a throughput Monte Carlo: the future is assumed to look like the fortnights you typed, not like the average of them. Average pace is " +
-      avg.toFixed(1) + " a period, and " + remaining + " divided by that is " + naive + " " + periodWord(naive, cadence) +
-      ". That single number hides the slow periods. The bars are how often each finish showed up. The stronger colour is the stretch from the coin-flip to the date you plan with.";
-    if (history.length < 6) note += " Fewer than six periods is a thin history. Treat the dates as a sketch, and keep collecting.";
-    if (capped / TRIALS > 0.02) note += " Some runs still hadn't finished after " + MAX_PERIODS + " periods. If zeros dominate the history, the backlog is not this team's current pace.";
+    drawHistogram(simulation.durations, results[0].periods === null ? Infinity : results[0].periods, plan.periods === null ? Infinity : plan.periods);
+    $("forecast-caption").textContent = "Completed runs out of 10,000; horizontal axis: periods until finish";
+    var note = "Each run samples your history at random, with replacement. This assumes the next periods resemble the history: the same team, similar work and the same definition of done. " +
+      "Average pace is " + avg.toFixed(1) + " a period; dividing the backlog by that gives " + naive + " " + periodWord(naive, cadence) +
+      ", but that single number hides the slow periods. Confidence levels are estimates under those assumptions, including 95%; none is a promise.";
+    if (history.length < 6) note += " Fewer than six periods is a thin history. Treat the forecast as a sketch, and keep collecting.";
+    if (simulation.unfinished) note += " " + simulation.unfinished.toLocaleString("en-GB") + " of 10,000 runs did not finish within " +
+      simulation.maxPeriods + " periods. They remain in the confidence calculation and are excluded from the completed-run bars.";
     $("forecast-note").textContent = note;
   }
 
@@ -653,9 +648,10 @@
       ""
     ];
     f.results.forEach(function (row) {
-      lines.push(row.k + ": " + row.periods + " " + periodWord(row.periods, f.cadence) + (row.when ? " (by " + row.when + ")" : ""));
+      lines.push(row.k + ": " + (row.periods === null ? "beyond " + f.maxPeriods + " periods" : row.periods + " " + periodWord(row.periods, f.cadence)) + (row.when ? " (by " + row.when + ")" : ""));
     });
     lines.push("");
+    if (f.unfinished) lines.push(f.unfinished + " of 10,000 runs did not finish within " + f.maxPeriods + " periods; they remain in the confidence calculation.");
     lines.push("Plan in public at 85%. The 50% date is a coin flip — quoting only that is how a range becomes a late project. This assumes the next periods resemble the history above: same team, same kind of work, same definition of done. It is not a commitment.");
     return lines.filter(function (line) { return line !== ""; }).join("\n");
   }
@@ -687,17 +683,7 @@
   }
 
   function loadVotes() {
-    var raw = storageGet("cc-practice-health");
-    votes = emptyVotes();
-    if (!raw) return;
-    DIMENSIONS.forEach(function (dim) {
-      var saved = raw[dim.id];
-      if (!saved) return;
-      LEVELS.forEach(function (level) {
-        var n = Math.round(Number(saved[level.id]));
-        if (Number.isFinite(n) && n > 0 && n < 500) votes[dim.id][level.id] = n;
-      });
-    });
+    votes = Core.normalizeVotes(storageGet("cc-practice-health"), DIMENSIONS, LEVELS);
   }
 
   function saveVotes() {
@@ -722,7 +708,10 @@
     DIMENSIONS.forEach(function (dim) {
       var row = document.querySelector('.px-dim[data-dim="' + dim.id + '"]');
       LEVELS.forEach(function (level) {
-        row.querySelector('.px-vote__n[data-level="' + level.id + '"]').textContent = String(votes[dim.id][level.id]);
+        var count = votes[dim.id][level.id];
+        row.querySelector('.px-vote__n[data-level="' + level.id + '"]').textContent = String(count);
+        row.querySelector('button[data-op="minus"][data-level="' + level.id + '"]').disabled = count === 0;
+        row.querySelector('button[data-op="plus"][data-level="' + level.id + '"]').disabled = count === 9999;
       });
     });
     drawRadar();
@@ -775,8 +764,11 @@
       markup += '<text class="label" x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="' + anchor +
         '" dominant-baseline="middle">' + escapeHtml(dim.name) + "</text>";
       if (score != null) {
-        var r = ((score - 1) / 4) * radius;
-        shape.push((cx + Math.cos(ang) * r).toFixed(1) + "," + (cy + Math.sin(ang) * r).toFixed(1));
+        var r = (score / 5) * radius;
+        var pointX = (cx + Math.cos(ang) * r).toFixed(1);
+        var pointY = (cy + Math.sin(ang) * r).toFixed(1);
+        shape.push(pointX + "," + pointY);
+        markup += '<circle class="point" cx="' + pointX + '" cy="' + pointY + '" r="3"><title>' + escapeHtml(dim.name + ": " + scoreWord(score)) + "</title></circle>";
       }
     });
     if (shape.length >= 3) markup += '<polygon class="shape" points="' + shape.join(" ") + '"></polygon>';
@@ -826,7 +818,7 @@
 
   function drawOne() {
     var pool = onePool();
-    var item = pickFrom(pool);
+    var item = pickFrom(pool, currentOne ? [currentOne.id] : []);
     remember(item.id);
     renderOne(item);
   }
@@ -841,37 +833,43 @@
   }
 
   function runRoom() {
-    var people = Number($("meet-people").value);
-    var mins = Number($("meet-mins").value);
-    var rate = Number($("meet-rate").value);
+    var people = Core.numberInRange($("meet-people").value, 1, 200, true);
+    var mins = Core.numberInRange($("meet-mins").value, 5, 480, true);
+    var rate = Core.numberInRange($("meet-rate").value, 0, 1000, false);
     var currency = $("meet-currency").value;
-    var focusPeople = Number($("focus-people").value);
-    var meetings = Number($("focus-meetings").value);
-    var available = Number($("focus-available").value);
+    var focusPeople = Core.numberInRange($("focus-people").value, 1, 200, true);
+    var meetings = Core.numberInRange($("focus-meetings").value, 0, 60, false);
+    var available = Core.numberInRange($("focus-available").value, 1, 60, false);
 
     storageSet("cc-practice-room", {
-      people: people,
-      mins: mins,
-      rate: rate,
+      people: $("meet-people").value,
+      mins: $("meet-mins").value,
+      rate: $("meet-rate").value,
       currency: currency,
-      focusPeople: focusPeople,
-      meetings: meetings,
-      available: available
+      focusPeople: $("focus-people").value,
+      meetings: $("focus-meetings").value,
+      available: $("focus-available").value
     });
 
-    if (!(people > 0) || !(mins > 0) || !(rate >= 0)) {
-      $("meet-say").textContent = "Add the people, the minutes and a rough hourly cost.";
+    var meetingFields = [["meet-people", people], ["meet-mins", mins], ["meet-rate", rate]];
+    var focusFields = [["focus-people", focusPeople], ["focus-meetings", meetings], ["focus-available", available]];
+    meetingFields.concat(focusFields).forEach(function (field) {
+      if (field[1] === null) $(field[0]).setAttribute("aria-invalid", "true");
+      else $(field[0]).removeAttribute("aria-invalid");
+    });
+    if (people === null || mins === null || rate === null || ["GBP", "USD", "EUR"].indexOf(currency) < 0) {
+      $("meet-say").textContent = "Use 1–200 whole people, 5–480 whole minutes and an hourly cost from 0 to 1,000.";
     } else {
       var hours = mins / 60;
       var cost = people * rate * hours;
       var personHours = people * hours;
       $("meet-say").textContent = "This meeting is about " + money(cost, currency) + " and " +
-        trimNum(personHours) + " person-hours. Held every fortnight for a quarter, that is " +
+        trimNum(personHours) + " person-hours. Held six times over roughly a quarter, that is " +
         money(cost * 6, currency) + ". Worth saying the number before the invite goes out.";
     }
 
-    if (!(focusPeople > 0) || !(available > 0) || !(meetings >= 0)) {
-      $("focus-say").textContent = "Add the team size and the hours.";
+    if (focusPeople === null || available === null || meetings === null) {
+      $("focus-say").textContent = "Use 1–200 whole people, 0–60 meeting hours and 1–60 available hours.";
       return;
     }
     var left = Math.max(0, available - meetings);
@@ -879,7 +877,7 @@
     var line = "Each person has " + trimNum(left) + " focus hours left this week. Across " +
       focusPeople + ", that is " + trimNum(left * focusPeople) + " hours to actually move work. Meetings are " +
       Math.round(ratio * 100) + "% of the hours you called available.";
-    if (ratio >= 0.5) line += " More than half the week is already spoken for. The board will not move at the speed the calendar implies.";
+    if (ratio >= 0.5) line += " At least half the week is already spoken for. The board will not move at the speed the calendar implies.";
     else if (ratio >= 0.3) line += " Past about a third, the long block goes. Look for one recurring meeting that could have been a note.";
     else line += " There is still a real stretch of making time. Protect it on purpose, or the next meeting will take it.";
     $("focus-say").textContent = line;
@@ -887,25 +885,27 @@
 
   function loadForecastForm() {
     var saved = storageGet("cc-practice-forecast");
-    if (saved && Array.isArray(saved.history) && saved.history.length) {
-      $("tp-paste").value = saved.history.join(", ");
-      if (saved.remaining) $("remaining").value = saved.remaining;
-      if (saved.cadence) $("cadence").value = String(saved.cadence);
-      if (saved.start) $("start-date").value = saved.start;
+    if (saved && typeof saved === "object") {
+      if (typeof saved.text === "string") $("tp-paste").value = saved.text;
+      else if (Array.isArray(saved.history)) $("tp-paste").value = saved.history.join(", ");
+      if (saved.remaining != null) $("remaining").value = String(saved.remaining);
+      if ([7, 10, 14, 21].indexOf(Number(saved.cadence)) >= 0) $("cadence").value = String(saved.cadence);
+      if (typeof saved.start === "string" && (!saved.start || Core.localDate(saved.start))) $("start-date").value = saved.start;
+    } else {
+      $("start-date").value = localISO(new Date());
     }
-    if (!$("start-date").value) $("start-date").value = localISO(new Date());
   }
 
   function loadRoom() {
     var saved = storageGet("cc-practice-room");
     if (!saved) return;
-    if (saved.people) $("meet-people").value = saved.people;
-    if (saved.mins) $("meet-mins").value = saved.mins;
+    if (saved.people != null) $("meet-people").value = saved.people;
+    if (saved.mins != null) $("meet-mins").value = saved.mins;
     if (saved.rate != null) $("meet-rate").value = saved.rate;
     if (saved.currency) $("meet-currency").value = saved.currency;
-    if (saved.focusPeople) $("focus-people").value = saved.focusPeople;
+    if (saved.focusPeople != null) $("focus-people").value = saved.focusPeople;
     if (saved.meetings != null) $("focus-meetings").value = saved.meetings;
-    if (saved.available) $("focus-available").value = saved.available;
+    if (saved.available != null) $("focus-available").value = saved.available;
   }
 
   function bind() {
@@ -916,12 +916,13 @@
     });
 
     document.querySelector(".px-switch").addEventListener("keydown", function (event) {
-      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+      if (!event.target.closest(".px-tab") || ["ArrowRight", "ArrowLeft", "Home", "End"].indexOf(event.key) < 0) return;
       var current = activeTab();
       var index = TABS.indexOf(current);
       if (index < 0) return;
       event.preventDefault();
-      var next = TABS[(index + (event.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length];
+      var next = event.key === "Home" ? TABS[0] : event.key === "End" ? TABS[TABS.length - 1] :
+        TABS[(index + (event.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length];
       $("tab-" + next).focus();
       selectTab(next);
     });
@@ -932,6 +933,7 @@
       chip.parentElement.querySelectorAll(".px-chip").forEach(function (other) {
         other.setAttribute("aria-pressed", other === chip ? "true" : "false");
       });
+      drawRetro();
     });
 
     $("one-chips").addEventListener("click", function (event) {
@@ -940,6 +942,11 @@
       chip.parentElement.querySelectorAll(".px-chip").forEach(function (other) {
         other.setAttribute("aria-pressed", other === chip ? "true" : "false");
       });
+      drawOne();
+    });
+
+    document.querySelectorAll('input[name="warmth"]').forEach(function (input) {
+      input.addEventListener("change", drawRetro);
     });
 
     $("retro-draw").addEventListener("click", drawRetro);
@@ -985,7 +992,7 @@
       if (event.metaKey || event.ctrlKey || event.altKey) return;
       var target = event.target;
       if (target && (target.matches("input, textarea, select") || target.isContentEditable)) return;
-      if (activeTab() !== "retro") return;
+      if (activeTab() !== "retro" || document.activeElement !== $("retro-card")) return;
       if (event.key === "n" || event.key === "N") {
         event.preventDefault();
         drawRetro();
@@ -997,7 +1004,7 @@
     });
 
     ["tp-paste", "remaining", "cadence", "start-date"].forEach(function (id) {
-      $(id).addEventListener("input", runForecast);
+      $(id).addEventListener("input", queueForecast);
       $(id).addEventListener("change", runForecast);
     });
 
@@ -1023,9 +1030,11 @@
       if (!button) return;
       var dim = button.closest(".px-dim").getAttribute("data-dim");
       var level = button.getAttribute("data-level");
-      if (button.getAttribute("data-op") === "plus") votes[dim][level] += 1;
+      if (button.disabled) return;
+      if (button.getAttribute("data-op") === "plus") votes[dim][level] = Math.min(9999, votes[dim][level] + 1);
       if (button.getAttribute("data-op") === "minus") votes[dim][level] = Math.max(0, votes[dim][level] - 1);
       clearArmed = false;
+      window.clearTimeout(clearTimeoutId);
       $("health-reset").textContent = "Clear votes";
       saveVotes();
       paintHealth();
@@ -1039,13 +1048,15 @@
       if (!clearArmed) {
         clearArmed = true;
         $("health-reset").textContent = "Clear all votes?";
-        window.setTimeout(function () {
+        window.clearTimeout(clearTimeoutId);
+        clearTimeoutId = window.setTimeout(function () {
           clearArmed = false;
           $("health-reset").textContent = "Clear votes";
         }, 2800);
         return;
       }
       clearArmed = false;
+      window.clearTimeout(clearTimeoutId);
       votes = emptyVotes();
       saveVotes();
       paintHealth();
@@ -1063,6 +1074,8 @@
       $(id).addEventListener("change", runRoom);
     });
 
+    window.addEventListener("hashchange", syncTabFromURL);
+    window.addEventListener("popstate", syncTabFromURL);
     window.setInterval(tick, 200);
   }
 
@@ -1074,7 +1087,7 @@
   setMinutes(8);
   drawRetro();
   drawOne();
-  runForecast();
   runRoom();
   bind();
+  syncTabFromURL();
 })();

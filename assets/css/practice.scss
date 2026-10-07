@@ -150,12 +150,12 @@
 .px-chip:hover { border-color: var(--border-strong); color: var(--text); }
 
 .px-chip[aria-pressed="true"] {
-  color: var(--accent);
+  color: var(--accent-hover);
   background: var(--accent-soft);
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
 }
 
-.px input,
+.px input:not([type="radio"]),
 .px select,
 .px textarea {
   font-family: var(--font-sans);
@@ -171,7 +171,7 @@
 
 .px textarea { resize: vertical; min-height: 4.5rem; line-height: 1.45; }
 
-.px input:focus,
+.px input:not([type="radio"]):focus,
 .px select:focus,
 .px textarea:focus {
   outline: none;
@@ -183,7 +183,7 @@
   font-family: var(--font-sans);
   font-size: 0.84rem;
   line-height: 1.5;
-  color: var(--text-faint);
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -273,7 +273,7 @@
   font-family: var(--font-sans);
   font-style: normal;
   font-weight: 600;
-  color: var(--text-faint);
+  color: var(--text-muted);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   font-size: 0.72rem;
@@ -303,15 +303,20 @@
   line-height: 1.2;
 }
 
-.px-btn:hover { border-color: var(--text-faint); }
+.px-btn:hover { border-color: var(--text-muted); }
+.px button:disabled { opacity: 0.55; cursor: default; }
+.px button { touch-action: manipulation; }
+.px-error { margin: 0; font: 0.84rem/1.5 var(--font-sans); color: var(--accent); }
+.px [aria-invalid="true"] { border-color: var(--accent); }
+.px-panel { scroll-margin-top: 9rem; }
 
 .px-btn--primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--surface);
 }
 
-.px-btn--primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: #fff; }
+.px-btn--primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: var(--surface); }
 
 .px-btn--ghost { background: transparent; box-shadow: none; }
 
@@ -453,7 +458,7 @@
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--text-faint);
+  color: var(--text-muted);
 }
 
 .px-round__text { margin: 0.15rem 0 0; line-height: 1.35; }
@@ -495,10 +500,10 @@
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--text-faint);
+  color: var(--text-muted);
 }
 
-.px-pct--plan .px-pct__k { color: var(--accent); }
+.px-pct--plan .px-pct__k { color: var(--accent-hover); }
 
 .px-pct__n {
   display: block;
@@ -528,9 +533,9 @@
 .px-chart svg { width: 100%; height: auto; display: block; }
 
 .px-chart .bar { fill: var(--accent); opacity: 0.78; }
-.px-chart .bar-muted { fill: var(--text-faint); opacity: 0.35; }
+.px-chart .bar-muted { fill: var(--text-muted); opacity: 0.75; }
 .px-chart .axis { stroke: var(--border-strong); }
-.px-chart .tick { font-family: var(--font-sans); font-size: 11px; fill: var(--text-faint); }
+.px-chart .tick { font-family: var(--font-sans); font-size: 11px; fill: var(--text-muted); }
 
 .px-section-lead {
   max-width: 42rem;
@@ -572,7 +577,8 @@
 .px-votes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; }
 
 .px-vote {
-  display: flex;
+  display: grid;
+  grid-template-columns: 44px minmax(1.7rem, 1fr) 44px;
   align-items: center;
   justify-content: space-between;
   gap: 0.25rem;
@@ -589,6 +595,7 @@
   line-height: 1.2;
   color: var(--text-muted);
   padding-left: 0.25rem;
+  grid-column: 1 / -1;
 }
 
 .px-vote__n {
@@ -600,8 +607,8 @@
 }
 
 .px-vote button {
-  width: 1.7rem;
-  height: 1.7rem;
+  width: 44px;
+  height: 44px;
   border-radius: 7px;
   border: 1px solid var(--border);
   background: var(--surface);
@@ -614,6 +621,7 @@
 .px-vote button:hover { border-color: var(--border-strong); }
 
 #health-radar { width: 100%; height: auto; display: block; }
+#health-radar .point { fill: var(--accent); }
 #health-radar .grid { fill: none; stroke: var(--border); }
 #health-radar .axis-line { stroke: var(--border-strong); }
 #health-radar .shape { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
@@ -649,7 +657,7 @@
 
 .px-foot { margin-top: var(--space-7); }
 
-@media (max-width: 860px) {
+@media (max-width: 960px) {
   .px-switch-wrap { position: static; }
   .px-layout,
   .px-health,
@@ -665,3 +673,9 @@
 @media (prefers-reduced-motion: reduce) {
   .px-card.is-in .px-question { animation: none; }
 }
+
+@media (pointer: coarse) {
+  .px-tab, .px-chip, .px-btn--small, .px-seg button, .px-choice { min-height: 44px; }
+}
+
+.px [hidden] { display: none !important; }

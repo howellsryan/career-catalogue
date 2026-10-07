@@ -1,0 +1,60 @@
+---
+layout: default
+title: Daily Fact
+description: A new fact each day. Read today’s fact or explore the archive.
+permalink: /daily-fact/
+---
+<section class="daily-fact wrap" aria-labelledby="daily-fact-heading">
+  <header class="daily-fact__header">
+    <div class="daily-fact__intro">
+      <h1 id="daily-fact-heading">Daily Fact</h1>
+      <p>A new fact each day.</p>
+    </div>
+    <div id="fact-browser" class="daily-fact__browser" hidden>
+      <div class="daily-fact__date-control">
+        <label for="fact-history">Date</label>
+        <select id="fact-history" name="date"><option value="">Today</option></select>
+      </div>
+      <button id="fact-earlier" class="daily-fact__button" type="button" hidden>Earlier dates</button>
+    </div>
+  </header>
+
+  <div class="daily-fact__feedback">
+    <p id="fact-loading" role="status" aria-live="polite" hidden>Loading fact…</p>
+    <p id="fact-history-status" role="status" aria-live="polite"></p>
+  </div>
+
+  <div id="daily-fact" class="daily-fact__panel" data-endpoint="{{ site.daily_fact_api_url | escape }}" aria-busy="false">
+    <div id="fact-state" class="daily-fact__state" hidden>
+      <h2 id="fact-state-title"></h2>
+      <p id="fact-state-description"></p>
+      <button id="fact-retry" class="daily-fact__button" type="button" hidden>Try again</button>
+    </div>
+
+    <article id="fact-content" class="daily-fact__article" aria-labelledby="fact-title" hidden>
+      <div class="daily-fact__meta">
+        <span id="fact-category"></span>
+        <span>Published <time id="fact-date"></time></span>
+      </div>
+      <h2 id="fact-title" class="daily-fact__title"></h2>
+      <p id="fact-text" class="daily-fact__text"></p>
+      <section class="daily-fact__context" aria-labelledby="fact-context-heading">
+        <h3 id="fact-context-heading">Context</h3>
+        <p id="fact-explanation"></p>
+      </section>
+      <div class="daily-fact__actions">
+        <button id="fact-copy" class="daily-fact__button" type="button" hidden>Copy fact</button>
+        <p id="fact-copy-status" role="status" aria-live="polite"></p>
+      </div>
+    </article>
+
+    <noscript>
+      <div class="daily-fact__state">
+        <h2>Read the daily fact</h2>
+        <p>Enable JavaScript to read the fact here, or <a href="{{ site.daily_fact_api_url | escape }}">open the fact API</a>.</p>
+      </div>
+    </noscript>
+  </div>
+  <p id="fact-announcement" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></p>
+</section>
+<script src="{{ '/assets/js/daily-fact.js' | relative_url }}" defer></script>
