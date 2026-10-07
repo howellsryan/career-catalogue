@@ -23,7 +23,7 @@ test("native Durable Object archives legacy data across restarts and paginates e
   async function start(main) {
     await writeFile(config,JSON.stringify({
       name:"daily-fact-local-migration",main:resolve(main),compatibility_date:"2026-10-04",
-      compatibility_flags:["nodejs_compat"],vars:{OPENAI_MODEL:"gpt-5.6-sol",OPENAI_BUDGET_ENFORCED:"false"},
+      compatibility_flags:["nodejs_compat"],vars:{OPENAI_MODEL:"gpt-5.6-terra",OPENAI_BUDGET_ENFORCED:"false"},
       durable_objects:{bindings:[{name:"DAILY_FACT",class_name:"DailyFactStore"}]},
       migrations:[{tag:"v1",new_sqlite_classes:["DailyFactStore"]}]
     }));

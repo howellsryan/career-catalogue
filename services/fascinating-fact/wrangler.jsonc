@@ -10,8 +10,9 @@
     "enabled": true
   },
   "vars": {
-    "OPENAI_MODEL": "gpt-5.6-sol",
-    "OPENAI_BUDGET_ENFORCED": "true"
+    "OPENAI_MODEL": "gpt-5.6-terra",
+    "OPENAI_BUDGET_ENFORCED": "true",
+    "OPENAI_DAILY_TOKEN_BUDGET": "1000000"
   },
   "durable_objects": {
     "bindings": [
