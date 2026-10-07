@@ -14,13 +14,13 @@ test("generation uses configured model, bounded tools and strict structured outp
     requests++;assert.equal(url,"https://api.openai.com/v1/responses");
     assert.equal(options.headers.Authorization,"Bearer dedicated-test-key");
     const body=JSON.parse(options.body);
-    assert.equal(body.model,"gpt-6-sol");assert.equal(body.max_output_tokens,4000);
+    assert.equal(body.model,"gpt-5.6-sol");assert.equal(body.max_output_tokens,4000);
     assert.equal(body.max_tool_calls,4);assert.equal(body.store,false);
     assert.equal(body.text.format.strict,true);
     assert.match(body.instructions,/No graphic violence/);
     return Response.json(envelope(candidate));
   };
-  assert.deepEqual(await new OpenAI("dedicated-test-key","gpt-6-sol",send,quiet).generate("science","2026-10-04"),candidate);
+  assert.deepEqual(await new OpenAI("dedicated-test-key","gpt-5.6-sol",send,quiet).generate("science","2026-10-04"),candidate);
   assert.equal(requests,1);
 });
 test("review independently searches and returns claim-level evidence",async()=>{
