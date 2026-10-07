@@ -1,6 +1,8 @@
 import { archiveKey } from "./archive.js";
 import { CATEGORIES, FactError, approved, publication, utcDate, validateCandidate, validateReview } from "./domain.js";
 import type { Candidate, Category, Publication, Review } from "./domain.js";
+import { DEFAULT_DAILY_TOKEN_BUDGET, MAX_REQUEST_RESERVATION } from "./budget.js";
+import type { RequestBudget } from "./budget.js";
 
 export interface Transaction {
   get<T>(key: string): Promise<T | undefined>;
@@ -10,13 +12,14 @@ export interface Transaction {
 }
 export interface Store { transaction<T>(callback: (tx: Transaction) => Promise<T>): Promise<T> }
 export interface AI {
-  generate(category: Category, day: string): Promise<Candidate>;
-  review(candidate: Candidate, day: string): Promise<Review>;
+  generate(category: Category, day: string, budget: RequestBudget): Promise<Candidate>;
+  review(candidate: Candidate, day: string, budget: RequestBudget): Promise<Review>;
 }
 export interface Job {
   day: string; attempts: number; status: "queued" | "running" | "retry" | "succeeded" | "stopped";
   nextAt: number;
-  active?: { id: string; phase: "generation" | "review"; deadline: number };
+  active?: { id: string; phase: "generation" | "review"; deadline: number; reserved?: boolean };
+  budget?: { reservedTokens: number; requests: number };
   failure?: string;
   failurePermanent?: boolean;
 }
@@ -42,7 +45,8 @@ export class DailyJob {
       const data = new Uint32Array(1); crypto.getRandomValues(data); return data[0] / 0x100000000;
     },
     private readonly log: (event: string, data: Record<string, unknown>) => void =
-      (event, data) => console.log(JSON.stringify({ event, ...data }))
+      (event, data) => console.log(JSON.stringify({ event, ...data })),
+    private readonly tokenBudget: number = DEFAULT_DAILY_TOKEN_BUDGET
   ) {}
 
   async queue(day: string, bootstrap = false): Promise<"accepted" | "pending" | "published" | "stopped" | "obsolete"> {
@@ -62,7 +66,7 @@ export class DailyJob {
         await tx.put("state", state); await tx.setAlarm(now + 1);
         return "accepted";
       }
-      state.job = { day, attempts: 0, status: "queued", nextAt: now };
+      state.job = { day, attempts: 0, status: "queued", nextAt: now, budget: { reservedTokens: 0, requests: 0 } };
       await tx.put("state", state);
       await tx.setAlarm(now + 1);
       return "accepted";
@@ -71,6 +75,47 @@ export class DailyJob {
 
   private owned(state: State, id: string): boolean {
     return state.job?.status === "running" && state.job.active?.id === id;
+  }
+
+  private requestBudget(id: string, day: string, phase: "generation" | "review"): RequestBudget {
+    let deadline = 0;
+    return {
+      reserve: async tokens => {
+        const result = await this.store.transaction(async tx => {
+          const state = await tx.get<State>("state") ?? {};
+          const now = this.now();
+          if (!this.owned(state, id) || state.job!.day !== day || utcDate(now) !== day ||
+              state.job!.active!.phase !== phase || now >= state.job!.active!.deadline) {
+            throw new FactError("attempt_not_active");
+          }
+          const job = state.job!;
+          if (job.active!.reserved) throw new FactError("request_already_reserved", true);
+          if (!Number.isSafeInteger(tokens) || tokens <= 0 || tokens > MAX_REQUEST_RESERVATION ||
+              !Number.isSafeInteger(this.tokenBudget) || this.tokenBudget <= 0 ||
+              this.tokenBudget > DEFAULT_DAILY_TOKEN_BUDGET) throw new FactError("openai_budget_configuration", true);
+          // Legacy input/tool usage was not bounded or persisted. Fail closed for
+          // the rest of that UTC day rather than assume a safe remaining allowance.
+          job.budget ??= {
+            reservedTokens: job.attempts > 1 || phase === "review" ? this.tokenBudget : 0,
+            requests: (job.attempts - 1) * 2 + (phase === "review" ? 1 : 0)
+          };
+          if (job.budget.reservedTokens + tokens > this.tokenBudget) {
+            // Persist the fail-closed legacy reservation even when the first new request is denied.
+            await tx.put("state", state);
+            return { allowed: false, deadline: job.active!.deadline, total: job.budget.reservedTokens };
+          }
+          job.budget.reservedTokens += tokens; job.budget.requests++;
+          job.active!.reserved = true;
+          await tx.put("state", state);
+          return { allowed: true, deadline: job.active!.deadline, total: job.budget.reservedTokens };
+        });
+        if (!result.allowed) throw new FactError("daily_token_budget_exhausted", true);
+        deadline = result.deadline;
+        this.log("token_budget_reserved", { day, attempt_id: id, phase, tokens,
+          reserved_today: result.total, daily_limit: this.tokenBudget });
+      },
+      remainingMs: () => Math.max(0, deadline - this.now() - RECOVERY_GRACE_MS)
+    };
   }
 
   private async failIn(tx: Transaction, state: State, code: string, permanent: boolean, now: number) {
@@ -120,7 +165,7 @@ export class DailyJob {
     this.log("attempt_started", { day: attempt.day, attempt_id: attempt.id, attempt: attempt.number });
     try {
       const category = CATEGORIES[Math.min(CATEGORIES.length - 1, Math.floor(this.random() * CATEGORIES.length))];
-      const candidate = validateCandidate(await this.ai.generate(category, attempt.day));
+      const candidate = validateCandidate(await this.ai.generate(category, attempt.day, this.requestBudget(attempt.id, attempt.day, "generation")));
       const reviewAllowed = await this.store.transaction(async tx => {
         const state = await tx.get<State>("state") ?? {};
         if (!this.owned(state, attempt.id)) return false;
@@ -128,13 +173,13 @@ export class DailyJob {
         if (utcDate(now) !== attempt.day || now >= state.job!.active!.deadline) {
           await this.failIn(tx, state, "expired_generation", false, now); return false;
         }
-        state.job!.active!.phase = "review";
+        state.job!.active!.phase = "review"; state.job!.active!.reserved = false;
         state.job!.active!.deadline = now + REQUEST_TIMEOUT_MS + RECOVERY_GRACE_MS;
         await tx.put("state", state); await tx.setAlarm(state.job!.active!.deadline);
         return true;
       });
       if (!reviewAllowed) return;
-      const review = validateReview(await this.ai.review(candidate, attempt.day));
+      const review = validateReview(await this.ai.review(candidate, attempt.day, this.requestBudget(attempt.id, attempt.day, "review")));
       if (!approved(review)) {
         this.log("candidate_rejected", { day: attempt.day, attempt_id: attempt.id, reasons: review.reasons });
         throw new FactError("review_rejected");
