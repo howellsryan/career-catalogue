@@ -76,3 +76,31 @@ test("maximum supported Unicode inputs stay valid and matching compares complete
   assert.ok(core.compare("İ".repeat(64), "word", 1).errors.query, "lowercasing can expand the normalized code-point length");
   assert.equal(core.compare("cat", "a cat", 1).rows[0].accepted, false);
 });
+
+test("comparison export includes the actual normalized query, threshold, ranked outcomes and intent caveat", () => {
+  const result = core.compare(" PLUMBR ", "plumper\nplumber\nPLUMBER", 1);
+  const text = core.formatComparison(result);
+  assert.match(text, /Query \(normalized\): "plumbr"/);
+  assert.match(text, /Maximum edit distance: 1/);
+  assert.match(text, /Exact matches: 0 of 2/);
+  assert.match(text, /Fuzzy accepts: 1 of 2/);
+  assert.match(text, /"plumber" — distance 1; accepted; not an exact match/);
+  assert.match(text, /"plumper" — distance 2; excluded; not an exact match/);
+  assert.ok(text.indexOf('"plumber" —') < text.indexOf('"plumper" —'));
+  assert.match(text, /Repeated normalized candidate lines ignored: 1/);
+  assert.match(text, /Spelling similarity is not intent/);
+  assert.match(text, /one real typo and one confusing near-match/);
+});
+
+test("invalid comparisons cannot be exported but a valid comparison with no accepted candidates can", () => {
+  for (const result of [null, {}, core.compare("", "plumber", 1), core.compare("plumbr", "", 1), core.compare("plumbr", "plumber", 4)]) assert.equal(core.formatComparison(result), "");
+  const text = core.formatComparison(core.compare("plumbr", "plumber", 0));
+  assert.match(text, /Fuzzy accepts: 0 of 1/);
+  assert.match(text, /"plumber" — distance 1; excluded/);
+});
+
+test("comparison export treats entered markup and quotes as literal candidate text", () => {
+  const text = core.formatComparison(core.compare('<em>"hi"</em>', '<em>"hi"</em>\nother', 0));
+  assert.ok(text.includes(JSON.stringify('<em>"hi"</em>') + ' — distance 0; accepted; exact match'));
+  assert.match(text, /Fuzzy accepts: 1 of 2/);
+});

@@ -7,7 +7,8 @@
 
     <nav class="site-nav" aria-label="Primary">
       <a href="{{ '/' | relative_url }}"{% if page.url == '/' %} aria-current="page"{% endif %}>Writing</a>
-      <a href="{{ '/practice/' | relative_url }}"{% if page.url == '/practice/' %} aria-current="page"{% endif %}>Practice</a>
+      {% assign practice_prefix = page.url | slice: 0, 10 %}
+      <a href="{{ '/practice/' | relative_url }}"{% if practice_prefix == '/practice/' %} aria-current="page"{% endif %}>{{ site.data.practice.name }}</a>
       <a href="{{ '/tags/' | relative_url }}"{% if page.url == '/tags/' %} aria-current="page"{% endif %}>Topics</a>
       <a href="{{ '/daily-fact/' | relative_url }}"{% if page.url == '/daily-fact/' %} aria-current="page"{% endif %}>Daily Fact</a>
       <a href="{{ '/about/' | relative_url }}"{% if page.url == '/about/' %} aria-current="page"{% endif %}>About</a>

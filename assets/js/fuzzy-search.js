@@ -1,6 +1,8 @@
 (function () {
   "use strict";
   var core = window.FuzzySearchCore;
+  var kit = window.PracticeKit;
+  var exportText = "", copying = false;
   if (!core || !document.getElementById("fuzzy-search-lab")) return;
   function $(id) { return document.getElementById(id); }
 
@@ -14,6 +16,11 @@
     });
     $("fx-rows").textContent = "";
     var invalid = Object.keys(result.errors).length > 0;
+    exportText = core.formatComparison(result);
+    $("fx-export").textContent = exportText;
+    $("fx-copy").disabled = invalid || copying || !kit;
+    $("fx-download").disabled = invalid || !kit;
+    $("fx-copy-status").textContent = "";
     $("fx-results").hidden = invalid;
     if (invalid) {
       $("fx-status").textContent = "Comparison paused. " + Object.keys(result.errors).map(function (field) { return result.errors[field]; }).join(" ");
@@ -62,5 +69,20 @@
     $("fx-exercise-feedback").textContent = core.checkExercise($("fx-exercise").value).message;
   });
   $("fx-exercise").addEventListener("change", function () { $("fx-exercise-feedback").textContent = ""; });
+  $("fx-copy").addEventListener("click", async function () {
+    if (!exportText || copying || !kit || $("fx-copy").disabled) return;
+    var snapshot = exportText;
+    copying = true;
+    var copied = await kit.copy(snapshot, $("fx-copy"), $("fx-copy-status"));
+    copying = false;
+    $("fx-copy").disabled = !exportText;
+    if (copied && snapshot !== exportText) $("fx-copy-status").textContent = "Copied the previous comparison. Your inputs changed while it was copying.";
+  });
+  $("fx-download").addEventListener("click", function () {
+    if (!exportText || !kit || $("fx-download").disabled) return;
+    $("fx-copy-status").textContent = kit.download(exportText, "fuzzy-search-comparison.txt")
+      ? "Comparison downloaded."
+      : "Could not download. Open the comparison preview, select its text and copy it using your browser.";
+  });
   render();
 })();

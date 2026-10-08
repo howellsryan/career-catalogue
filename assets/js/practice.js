@@ -2,6 +2,10 @@
   "use strict";
 
   var Core = window.PracticeCore;
+  var tool = ["retro", "forecast", "health", "one-to-ones", "room"].find(function (name) {
+    return document.getElementById("panel-" + name);
+  });
+  if (!Core || !tool) return;
 
   var THEME_LABEL = {
     ease: "Getting started",
@@ -189,10 +193,7 @@
     { id: "high", label: "Healthy" }
   ];
 
-  var TABS = ["retro", "forecast", "health", "one-to-ones", "room"];
   var SAMPLE = [6, 9, 7, 4, 8, 11, 5, 8, 6, 10];
-  var TRIALS = 10000;
-  var MAX_PERIODS = 400;
   var RING = 2 * Math.PI * 34;
 
   var currentRetro = null;
@@ -204,7 +205,6 @@
   var clearArmed = false;
   var clearTimeoutId = null;
   var forecastTimeoutId = null;
-  var forecastReady = false;
 
   var timer = {
     running: false,
@@ -252,42 +252,6 @@
     }
     if (!choices.length) choices = pool.slice();
     return choices[Math.floor(Math.random() * choices.length)];
-  }
-
-  function activeTab() {
-    var found = "retro";
-    TABS.forEach(function (name) {
-      if ($("tab-" + name).getAttribute("aria-selected") === "true") found = name;
-    });
-    return found;
-  }
-
-  function selectTab(id, updateURL) {
-    id = id.replace(/^panel-/, "");
-    if (TABS.indexOf(id) < 0) id = "retro";
-    var previous = activeTab();
-    var focused = document.activeElement;
-    TABS.forEach(function (name) {
-      var on = name === id;
-      var tab = $("tab-" + name);
-      tab.setAttribute("aria-selected", on ? "true" : "false");
-      tab.tabIndex = on ? 0 : -1;
-      $("panel-" + name).hidden = !on;
-    });
-    if (previous !== id && focused && $("panel-" + previous).contains(focused)) $("tab-" + id).focus();
-    if (updateURL !== false && previous !== id) {
-      var hash = id === "retro" ? "" : "#" + id;
-      history.pushState(null, "", location.pathname + location.search + hash);
-    }
-    if (id === "forecast" && !forecastReady) {
-      forecastReady = true;
-      runForecast();
-    }
-  }
-
-  function syncTabFromURL() {
-    var id = location.hash.replace(/^#/, "");
-    selectTab(id, false);
   }
 
   function currentPool() {
@@ -909,25 +873,7 @@
     if (saved.available != null) $("focus-available").value = saved.available;
   }
 
-  function bind() {
-    document.querySelector(".px-switch").addEventListener("click", function (event) {
-      var tab = event.target.closest(".px-tab");
-      if (!tab) return;
-      selectTab(tab.id.replace("tab-", ""));
-    });
-
-    document.querySelector(".px-switch").addEventListener("keydown", function (event) {
-      if (!event.target.closest(".px-tab") || ["ArrowRight", "ArrowLeft", "Home", "End"].indexOf(event.key) < 0) return;
-      var current = activeTab();
-      var index = TABS.indexOf(current);
-      if (index < 0) return;
-      event.preventDefault();
-      var next = event.key === "Home" ? TABS[0] : event.key === "End" ? TABS[TABS.length - 1] :
-        TABS[(index + (event.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length];
-      $("tab-" + next).focus();
-      selectTab(next);
-    });
-
+  function bindRetro() {
     document.querySelector("#panel-retro .px-chips").addEventListener("click", function (event) {
       var chip = event.target.closest(".px-chip");
       if (!chip) return;
@@ -935,15 +881,6 @@
         other.setAttribute("aria-pressed", other === chip ? "true" : "false");
       });
       drawRetro();
-    });
-
-    $("one-chips").addEventListener("click", function (event) {
-      var chip = event.target.closest(".px-chip");
-      if (!chip) return;
-      chip.parentElement.querySelectorAll(".px-chip").forEach(function (other) {
-        other.setAttribute("aria-pressed", other === chip ? "true" : "false");
-      });
-      drawOne();
     });
 
     document.querySelectorAll('input[name="warmth"]').forEach(function (input) {
@@ -993,7 +930,7 @@
       if (event.metaKey || event.ctrlKey || event.altKey) return;
       var target = event.target;
       if (target && (target.matches("input, textarea, select") || target.isContentEditable)) return;
-      if (activeTab() !== "retro" || document.activeElement !== $("retro-card")) return;
+      if (document.activeElement !== $("retro-card")) return;
       if (event.key === "n" || event.key === "N") {
         event.preventDefault();
         drawRetro();
@@ -1004,6 +941,10 @@
       }
     });
 
+    window.setInterval(tick, 200);
+  }
+
+  function bindForecast() {
     ["tp-paste", "remaining", "cadence", "start-date"].forEach(function (id) {
       $(id).addEventListener("input", queueForecast);
       $(id).addEventListener("change", runForecast);
@@ -1026,6 +967,9 @@
       copyWithButton(text, $("forecast-copy"));
     });
 
+  }
+
+  function bindHealth() {
     $("health-rows").addEventListener("click", function (event) {
       var button = event.target.closest("button");
       if (!button) return;
@@ -1064,31 +1008,54 @@
       $("health-reset").textContent = "Clear votes";
     });
 
+  }
+
+  function bindOneToOnes() {
+    $("one-chips").addEventListener("click", function (event) {
+      var chip = event.target.closest(".px-chip");
+      if (!chip) return;
+      chip.parentElement.querySelectorAll(".px-chip").forEach(function (other) {
+        other.setAttribute("aria-pressed", other === chip ? "true" : "false");
+      });
+      drawOne();
+    });
+
     $("one-draw").addEventListener("click", drawOne);
     $("one-copy").addEventListener("click", function () {
       if (!currentOne) return;
       copyWithButton(currentOne.text + "\n\nWhy this one: " + currentOne.why + "\nIf you need a second: " + currentOne.follow, $("one-copy"));
     });
 
+  }
+
+  function bindRoom() {
     ["meet-people", "meet-mins", "meet-rate", "meet-currency", "focus-people", "focus-meetings", "focus-available"].forEach(function (id) {
       $(id).addEventListener("input", runRoom);
       $(id).addEventListener("change", runRoom);
     });
 
-    window.addEventListener("hashchange", syncTabFromURL);
-    window.addEventListener("popstate", syncTabFromURL);
-    window.setInterval(tick, 200);
   }
 
-  loadForecastForm();
-  loadRoom();
-  loadVotes();
-  buildHealth();
-  paintHealth();
-  setMinutes(8);
-  drawRetro();
-  drawOne();
-  runRoom();
-  bind();
-  syncTabFromURL();
+  // Each page mounts one tool. Do not read or bind controls from other tools.
+  if (tool === "retro") {
+    setMinutes(8);
+    drawRetro();
+    bindRetro();
+  } else if (tool === "forecast") {
+    loadForecastForm();
+    runForecast();
+    bindForecast();
+  } else if (tool === "health") {
+    loadVotes();
+    buildHealth();
+    paintHealth();
+    bindHealth();
+  } else if (tool === "one-to-ones") {
+    drawOne();
+    bindOneToOnes();
+  } else if (tool === "room") {
+    loadRoom();
+    runRoom();
+    bindRoom();
+  }
 })();

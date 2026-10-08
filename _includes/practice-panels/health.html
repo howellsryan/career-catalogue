@@ -1,0 +1,16 @@
+<section class="px-panel" id="panel-health" aria-labelledby="practice-tool-title">
+    <h2 class="visually-hidden">Team health</h2>
+    <p class="px-section-lead">Pass it round, or tally the room out loud. Three votes is enough to see a shape. This is a conversation, not a score you keep on a person.</p>
+    <div class="px-health">
+      <div class="px-health__chart">
+        <svg id="health-radar" viewBox="0 0 400 400" role="img" aria-labelledby="health-read"></svg>
+        <p class="px-say px-say--small" id="health-read" aria-live="polite">Add a few votes and the shape appears.</p>
+        <div class="px-actions">
+          <button type="button" class="px-btn" id="health-copy">Copy the summary</button>
+          <button type="button" class="px-btn px-btn--ghost" id="health-reset">Clear votes</button>
+        </div>
+      </div>
+      <div id="health-rows" class="px-health__rows"></div>
+    </div>
+    <p class="px-hint">Choose one improvement together. <a href="{{ '/practice/experiment/?from=health' | relative_url }}">Record the experiment and how you will know it helped.</a></p>
+  </section>

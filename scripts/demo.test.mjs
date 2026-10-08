@@ -146,3 +146,42 @@ test("exports preserve multiline user entries as text and include the full cycle
   assert.match(output, /Include the settlement reference/);
   assert.match(output, /Decision: Act/);
 });
+
+test("a single copied response keeps unanswered fields visible and excludes other requests", () => {
+  const state = core.addFeedback(core.example());
+  state.feedback[2].request = "Support multiple currencies\nwithout converting historical payments";
+  const output = core.response(state, 2, "2026-10-08");
+  assert.match(output, /Request: Support multiple currencies\nwithout converting historical payments/);
+  assert.match(output, /Decision: Pending — no decision recorded/);
+  assert.match(output, /Rationale \/ next step: Not recorded yet/);
+  assert.match(output, /Owner: Not yet assigned/);
+  assert.match(output, /Follow-up date: Not scheduled/);
+  assert.match(output, /Response status: Response pending/);
+  assert.doesNotMatch(output, /Schedule the CSV|settlement reference/);
+});
+
+test("each decision stays explicit in a copied response without implying work completion", () => {
+  const state = core.example();
+  for (const decision of core.DECISIONS) {
+    state.feedback[0].decision = decision;
+    state.feedback[0].responded = true;
+    state.feedback[0].responseDate = "2026-10-07";
+    const output = core.response(state, 0, "2026-10-08");
+    assert.ok(output.includes("Decision: " + decision));
+    assert.match(output, /Response status: Response shared on 2026-10-07/);
+    assert.match(output, /It does not mean the requested work or investigation is complete/);
+    assert.doesNotMatch(output, /Work complete|Investigation complete/);
+  }
+});
+
+test("copying one response validates that item and remains possible while other draft dates need fixing", () => {
+  const state = core.example();
+  state.demoDate = "2026-02-30";
+  state.feedback[1].dueDate = "2026-02-30";
+  assert.doesNotThrow(() => core.response(state, 0, "2026-10-08"));
+  assert.throws(() => core.response(state, 1, "2026-10-08"), /Correct the dates/);
+  state.feedback[0].responded = true;
+  state.feedback[0].responseDate = "2026-10-09";
+  assert.throws(() => core.response(state, 0, "2026-10-08"), /Correct the dates/);
+  for (const index of [-1, 0.5, 2, NaN]) assert.throws(() => core.response(state, index, "2026-10-08"), /existing feedback item/);
+});

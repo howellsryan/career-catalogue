@@ -19,10 +19,15 @@ baseurl — every internal link must go through `relative_url` / `absolute_url`)
 - **Drafts** go in `_drafts/` (never published). Use `scripts/new-post.sh` to
   create one and `scripts/publish.sh` to promote it into `_posts/`.
 - **Old URLs** are preserved with `redirect_from` — don't remove those lines.
-- **Practice** (`practice.html`, permalink `/practice/`) is a browser tools section,
-  not a post. Its UI lives in `assets/js/practice.js`; calculations and validation
-  live in `assets/js/practice-core.js`. Keep `assets/css/practice.scss` on existing
-  site tokens. Run `node --test scripts/*.test.mjs` when changing these tools.
+- **Practice** (`practice.html`, permalink `/practice/`) is the tools catalogue.
+  `_data/practice.yml` owns the tool names, routes, job groups and introductions;
+  `_includes/practice-header.html` shares breadcrumbs and the tool switcher across
+  all nine pages. Original tools (`retro.html`, `forecast.html`, `health.html`,
+  `one-to-ones.html`, `room.html`) include `_includes/practice-panels/*`.
+  `practice.js` initializes only the mounted tool; calculations and validation
+  live in `practice-core.js`. `practice-catalogue.js` preserves old tab bookmarks.
+  Keep `assets/css/practice.scss` on existing site tokens. Run
+  `node --test scripts/*.test.mjs` when changing these tools.
 - **Companion tools** (`work-brief.html`, `fuzzy-search.html`, `experiment.html`,
   `demo.html`) live under `/practice/` and use the same CSS tokens. Their
   `assets/js/*-core.js` modules hold pure validation/calculations and their

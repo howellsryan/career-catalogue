@@ -84,5 +84,29 @@
     return { passed: false, message: "This recovers ‘plumber’, but also accepts ‘plumper’ at distance 2. A larger threshold adds matches without understanding meaning. Try the smallest threshold that fixes the one missing letter." };
   }
 
-  return { limits: limits, example: example, normalize: normalize, distance: distance, parseCandidates: parseCandidates, compare: compare, checkExercise: checkExercise };
+  function formatComparison(result) {
+    if (!result || !result.errors || Object.keys(result.errors).length || !Array.isArray(result.rows) || !result.rows.length) return "";
+    var exact = result.rows.filter(function (row) { return row.exact; }).length;
+    var accepted = result.rows.filter(function (row) { return row.accepted; }).length;
+    var lines = [
+      "Fuzzy-search comparison",
+      "",
+      "Query (normalized): " + JSON.stringify(result.query),
+      "Maximum edit distance: " + result.threshold,
+      "Exact matches: " + exact + " of " + result.rows.length,
+      "Fuzzy accepts: " + accepted + " of " + result.rows.length,
+      "",
+      "Candidates, ranked by fewest edits (ties keep input order):"
+    ];
+    result.rows.forEach(function (row) {
+      lines.push(JSON.stringify(row.value) + " — distance " + row.distance + "; " + (row.accepted ? "accepted" : "excluded") + "; " + (row.exact ? "exact match" : "not an exact match"));
+    });
+    if (result.duplicates) lines.push("", "Repeated normalized candidate lines ignored: " + result.duplicates);
+    lines.push("", "Normalization: surrounding whitespace ignored; lowercase Unicode NFC; accents remain significant.");
+    lines.push("Spelling similarity is not intent: an accepted candidate may still be irrelevant. Larger thresholds can recover typos and introduce false positives. Check relevance in your own domain.");
+    lines.push("Next check: try one real typo and one confusing near-match before choosing a production threshold.");
+    return lines.join("\n");
+  }
+
+  return { limits: limits, example: example, normalize: normalize, distance: distance, parseCandidates: parseCandidates, compare: compare, checkExercise: checkExercise, formatComparison: formatComparison };
 });

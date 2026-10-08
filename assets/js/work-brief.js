@@ -35,10 +35,17 @@
       var error = document.getElementById("brief-" + field.key + "-error");
       error.textContent = errors[field.key] || "";
       error.hidden = !errors[field.key];
-      if (errors[field.key]) input.setAttribute("aria-invalid", "true");
-      else input.removeAttribute("aria-invalid");
+      if (errors[field.key]) {
+        input.setAttribute("aria-invalid", "true");
+        var disclosure = typeof input.closest === "function" ? input.closest("details") : null;
+        if (disclosure) disclosure.open = true;
+      } else input.removeAttribute("aria-invalid");
     });
     document.getElementById("brief-preview").textContent = Core.markdown(draft);
+    document.getElementById("brief-summary-title").textContent = draft.title.trim() || "Work brief";
+    ["user", "problem", "outcome", "slice"].forEach(function (key) {
+      document.getElementById("brief-summary-" + key).textContent = draft[key].trim() || "To discuss";
+    });
     var list = document.getElementById("brief-discussion");
     list.replaceChildren();
     Core.discussionQuestions(draft).forEach(function (question) {

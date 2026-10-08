@@ -116,18 +116,35 @@
     lines.push("Thanks for the feedback. Here is our current response, including the questions that remain open.", "");
     if (!state.feedback.length) lines.push("No feedback has been recorded yet.");
     state.feedback.forEach(function (row, i) {
-      lines.push(
-        "## " + (i + 1) + ". " + filled(row.request, "Feedback item not described yet"),
-        "Decision: " + filled(row.decision, "Pending — no decision recorded"),
-        "Rationale / next step: " + filled(row.rationale, "Not recorded yet"),
-        "Owner: " + filled(row.owner, "Not yet assigned"),
-        "Follow-up date: " + filled(row.dueDate, "Not scheduled"),
-        "Response status: " + status(row, today) + (row.responded && row.responseDate ? " on " + row.responseDate : ""),
-        ""
-      );
+      lines.push("## " + (i + 1) + ". " + filled(row.request, "Feedback item not described yet"));
+      lines = lines.concat(responseLines(row, today), [""]);
     });
     lines.push("A shared response records communication. It does not mean the requested work or investigation is complete.", "");
     return lines.join("\n");
+  }
+
+  function responseLines(row, today) {
+    return [
+      "Decision: " + filled(row.decision, "Pending — no decision recorded"),
+      "Rationale / next step: " + filled(row.rationale, "Not recorded yet"),
+      "Owner: " + filled(row.owner, "Not yet assigned"),
+      "Follow-up date: " + filled(row.dueDate, "Not scheduled"),
+      "Response status: " + status(row, today) + (row.responded && row.responseDate ? " on " + row.responseDate : "")
+    ];
+  }
+
+  function response(value, index, today) {
+    var rows = object(value) && Array.isArray(value.feedback) ? value.feedback : [];
+    if (!Number.isInteger(index) || index < 0 || index >= Math.min(rows.length, MAX_FEEDBACK)) throw new RangeError("Choose an existing feedback item.");
+    var selected = empty();
+    selected.title = value.title;
+    selected.feedback = [rows[index]];
+    var state = usable(selected, today);
+    var row = state.feedback[0];
+    if (!row) throw new RangeError("Choose an existing feedback item.");
+    return ["# Response to feedback — " + filled(state.title, "Untitled demo"), "", "Request: " + filled(row.request, "Feedback item not described yet")]
+      .concat(responseLines(row, today), ["", "A shared response records communication. It does not mean the requested work or investigation is complete.", ""])
+      .join("\n");
   }
 
   function pack(value, today) { return agenda(value, today) + "\n---\n\n" + followUp(value, today); }
@@ -146,5 +163,5 @@
     };
   }
 
-  return { MAX_FEEDBACK: MAX_FEEDBACK, DECISIONS: DECISIONS, empty: empty, normalize: normalize, restore: restore, validDate: validDate, validate: validate, hasContent: hasContent, addFeedback: addFeedback, removeFeedback: removeFeedback, status: status, agenda: agenda, followUp: followUp, pack: pack, example: example };
+  return { MAX_FEEDBACK: MAX_FEEDBACK, DECISIONS: DECISIONS, empty: empty, normalize: normalize, restore: restore, validDate: validDate, validate: validate, hasContent: hasContent, addFeedback: addFeedback, removeFeedback: removeFeedback, status: status, agenda: agenda, followUp: followUp, response: response, pack: pack, example: example };
 });

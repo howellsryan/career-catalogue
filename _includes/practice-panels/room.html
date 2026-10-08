@@ -1,0 +1,44 @@
+<section class="px-panel" id="panel-room" aria-labelledby="practice-tool-title">
+    <div class="px-room">
+      <article class="px-card px-card--tool">
+        <p class="px-kicker">Before you send the invite</p>
+        <h2 class="px-tool-title">What the meeting costs</h2>
+        <div class="px-form">
+          <label class="px-legend" for="meet-people">People in the room</label>
+          <input id="meet-people" type="number" min="1" max="200" step="1" value="6" inputmode="numeric" name="meet-people" autocomplete="off">
+
+          <label class="px-legend" for="meet-mins">Minutes</label>
+          <input id="meet-mins" type="number" min="5" max="480" step="1" value="50" inputmode="numeric" name="meet-mins" autocomplete="off">
+
+          <label class="px-legend" for="meet-rate">Fully loaded hourly cost, per person</label>
+          <div class="px-money">
+            <select id="meet-currency" aria-label="Currency" name="meet-currency" autocomplete="off">
+              <option value="GBP" selected>£</option>
+              <option value="USD">$</option>
+              <option value="EUR">€</option>
+            </select>
+            <input id="meet-rate" type="number" min="0" max="1000" step="any" value="70" inputmode="decimal" name="meet-rate" autocomplete="off">
+          </div>
+          <p class="px-hint">Salary is not the cost. A rough fully loaded rate is enough — the point is the order of magnitude, said before the invite goes out.</p>
+        </div>
+        <p class="px-say px-say--small" id="meet-say" aria-live="polite"></p>
+      </article>
+
+      <article class="px-card px-card--tool">
+        <p class="px-kicker">After the calendar is honest</p>
+        <h2 class="px-tool-title">What is left to make something</h2>
+        <div class="px-form">
+          <label class="px-legend" for="focus-people">People on the team</label>
+          <input id="focus-people" type="number" min="1" max="200" step="1" value="6" inputmode="numeric" name="focus-people" autocomplete="off">
+
+          <label class="px-legend" for="focus-meetings">Meeting hours per person, this week</label>
+          <input id="focus-meetings" type="number" min="0" max="60" step="any" value="12" inputmode="decimal" name="focus-meetings" autocomplete="off">
+
+          <label class="px-legend" for="focus-available">Hours you are willing to call available</label>
+          <input id="focus-available" type="number" min="1" max="60" step="any" value="30" inputmode="decimal" name="focus-available" autocomplete="off">
+          <p class="px-hint">A five-day week minus lunch, slack and the odd interruption is closer to 30 hours than 40. Pretending otherwise is how focus disappears on paper last.</p>
+        </div>
+        <p class="px-say px-say--small" id="focus-say" aria-live="polite"></p>
+      </article>
+    </div>
+  </section>

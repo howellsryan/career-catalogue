@@ -1,0 +1,20 @@
+---
+layout: default
+title: Forecast
+permalink: /practice/forecast/
+description: "Use completed-item history to forecast a range of delivery dates."
+extra_css: /assets/css/practice.css
+tool: forecast
+---
+
+{% include practice-header.html %}
+
+<div class="wrap px px-stack">
+  <noscript><p class="px-empty">This tool needs JavaScript enabled. You can still browse the writing using the navigation above.</p></noscript>
+  <p id="practice-status" class="visually-hidden" role="status" aria-live="polite"></p>
+  {% include practice-panels/forecast.html %}
+  <p class="px-foot">Your history, backlog, period length and start date stay in local storage on this device. The forecast runs in your browser; nothing is sent to a service.</p>
+</div>
+
+<script src="{{ '/assets/js/practice-core.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+<script src="{{ '/assets/js/practice.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

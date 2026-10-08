@@ -4,28 +4,25 @@ title: Team experiment
 permalink: /practice/experiment/
 description: "Turn one retro or team health observation into a small experiment, then review what happened."
 extra_css: /assets/css/practice.css
+tool: experiment
 ---
 
-<section class="px-hero wrap">
-  <p class="px-breadcrumb"><a href="{{ '/practice/' | relative_url }}">← Practice</a></p>
-  <p class="px-eyebrow">Practice · Follow-through</p>
-  <h1 class="px-title">Try one change. Come back to what happened.</h1>
-  <p class="px-lead">Choose one small experiment together after a retro or health discussion. Ask for a volunteer, agree what you will observe, and make time to review it. Keep one active experiment at a time.</p>
-</section>
+{% include practice-header.html %}
 
 <div class="wrap px">
   <noscript><p class="px-empty">This worksheet needs JavaScript to save and review a plan. The completed example and <a href="{{ '/closing-the-feedback-loop/' | relative_url }}">the essay behind it</a> are still available below.</p></noscript>
   <p id="experiment-origin" class="px-note" hidden></p>
   <p id="experiment-storage-warning" class="px-error" role="alert" hidden>Your browser could not save this work. It remains here while the page is open. Copy or download it before leaving.</p>
   <p id="experiment-status" class="px-status" role="status" aria-live="polite"></p>
+  <p class="px-hint"><a href="#experiment-result">Review your plan and take a copy ↓</a></p>
   <section id="experiment-due" class="px-card px-stack" aria-labelledby="experiment-due-title" hidden>
     <h2 id="experiment-due-title"></h2>
     <p id="experiment-due-copy"></p>
-    <p><a href="#experiment-review">Review what happened ↓</a></p>
+    <p><a id="experiment-review-link" href="#experiment-review-details">Review what happened ↓</a></p>
   </section>
 
-  <div class="px-workspace">
-    <div class="px-stack">
+  <div class="px-workspace" id="experiment-workspace">
+    <div class="px-stack" id="experiment-edit-column">
       <form id="experiment-plan-form" class="px-card px-stack" novalidate>
         <div>
           <h2>Agree on one experiment</h2>
@@ -62,83 +59,101 @@ extra_css: /assets/css/practice.css
         <div class="px-actions"><button type="submit" class="px-btn px-btn--primary">Save the agreed plan</button></div>
       </form>
 
-      <form id="experiment-review" class="px-card px-stack" novalidate hidden>
-        <div>
-          <h2>What happened?</h2>
-          <p class="px-hint">Discuss the observation with the team. You can review early. Keep or Change begins another cycle without losing the original plan or this learning.</p>
-          <p id="experiment-review-error" class="px-error" role="alert" hidden></p>
-        </div>
-        <div class="px-field">
-          <label class="px-legend" for="experiment-happened">What did you observe and learn?</label>
-          <textarea id="experiment-happened" rows="5" maxlength="5000" required aria-describedby="experiment-happened-error"></textarea>
-          <p id="experiment-happened-error" class="px-error" hidden></p>
-        </div>
-        <div class="px-field">
-          <label class="px-legend" for="experiment-decision">What should happen next?</label>
-          <select id="experiment-decision" required aria-describedby="experiment-decision-hint experiment-decision-error">
-            <option value="">Choose a decision</option>
-            <option value="keep">Keep — try the same change for another cycle</option>
-            <option value="change">Change — revise the experiment</option>
-            <option value="stop">Stop — finish this experiment</option>
-          </select>
-          <p class="px-hint" id="experiment-decision-hint">Stop can mean the change is now routine, it did not help, or another issue matters more.</p>
-          <p id="experiment-decision-error" class="px-error" hidden></p>
-        </div>
-        <div id="experiment-next-date-field" class="px-field" hidden>
-          <label class="px-legend" for="experiment-nextDate">Next review date</label>
-          <input id="experiment-nextDate" type="date" max="9999-12-31" aria-describedby="experiment-nextDate-error">
-          <p id="experiment-nextDate-error" class="px-error" hidden></p>
-        </div>
-        <div id="experiment-revised-fields" class="px-stack" hidden>
-          <h3>Revise the next plan</h3>
-          <div class="px-field">
-            <label class="px-legend" for="experiment-revised-context">What are you noticing now?</label>
-            <textarea id="experiment-revised-context" rows="3" maxlength="3000" aria-describedby="experiment-revised-context-error"></textarea>
-            <p id="experiment-revised-context-error" class="px-error" hidden></p>
+      <details id="experiment-review-details" class="px-example" hidden>
+        <summary id="experiment-review-summary">Review early</summary>
+        <form id="experiment-review" class="px-stack" novalidate hidden>
+          <div>
+            <h2>What happened?</h2>
+            <p class="px-hint">Discuss the observation with the team. You can review early. Keep or Change begins another cycle without losing the original plan or this learning.</p>
+            <p id="experiment-review-error" class="px-error" role="alert" hidden></p>
           </div>
           <div class="px-field">
-            <label class="px-legend" for="experiment-revised-change">Revised change to try</label>
-            <textarea id="experiment-revised-change" rows="3" maxlength="3000" aria-describedby="experiment-revised-change-error"></textarea>
-            <p id="experiment-revised-change-error" class="px-error" hidden></p>
+            <label class="px-legend" for="experiment-happened">What did you observe and learn?</label>
+            <textarea id="experiment-happened" rows="5" maxlength="5000" required aria-describedby="experiment-happened-error"></textarea>
+            <p id="experiment-happened-error" class="px-error" hidden></p>
           </div>
           <div class="px-field">
-            <label class="px-legend" for="experiment-revised-owner">Volunteer owner</label>
-            <input id="experiment-revised-owner" type="text" maxlength="200" autocomplete="off" aria-describedby="experiment-revised-owner-error">
-            <p id="experiment-revised-owner-error" class="px-error" hidden></p>
+            <label class="px-legend" for="experiment-decision">What should happen next?</label>
+            <select id="experiment-decision" required aria-describedby="experiment-decision-hint experiment-decision-error">
+              <option value="">Choose a decision</option>
+              <option value="keep">Keep — try the same change for another cycle</option>
+              <option value="change">Change — revise the experiment</option>
+              <option value="stop">Stop — finish this experiment</option>
+            </select>
+            <p class="px-hint" id="experiment-decision-hint">Stop can mean the change is now routine, it did not help, or another issue matters more.</p>
+            <p id="experiment-decision-error" class="px-error" hidden></p>
           </div>
-          <div class="px-field">
-            <label class="px-legend" for="experiment-revised-signal">Observable success signal</label>
-            <textarea id="experiment-revised-signal" rows="3" maxlength="3000" aria-describedby="experiment-revised-signal-error"></textarea>
-            <p id="experiment-revised-signal-error" class="px-error" hidden></p>
+          <div id="experiment-next-date-field" class="px-field" hidden>
+            <label class="px-legend" for="experiment-nextDate">Next review date</label>
+            <input id="experiment-nextDate" type="date" max="9999-12-31" aria-describedby="experiment-nextDate-error">
+            <p id="experiment-nextDate-error" class="px-error" hidden></p>
           </div>
-        </div>
-        <div class="px-actions"><button type="submit" class="px-btn px-btn--primary">Save the review</button></div>
-      </form>
+          <div id="experiment-revised-fields" class="px-stack" hidden>
+            <h3>Revise the next plan</h3>
+            <div class="px-field">
+              <label class="px-legend" for="experiment-revised-context">What are you noticing now?</label>
+              <textarea id="experiment-revised-context" rows="3" maxlength="3000" aria-describedby="experiment-revised-context-error"></textarea>
+              <p id="experiment-revised-context-error" class="px-error" hidden></p>
+            </div>
+            <div class="px-field">
+              <label class="px-legend" for="experiment-revised-change">Revised change to try</label>
+              <textarea id="experiment-revised-change" rows="3" maxlength="3000" aria-describedby="experiment-revised-change-error"></textarea>
+              <p id="experiment-revised-change-error" class="px-error" hidden></p>
+            </div>
+            <div class="px-field">
+              <label class="px-legend" for="experiment-revised-owner">Volunteer owner</label>
+              <input id="experiment-revised-owner" type="text" maxlength="200" autocomplete="off" aria-describedby="experiment-revised-owner-error">
+              <p id="experiment-revised-owner-error" class="px-error" hidden></p>
+            </div>
+            <div class="px-field">
+              <label class="px-legend" for="experiment-revised-signal">Observable success signal</label>
+              <textarea id="experiment-revised-signal" rows="3" maxlength="3000" aria-describedby="experiment-revised-signal-error"></textarea>
+              <p id="experiment-revised-signal-error" class="px-error" hidden></p>
+            </div>
+          </div>
+          <div class="px-actions"><button type="submit" class="px-btn px-btn--primary">Save the review</button></div>
+        </form>
+      </details>
     </div>
 
-    <div class="px-stack">
-      <section class="px-card" aria-labelledby="experiment-preview-heading">
-        <h2 id="experiment-preview-heading">Your draft</h2>
+    <div class="px-stack" id="experiment-output-column">
+      <section class="px-card px-stack" id="experiment-result" aria-labelledby="experiment-preview-heading">
+        <h2 id="experiment-preview-heading" tabindex="-1">Your draft</h2>
         <p id="experiment-preview-help" class="px-hint">A copy you can take into the conversation. Saving the agreed plan starts the review cycle.</p>
-        <pre id="experiment-output" class="px-output" tabindex="0" aria-label="Experiment Markdown preview"></pre>
+        <dl class="px-summary-list" id="experiment-plan-summary">
+          <div><dt>Observation</dt><dd id="experiment-summary-context">Still to discuss</dd></div>
+          <div><dt>Change to try</dt><dd id="experiment-summary-change">Still to discuss</dd></div>
+          <div><dt>Volunteer owner</dt><dd id="experiment-summary-owner">Still to discuss</dd></div>
+          <div><dt>Success signal</dt><dd id="experiment-summary-signal">Still to discuss</dd></div>
+          <div><dt>Review date</dt><dd id="experiment-summary-reviewDate">Not scheduled</dd></div>
+        </dl>
+        <p id="experiment-result-learning" class="px-note" hidden></p>
+        <p id="experiment-review-draft-note" class="px-note" hidden>Your copy also includes the unfinished review, clearly marked as a draft.</p>
         <div class="px-actions">
-          <button id="experiment-copy" type="button" class="px-btn">Copy Markdown</button>
-          <button id="experiment-download" type="button" class="px-btn">Download Markdown</button>
+          <button id="experiment-copy" type="button" class="px-btn px-btn--primary">Copy experiment</button>
+          <button id="experiment-download" type="button" class="px-btn">Download experiment</button>
         </div>
+        <details class="px-example">
+          <summary>View Markdown</summary>
+          <pre id="experiment-output" class="px-output" tabindex="0" aria-label="Experiment Markdown preview"></pre>
+        </details>
       </section>
-      <details class="px-example">
-        <summary>A completed example: reviews piling up</summary>
-        <p><strong>Observation:</strong> Small changes wait until the last days of a sprint for review, leaving the team rushing to finish.</p>
-        <p><strong>Change:</strong> For one fortnight, volunteer reviewers check the queue after the daily scrum and take the oldest ready change first.</p>
-        <p><strong>Owner:</strong> A volunteer from the team rotates the reviewer reminder.</p>
-        <p><strong>Success signal:</strong> Compare how long changes wait for review. Ask at the next retro whether people felt less rushed. Do not measure individual reviewer output.</p>
-        <p><strong>Review after one fortnight:</strong> Waiting time improved, but the daily reminder interrupted people during deep work.</p>
-        <p><strong>Decision — Change:</strong> Keep checking the queue, use an asynchronous reminder, and review again in a fortnight.</p>
-      </details>
-      <div class="px-actions">
-        <button id="experiment-new" type="button" class="px-btn px-btn--ghost">Start a new experiment</button>
-        <button id="experiment-clear" type="button" class="px-btn px-btn--ghost">Clear all experiment data</button>
-      </div>
+    </div>
+  </div>
+
+  <div class="px-related px-stack">
+    <details class="px-example">
+      <summary>A completed example: reviews piling up</summary>
+      <p><strong>Observation:</strong> Small changes wait until the last days of a sprint for review, leaving the team rushing to finish.</p>
+      <p><strong>Change:</strong> For one fortnight, volunteer reviewers check the queue after the daily scrum and take the oldest ready change first.</p>
+      <p><strong>Owner:</strong> A volunteer from the team rotates the reviewer reminder.</p>
+      <p><strong>Success signal:</strong> Compare how long changes wait for review. Ask at the next retro whether people felt less rushed. Do not measure individual reviewer output.</p>
+      <p><strong>Review after one fortnight:</strong> Waiting time improved, but the daily reminder interrupted people during deep work.</p>
+      <p><strong>Decision — Change:</strong> Keep checking the queue, use an asynchronous reminder, and review again in a fortnight.</p>
+    </details>
+    <div class="px-actions">
+      <button id="experiment-new" type="button" class="px-btn px-btn--ghost">Start a new experiment</button>
+      <button id="experiment-clear" type="button" class="px-btn px-btn--ghost">Clear all experiment data</button>
     </div>
   </div>
 
@@ -151,7 +166,7 @@ extra_css: /assets/css/practice.css
 
   <section class="px-related" aria-labelledby="experiment-reading-heading">
     <h2 id="experiment-reading-heading">The writing behind the practice</h2>
-    <p><a href="{{ '/closing-the-feedback-loop/' | relative_url }}">Closing the Feedback Loop</a> · <a href="{{ '/the-importance-of-iterative-development/' | relative_url }}">The Importance of Iterative Development</a> · <a href="{{ '/practice/#panel-retro' | relative_url }}">Retro</a> · <a href="{{ '/practice/#panel-health' | relative_url }}">Team health</a></p>
+    <p><a href="{{ '/closing-the-feedback-loop/' | relative_url }}">Closing the Feedback Loop</a> · <a href="{{ '/the-importance-of-iterative-development/' | relative_url }}">The Importance of Iterative Development</a> · <a href="{{ '/practice/retro/' | relative_url }}">Retro</a> · <a href="{{ '/practice/health/' | relative_url }}">Team health</a></p>
   </section>
   <p class="px-foot">Runs in your browser. Plans and learning stay in local storage on this device. No reminders are sent. Keep shared observations here; leave private feedback and personal health votes out.</p>
 </div>

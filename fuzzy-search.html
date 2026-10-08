@@ -4,14 +4,10 @@ title: Fuzzy-search lab
 permalink: /practice/fuzzy-search/
 description: "Try exact and Levenshtein matching, inspect the implementation, and learn where typo tolerance creates irrelevant results."
 extra_css: /assets/css/practice.css
+tool: fuzzy-search
 ---
 
-<section class="px-hero wrap">
-  <a class="post__back" href="{{ '/practice/' | relative_url }}">← Practice</a>
-  <p class="px-eyebrow">Engineering lab</p>
-  <h1 class="px-title">When does a typo become a wrong match?</h1>
-  <p class="px-lead">Try a small search problem before taking the idea into production. Exact matching misses a typo; edit distance can recover it, but a wider net also catches words you did not mean.</p>
-</section>
+{% include practice-header.html %}
 
 <div class="wrap px px-stack" id="fuzzy-search-lab">
   <noscript><p class="px-empty">Enable JavaScript to run the lab. The worked example and implementation below can still be read without it.</p></noscript>
@@ -31,6 +27,7 @@ carpenter
 electrician
 plumbing</textarea>
         <p class="px-hint" id="fx-candidates-hint">Up to 50 non-empty lines and 64 characters per candidate. Blank lines and repeated normalized candidates are ignored.</p>
+        <p class="px-hint">Try one real typo from your domain, with its intended result and a confusing near-match in the candidate list.</p>
         <p class="px-error" id="fx-candidates-error" hidden></p>
 
         <label class="px-legend" for="fx-threshold">Maximum edit distance</label>
@@ -54,7 +51,7 @@ plumbing</textarea>
       <h2 class="px-tool-title" id="fx-results-title">Exact versus fuzzy</h2>
       <p id="fx-status" class="px-status" role="status" aria-live="polite" aria-atomic="true"></p>
       <div id="fx-results" hidden>
-        <div class="px-table-scroll">
+        <div class="px-table-scroll" tabindex="0" role="region" aria-label="Search comparison">
           <table>
             <caption>Ranked by fewest edits; ties keep your candidate order.</caption>
             <thead><tr><th scope="col">Candidate</th><th scope="col">Edits</th><th scope="col">Exact</th><th scope="col">Fuzzy accepts</th></tr></thead>
@@ -64,7 +61,16 @@ plumbing</textarea>
         <p class="px-note" id="fx-example-note"></p>
         <p class="px-hint" id="fx-duplicates" hidden></p>
         <p class="px-hint">Edit distance measures spelling similarity. It does not know which result is useful. Larger thresholds trade missed matches for extra candidates; ranking and domain checks still matter.</p>
+        <details class="px-example">
+          <summary>Preview the comparison to take away</summary>
+          <pre class="px-output" id="fx-export" tabindex="0" aria-label="Comparison text to copy or download"></pre>
+        </details>
       </div>
+      <div class="px-actions">
+        <button type="button" class="px-btn" id="fx-copy" disabled>Copy comparison</button>
+        <button type="button" class="px-btn" id="fx-download" disabled>Download comparison</button>
+      </div>
+      <p class="px-status" id="fx-copy-status" role="status" aria-live="polite" aria-atomic="true"></p>
     </section>
   </div>
 
@@ -115,7 +121,7 @@ plumbing</textarea>
   return previous[b.length];
 }</code></pre>
       <p>Time grows with the product of the string lengths. Two rows keep memory proportional to the candidate length. The lab validates its input limits before computing and compares at most 50 candidates of 64 characters.</p>
-      <div class="px-table-scroll">
+      <div class="px-table-scroll" tabindex="0" role="region" aria-label="Implementation edge cases">
         <table>
           <caption>Useful checks for an implementation</caption>
           <thead><tr><th scope="col">Left</th><th scope="col">Right</th><th scope="col">Distance</th><th scope="col">Checks</th></tr></thead>
@@ -138,5 +144,6 @@ plumbing</textarea>
   <p class="px-foot">The lab runs in your browser. Your query and candidate list stay on this page and are not saved or sent to a service.</p>
 </div>
 
+<script src="{{ '/assets/js/practice-kit.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
 <script src="{{ '/assets/js/fuzzy-search-core.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
 <script src="{{ '/assets/js/fuzzy-search.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

@@ -101,7 +101,9 @@ CI (`.github/workflows/ci.yml`) runs all three on every pull request.
 | Design system / CSS   | `assets/css/styles.scss` (light + dark themes)    |
 | Theme toggle          | `assets/js/theme.js`                              |
 | Home (search + list)  | `index.html` — rendered at build time, filtered client-side |
-| Practice              | `practice.html` — retro, forecast, health, one-to-ones and room tools |
+| Practice catalogue    | `practice.html` and `_data/practice.yml` — nine tools grouped by the reader's job |
+| Shared tool header    | `_includes/practice-header.html` — breadcrumbs, tool switcher and expected output |
+| Original tools        | `retro.html`, `forecast.html`, `health.html`, `one-to-ones.html`, `room.html` — individual tool pages |
 | Work brief            | `work-brief.html` — guided request, worked example and Markdown export |
 | Fuzzy-search lab      | `fuzzy-search.html` — exact/fuzzy comparison and a practical exercise |
 | Team experiment       | `experiment.html` — one active change, review decisions and recent learning |
@@ -114,7 +116,10 @@ Old URLs from before the `_posts/` migration (e.g. `/Radical_Candour`) are
 preserved via `redirect_from` in each post's front matter, powered by
 `jekyll-redirect-from`.
 
-The companion tools live under `/practice/` and link from their related posts.
+All tools have dedicated pages under `/practice/` and link from their related
+posts. The catalogue groups them into Shape and deliver, Work with the team,
+and Learn by trying. Former `/practice/#health` and `/practice/#panel-health`
+bookmarks (and the other original tools) redirect to their dedicated pages.
 The work brief, team experiment and demo keep their drafts in this browser's
 local storage, with copy/download actions for backups. Storage failures leave
 the tools usable and show a warning to export before leaving. The fuzzy-search

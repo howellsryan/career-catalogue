@@ -23,6 +23,15 @@
     if (content !== undefined) node.textContent = content;
     return node;
   }
+  function compact(value, fallback, limit) {
+    var plain = value.trim().replace(/\s+/g, " ") || fallback;
+    return plain.length > limit ? plain.slice(0, limit - 1) + "…" : plain;
+  }
+  function openFeedbackRows() {
+    var open = [];
+    document.querySelectorAll("[data-feedback-item]").forEach(function (details) { open[Number(details.dataset.feedbackItem)] = details.open; });
+    return open;
+  }
 
   function rowField(index, key, label, options) {
     var settings = options || {};
@@ -52,17 +61,25 @@
     return wrapper;
   }
 
-  function renderFeedback() {
+  function renderFeedback(openRows) {
+    var opened = openRows || openFeedbackRows();
     var rows = $("demo-feedback-rows");
     rows.replaceChildren();
     if (!state.feedback.length) rows.appendChild(element("p", "px-empty", "No feedback recorded yet. Add an item when you hear a request or question."));
     state.feedback.forEach(function (row, index) {
-      var card = element("article", "px-card px-stack");
-      var heading = element("h3", "px-tool-title", "Feedback " + (index + 1));
-      heading.id = "demo-feedback-" + index + "-heading";
-      card.setAttribute("aria-labelledby", heading.id);
-      card.appendChild(heading);
-      card.appendChild(rowField(index, "request", "Request or question", { multiline: true, limit: 2000, placeholder: "What did the stakeholder ask for?" }));
+      var card = element("details", "px-card px-feedback-item");
+      card.dataset.feedbackItem = index;
+      card.open = opened[index] === true;
+      var summary = element("summary");
+      summary.id = "demo-feedback-" + index + "-heading";
+      var request = element("span", "px-feedback-request");
+      request.id = "demo-feedback-" + index + "-summary-request";
+      var meta = element("span", "px-feedback-meta");
+      meta.id = "demo-feedback-" + index + "-summary-meta";
+      summary.append(request, meta);
+      card.appendChild(summary);
+      var body = element("div", "px-stack");
+      body.appendChild(rowField(index, "request", "Request or question", { multiline: true, limit: 2000, placeholder: "What did the stakeholder ask for?" }));
       var grid = element("div", "px-grid");
       var decisionField = element("div", "px-field");
       var decisionId = "demo-feedback-" + index + "-decision";
@@ -80,9 +97,9 @@
       select.value = row.decision;
       decisionField.append(label, select);
       grid.append(decisionField, rowField(index, "owner", "Owner", { limit: 200, placeholder: "Name a person or role" }));
-      card.appendChild(grid);
-      card.appendChild(rowField(index, "rationale", "Rationale or next step", { multiline: true, limit: 2000, placeholder: "Why this decision? What remains to be checked?" }));
-      card.appendChild(rowField(index, "dueDate", "Follow-up date (optional)", { type: "date" }));
+      body.appendChild(grid);
+      body.appendChild(rowField(index, "rationale", "Rationale or next step", { multiline: true, limit: 2000, placeholder: "Why this decision? What remains to be checked?" }));
+      body.appendChild(rowField(index, "dueDate", "Follow-up date (optional)", { type: "date" }));
       var sharedLabel = element("label", "px-choice");
       var checkbox = document.createElement("input");
       checkbox.type = "checkbox";
@@ -91,19 +108,26 @@
       checkbox.dataset.feedbackIndex = index;
       checkbox.checked = row.responded;
       sharedLabel.append(checkbox, document.createTextNode("Response shared with the stakeholder"));
-      card.appendChild(sharedLabel);
+      body.appendChild(sharedLabel);
       var responseField = rowField(index, "responseDate", "Date response was shared (optional)", { type: "date" });
       responseField.id = "demo-feedback-" + index + "-response-date-field";
       responseField.hidden = !row.responded;
       responseField.querySelector("input").disabled = !row.responded;
-      card.appendChild(responseField);
+      body.appendChild(responseField);
       var rowStatus = element("p", "px-status");
       rowStatus.id = "demo-feedback-" + index + "-status";
-      card.appendChild(rowStatus);
+      body.appendChild(rowStatus);
+      var actions = element("div", "px-actions");
+      var copy = element("button", "px-btn px-btn--small", "Copy this response");
+      copy.type = "button";
+      copy.id = "demo-feedback-" + index + "-copy";
+      copy.dataset.copyFeedback = index;
       var remove = element("button", "px-btn px-btn--ghost px-btn--small", "Remove feedback " + (index + 1));
       remove.type = "button";
       remove.dataset.removeFeedback = index;
-      card.appendChild(remove);
+      actions.append(copy, remove);
+      body.appendChild(actions);
+      card.appendChild(body);
       rows.appendChild(card);
     });
     $("demo-add-feedback").disabled = state.feedback.length >= core.MAX_FEEDBACK;
@@ -120,7 +144,11 @@
         errorNode.hidden = !message;
         errorNode.textContent = message;
       }
-      if (message) input.setAttribute("aria-invalid", "true");
+      if (message) {
+        input.setAttribute("aria-invalid", "true");
+        var details = input.closest("details[data-feedback-item]");
+        if (details) details.open = true;
+      }
       else input.removeAttribute("aria-invalid");
     });
     return errors;
@@ -133,6 +161,9 @@
     ["demo-copy-agenda", "demo-download-agenda"].forEach(function (id) { $(id).disabled = !valid || !agendaStarted; });
     ["demo-copy-follow-up", "demo-download-follow-up"].forEach(function (id) { $(id).disabled = !valid || !state.feedback.length; });
     $("demo-download-pack").disabled = !valid || !core.hasContent(state);
+    $("demo-agenda-glance-title").textContent = compact(state.title, "Untitled demo", 120) + (state.demoDate ? " · " + state.demoDate : "");
+    var prompts = { problem: "Name the user and their problem.", change: "Describe the task you will demonstrate.", evidence: "Record what you know, or what needs testing.", question: "Choose what you want to learn." };
+    Object.keys(prompts).forEach(function (key) { $("demo-agenda-glance-" + key).textContent = compact(state[key], prompts[key], 220); });
     if (valid) {
       outputs.agenda = core.agenda(state, today());
       outputs.followUp = core.followUp(state, today());
@@ -146,10 +177,14 @@
     var pending = 0;
     var overdue = 0;
     state.feedback.forEach(function (row, index) {
+      var rowErrors = Object.keys(errors).some(function (key) { return key.indexOf("feedback." + index + ".") === 0; });
       var description = core.status(row, today());
-      if (!row.responded) pending += 1;
+      if (!row.responded || rowErrors) pending += 1;
       if (description === "Response overdue") overdue += 1;
-      $("demo-feedback-" + index + "-status").textContent = description + (row.responded && row.responseDate ? " on " + row.responseDate : "") + ".";
+      $("demo-feedback-" + index + "-status").textContent = rowErrors ? "Check the dates before sharing this response." : description + (row.responded && row.responseDate ? " on " + row.responseDate : "") + ".";
+      $("demo-feedback-" + index + "-summary-request").textContent = (index + 1) + ". " + compact(row.request, "New feedback item", 120);
+      $("demo-feedback-" + index + "-summary-meta").textContent = [row.decision || "Decision pending", compact(row.owner, "Owner unassigned", 60), row.dueDate ? "Follow up " + row.dueDate : "No follow-up date", rowErrors ? "Check dates" : description].join(" · ");
+      $("demo-feedback-" + index + "-copy").disabled = rowErrors;
     });
     $("demo-feedback-summary").textContent = state.feedback.length
       ? state.feedback.length + " feedback item" + (state.feedback.length === 1 ? "" : "s") + "; " + pending + " response" + (pending === 1 ? "" : "s") + " still pending" + (overdue ? ", " + overdue + " overdue" : "") + "."
@@ -158,7 +193,7 @@
 
   function render() {
     document.querySelectorAll("[data-demo-field]").forEach(function (input) { input.value = state[input.dataset.demoField]; });
-    renderFeedback();
+    renderFeedback([]);
     update();
   }
 
@@ -189,20 +224,31 @@
   $("demo-tool").addEventListener("change", edit);
   $("demo-add-feedback").addEventListener("click", function () {
     if (state.feedback.length >= core.MAX_FEEDBACK) return;
+    var opened = openFeedbackRows();
     state = core.addFeedback(state);
-    renderFeedback(); update(); save();
+    opened[state.feedback.length - 1] = true;
+    renderFeedback(opened); update(); save();
     $("demo-feedback-" + (state.feedback.length - 1) + "-request").focus();
     announce("Feedback item added.");
   });
   $("demo-feedback-rows").addEventListener("click", function (event) {
+    var copy = event.target.closest("[data-copy-feedback]");
+    if (copy) {
+      var response = core.response(state, Number(copy.dataset.copyFeedback), today());
+      kit.copy(response, copy, $("demo-status")).then(update);
+      return;
+    }
     var button = event.target.closest("[data-remove-feedback]");
     if (!button) return;
     var index = Number(button.dataset.removeFeedback);
     var row = state.feedback[index];
     if (Object.keys(row).some(function (key) { return row[key] === true || (typeof row[key] === "string" && row[key].trim()); }) &&
         !window.confirm("Remove feedback " + (index + 1) + " and its recorded response? This clears the item's fields.")) return;
+    var opened = openFeedbackRows();
     state = core.removeFeedback(state, index);
-    renderFeedback(); update(); save();
+    opened.splice(index, 1);
+    if (state.feedback.length) opened[Math.min(index, state.feedback.length - 1)] = true;
+    renderFeedback(opened); update(); save();
     if (state.feedback.length) $("demo-feedback-" + Math.min(index, state.feedback.length - 1) + "-request").focus();
     else $("demo-add-feedback").focus();
     announce("Feedback item removed.");

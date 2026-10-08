@@ -11,6 +11,8 @@
   var state = core.normalizeState(loaded, today());
   var showLatest = !state.active && !core.hasDraftWork(state.draft) && state.archive.length > 0;
   var status = el("experiment-status"), planForm = el("experiment-plan-form"), reviewForm = el("experiment-review");
+  var reviewDetails = el("experiment-review-details");
+  var lastReviewIdentity = "", lastReviewDue = "";
   var draftTimer;
 
   function persist() {
@@ -63,23 +65,55 @@
     date.setFullYear(bits[0], bits[1] - 1, bits[2]);
     return date.toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
   }
+  function hasReviewWork() {
+    if (!state.active) return false;
+    var draft = state.reviewDraft;
+    return Boolean(draft.happened.trim() || draft.decision);
+  }
+  function reviewDisclosure(due) {
+    var active = state.active;
+    var identity = active ? active.id + ":" + active.cycle : "";
+    var pending = hasReviewWork();
+    var ready = due === "today" || due === "overdue";
+    reviewDetails.hidden = !active;
+    el("experiment-review-summary").textContent = pending ? "Continue your review" : (ready ? "Review what happened" : "Review early");
+    if (identity !== lastReviewIdentity || (ready && due !== lastReviewDue)) reviewDetails.open = Boolean(active && (ready || pending));
+    if (!active) reviewDetails.open = false;
+    lastReviewIdentity = identity;
+    lastReviewDue = due;
+  }
   function renderDue() {
     el("experiment-due").hidden = !state.active;
-    if (!state.active) return;
+    if (!state.active) { reviewDisclosure("unknown"); return; }
     var reviewDate = state.active.plan.reviewDate, due = core.reviewStatus(reviewDate, today());
     el("experiment-due-title").textContent = due === "overdue" ? "Your experiment is ready for review" : (due === "today" ? "Review your experiment today" : "Review on " + dateLabel(reviewDate));
     el("experiment-due-copy").textContent = due === "overdue" ? "The agreed review date was " + dateLabel(reviewDate) + ". Bring the observation back to the team and choose what happens next." : (due === "today" ? "Compare what happened with the signal you agreed. Then keep, change or stop the experiment." : "You can review early if you have enough evidence. Otherwise, come back on the agreed date.");
     el("experiment-reviewDate").min = today();
     el("experiment-nextDate").min = core.addDays(today(), 1) || today();
+    el("experiment-review-link").textContent = hasReviewWork() ? "Continue your review ↓" : (due === "upcoming" ? "Review early ↓" : "Review what happened ↓");
+    reviewDisclosure(due);
   }
   function currentExport() {
     return state.active || showLatest ? core.exportState(state) : core.exportDraft(state.draft);
   }
   function renderPreview() {
     var latest = !state.active && showLatest && !core.hasDraftWork(state.draft);
+    var plan = state.active ? state.active.plan : (latest ? state.archive[0].plan : state.draft);
     el("experiment-preview-heading").textContent = state.active ? "The agreed experiment" : (latest ? "Latest completed experiment" : "Your draft");
     el("experiment-preview-help").textContent = state.active ? "This export keeps the original plan and recent learning alongside the current plan." : (latest ? "Your plan and recent learning are ready to take away. Type in the form to start a new draft." : "A copy you can take into the conversation. Saving the agreed plan starts the review cycle.");
     el("experiment-output").textContent = currentExport();
+    fields.forEach(function (key) {
+      var value = typeof plan[key] === "string" ? plan[key].trim() : "";
+      el("experiment-summary-" + key).textContent = key === "reviewDate" ? (value ? dateLabel(value) : "Not scheduled") : (value || "Still to discuss");
+    });
+    var learning = el("experiment-result-learning");
+    learning.hidden = !latest;
+    if (latest) {
+      var review = state.archive[0];
+      var decision = review.decision === "closed" ? "Closed without a review" : review.decision[0].toUpperCase() + review.decision.slice(1);
+      learning.textContent = decision + " on " + dateLabel(review.reviewedOn) + ". " + review.happened;
+    }
+    el("experiment-review-draft-note").hidden = !hasReviewWork();
   }
   function renderHistory() {
     var container = el("experiment-history");
@@ -116,6 +150,8 @@
   function render() {
     planForm.hidden = Boolean(state.active);
     reviewForm.hidden = !state.active;
+    var firstColumn = state.active ? el("experiment-output-column") : el("experiment-edit-column");
+    el("experiment-workspace").insertBefore(firstColumn, el("experiment-workspace").firstElementChild);
     renderDue(); renderPreview(); renderHistory();
   }
   function clearErrors(form) {
@@ -123,6 +159,7 @@
     form.querySelectorAll(".px-error").forEach(function (error) { error.hidden = true; error.textContent = ""; });
   }
   function showErrors(form, errors) {
+    if (form === reviewForm) reviewDetails.open = true;
     clearErrors(form);
     var first;
     Object.keys(errors).forEach(function (key) {
@@ -149,11 +186,11 @@
   });
   reviewForm.addEventListener("input", function () {
     state.reviewDraft = readReview();
-    clearErrors(reviewForm); renderPreview(); autosave();
+    clearErrors(reviewForm); renderDue(); renderPreview(); autosave();
   });
   el("experiment-decision").addEventListener("change", function () {
     state.reviewDraft = readReview();
-    reviewVisibility(); clearErrors(reviewForm); renderPreview(); autosave();
+    reviewVisibility(); clearErrors(reviewForm); renderDue(); renderPreview(); autosave();
   });
   planForm.addEventListener("submit", function (event) {
     event.preventDefault(); clearTimeout(draftTimer);
@@ -164,7 +201,7 @@
     clearErrors(planForm); fillForms(); render();
     var saved = persist();
     announce((saved ? "Agreed plan saved." : "Agreed plan is ready in this page.") + " Come back on " + dateLabel(state.active.plan.reviewDate) + " to review it.", saved);
-    el("experiment-happened").focus();
+    el("experiment-preview-heading").focus();
   });
   reviewForm.addEventListener("submit", function (event) {
     event.preventDefault(); clearTimeout(draftTimer);
@@ -182,6 +219,17 @@
   el("experiment-download").addEventListener("click", function () {
     announce(kit.download(currentExport(), "team-experiment-" + today() + ".md") ? "Experiment downloaded." : "Could not download. Copy the preview or select its text instead.");
   });
+  function openReview(event) {
+    if (!state.active) return;
+    if (event) event.preventDefault();
+    reviewDetails.open = true;
+    el("experiment-happened").focus();
+  }
+  el("experiment-review-link").addEventListener("click", openReview);
+  function openLinkedReview() {
+    if (location.hash === "#experiment-review" || location.hash === "#experiment-review-details") openReview();
+  }
+  window.addEventListener("hashchange", openLinkedReview);
   el("experiment-new").addEventListener("click", function () {
     if (state.active) {
       if (!window.confirm("Close the active experiment and start a blank draft? Its plan and any review notes will be kept in Recent learning as a closure without review.")) return;
@@ -215,6 +263,7 @@
     el("experiment-origin").textContent = origin === "retro" ? "From the retro: choose one observation the team wants to act on." : "From the health discussion: choose one shared observation to explore. Votes and personal scores are not copied into this plan.";
   }
   fillForms(); render();
+  openLinkedReview();
   if (loaded && JSON.stringify(loaded) !== JSON.stringify(state)) announce("Saved data has been recovered where possible. Check the plan before continuing.");
   persist(); // Check storage availability before the reader invests in a plan.
 })();

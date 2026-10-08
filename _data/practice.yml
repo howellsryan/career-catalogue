@@ -1,0 +1,84 @@
+name: Practice
+groups:
+  - id: delivery
+    title: Shape and deliver
+    description: Clarify a request, discuss a delivery range, and show whether the work helped.
+  - id: team
+    title: Work with the team
+    description: Start a useful conversation and turn what you hear into a change you can review.
+  - id: learning
+    title: Learn by trying
+    description: Explore an engineering trade-off with a small, inspectable example.
+tools:
+  - id: work-brief
+    title: Work brief
+    url: /practice/work-brief/
+    group: delivery
+    category: Delivery tool
+    purpose: Bring a vague request to refinement with a clearer user problem, intended outcome and smallest useful slice. Leave room for what you do not know yet.
+    when: A request needs a clearer problem and a smaller first step.
+    outcome: A shareable brief and the questions still to answer.
+  - id: forecast
+    title: Forecast
+    url: /practice/forecast/
+    group: delivery
+    category: Delivery tool
+    purpose: Use your team's completed-item history to discuss a range of possible finish dates. Make uncertainty visible before agreeing a delivery expectation.
+    when: Someone needs a delivery expectation beyond a single guessed date.
+    outcome: A probability range and a stakeholder summary.
+  - id: demo
+    title: Demo & feedback
+    url: /practice/demo/
+    group: delivery
+    category: Delivery tool
+    purpose: Prepare a demo around a user problem, then decide how to respond to the feedback. A decision becomes useful when the person who asked hears it.
+    when: You need to show value and give stakeholder feedback a response.
+    outcome: A demo agenda and responses with owners and follow-up dates.
+  - id: retro
+    title: Retro
+    url: /practice/retro/
+    group: team
+    category: Team practice
+    purpose: Open a retrospective with a question that fits the room. Use facilitation prompts and a timer to make space for the team to think and talk.
+    when: A retrospective needs a useful opening or a shape for the hour.
+    outcome: A facilitated question or a complete suggested round.
+  - id: health
+    title: Team health
+    url: /practice/health/
+    group: team
+    category: Team practice
+    purpose: Look at how the team is doing across shared dimensions. Tally the room, discuss the differences and choose one improvement together.
+    when: You want to understand where the team needs support.
+    outcome: A shared conversation and a summary of the team's votes.
+  - id: experiment
+    title: Team experiment
+    url: /practice/experiment/
+    group: team
+    category: Team practice
+    purpose: Turn one retro or health observation into a small change. Agree what you will observe, then return to decide whether to keep, change or stop it.
+    when: A team conversation has surfaced something worth changing.
+    outcome: One agreed plan, a review date and a record of what you learned.
+  - id: one-to-ones
+    title: One-to-ones
+    url: /practice/one-to-ones/
+    group: team
+    category: Team practice
+    purpose: Find a question for a one-to-one that gives the other person room to speak. Choose a focus for the conversation rather than working through a checklist.
+    when: You want a better conversation about growth, support or the work.
+    outcome: A conversation prompt you can take into your next one-to-one.
+  - id: room
+    title: The room
+    url: /practice/room/
+    group: team
+    category: Team practice
+    purpose: Make the time cost of a meeting visible, then look at the focus time left in the team's week. Use the estimate to discuss a more deliberate calendar.
+    when: You are deciding who needs a meeting and how much focus time remains.
+    outcome: An estimate of meeting cost and available focus time.
+  - id: fuzzy-search
+    title: Fuzzy-search lab
+    url: /practice/fuzzy-search/
+    group: learning
+    category: Engineering lab
+    purpose: Try a small search problem before taking the idea into production. Compare exact matching with edit distance and see where typo tolerance introduces irrelevant results.
+    when: You want to understand the trade-off between typos and false matches.
+    outcome: An inspectable comparison and a threshold you can explain.
