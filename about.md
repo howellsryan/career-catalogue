@@ -21,7 +21,9 @@ through my game **PocketRPG**, which is played by 100s of people world-wide.
 
 Alongside the essays there is [Practice]({{ '/practice/' | relative_url }}): a retro
 opener, a Monte Carlo forecast, a team health check, one-to-one questions, and a
-couple of small sums for the room. It is a tool, not a post.
+couple of small sums for the room. You can also shape a work brief, try a
+fuzzy-search exercise, review a team experiment, or prepare a demo and its
+feedback follow-up. The worksheets stay in your browser and can be downloaded.
 
 ### Topics I come back to
 

@@ -31,6 +31,8 @@ The feedback loop is only successful if it is actually closed. Gathering input d
 
 Closing the loop involves a clear follow-up. If a stakeholder provides a suggestion, the team needs to communicate how that fits into the roadmap. Even if a request cannot be prioritised immediately, acknowledging it and explaining the reasoning prevents the stakeholder from feeling ignored. This transparency ensures the relationship remains a partnership rather than a transactional request-and-delivery model.
 
+[Prepare a demo and its feedback follow-up]({{ '/practice/demo/' | relative_url }}) with a browser-local agenda, feedback decisions, and an exportable stakeholder update. For improvements agreed during a retro, [plan one team experiment]({{ '/practice/experiment/' | relative_url }}) and review what happened at the next session.
+
 ### Driving Performance through Alignment
 
 The benefits of this approach are visible in the team's output. According to data from the Project Management Institute, poor communication is a leading cause of project failure. By enforcing a strict fortnightly feedback cycle, teams significantly reduce the risk of misalignment.

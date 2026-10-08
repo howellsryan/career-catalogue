@@ -13,6 +13,12 @@ extra_css: /assets/css/practice.css
 </section>
 
 <div class="wrap px">
+  <nav class="px-tool-links" aria-label="Worksheets and engineering lab">
+    <a class="px-tool-link" href="{{ '/practice/work-brief/' | relative_url }}"><strong>Shape a work brief</strong><span>Turn a request into a small, testable delivery.</span></a>
+    <a class="px-tool-link" href="{{ '/practice/fuzzy-search/' | relative_url }}"><strong>Try fuzzy search</strong><span>A hands-on lab for typo tolerance and false matches.</span></a>
+    <a class="px-tool-link" href="{{ '/practice/experiment/' | relative_url }}"><strong>Review a team experiment</strong><span>Try one change, then decide whether it helped.</span></a>
+    <a class="px-tool-link" href="{{ '/practice/demo/' | relative_url }}"><strong>Close the demo loop</strong><span>Show the value and respond to stakeholder feedback.</span></a>
+  </nav>
   <noscript><p class="px-empty">These tools need JavaScript enabled in your browser. You can still browse the writing using the navigation above.</p></noscript>
   <p id="practice-status" class="visually-hidden" role="status" aria-live="polite"></p>
   <div class="px-switch-wrap">
@@ -73,6 +79,7 @@ extra_css: /assets/css/practice.css
           <button type="button" class="px-btn" id="retro-copy">Copy</button>
           <p class="px-keys">On the question: <kbd>N</kbd> next <span aria-hidden="true">·</span> <kbd>C</kbd> copy</p>
         </div>
+        <p class="px-hint">Found something worth changing? <a href="{{ '/practice/experiment/?from=retro' | relative_url }}">Plan one experiment and review it next fortnight.</a></p>
 
         <div class="px-timer" id="retro-timer">
           <svg class="px-timer__ring" viewBox="0 0 80 80" aria-hidden="true">
@@ -167,6 +174,7 @@ extra_css: /assets/css/practice.css
       </div>
       <div id="health-rows" class="px-health__rows"></div>
     </div>
+    <p class="px-hint">Choose one improvement together. <a href="{{ '/practice/experiment/?from=health' | relative_url }}">Record the experiment and how you will know it helped.</a></p>
   </section>
 
   <section class="px-panel" id="panel-one-to-ones" role="tabpanel" aria-labelledby="tab-one-to-ones" hidden>

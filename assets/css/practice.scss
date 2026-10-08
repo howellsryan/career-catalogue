@@ -3,6 +3,86 @@
 
 /* Practice — tools section. Uses the site tokens; no new colours. */
 
+/* Companion worksheets and the engineering lab share these small primitives. */
+.px-breadcrumb { margin: 0 0 var(--space-4); font: var(--step--1)/1.5 var(--font-sans); }
+.px-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+.px-workspace > *, .px-grid > *, .px-stack > * { min-width: 0; }
+.px-stack { display: grid; gap: var(--space-5); }
+.px-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.px-stack h2, .px-workspace h2, .px-workspace h3, .px-related h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  line-height: 1.25;
+  margin: 0 0 var(--space-3);
+}
+.px-stack h2, .px-workspace h2, .px-related h2 { font-size: var(--step-2); }
+.px-workspace h3 { font-size: var(--step-1); }
+.px-output {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 0.86rem/1.65 var(--font-mono);
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  margin: var(--space-4) 0;
+  tab-size: 2;
+}
+.px-output code { font: inherit; }
+.px-example {
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-tint);
+}
+.px-example summary { font: 600 var(--step--1)/1.5 var(--font-sans); cursor: pointer; }
+.px-example > :not(summary) { margin-block: var(--space-3) 0; }
+.px-status { font: var(--step--1)/1.5 var(--font-sans); color: var(--text-muted); min-height: 1.5em; margin: var(--space-3) 0; }
+.px-related { margin-top: var(--space-7); padding-block: var(--space-5); border-top: 1px solid var(--border); }
+.px-related p { margin: 0; }
+.px-checklist { margin: 0; padding-left: 1.3rem; }
+.px-checklist li + li { margin-top: var(--space-2); }
+.px-tool-links { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin: 0 0 var(--space-6); }
+.px-tool-link {
+  display: block;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+}
+.px-tool-link:hover { border-color: var(--accent); text-decoration: none; }
+.px-tool-link strong { display: block; margin-bottom: var(--space-2); font: 600 var(--step--1)/1.4 var(--font-sans); }
+.px-tool-link span { display: block; font: 0.82rem/1.5 var(--font-sans); color: var(--text-muted); }
+.px-table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.px-table-scroll table { width: 100%; border-collapse: collapse; font: var(--step--1)/1.5 var(--font-sans); }
+.px-table-scroll th, .px-table-scroll td { text-align: left; padding: var(--space-3); border-bottom: 1px solid var(--border); }
+.px-table-scroll th { font-weight: 600; background: var(--surface-2); }
+.px-table-scroll tbody tr:last-child td { border-bottom: 0; }
+.px-table-scroll caption { text-align: left; padding: var(--space-3); color: var(--text-muted); }
+.px input[type="checkbox"] { width: 1.1rem; height: 1.1rem; padding: 0; box-shadow: none; accent-color: var(--accent); flex: 0 0 auto; }
+.px label:has(input[type="checkbox"]) { display: flex; align-items: center; gap: var(--space-2); }
+.px a.px-btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.px [hidden] { display: none !important; }
+
+@media (max-width: 800px) {
+  .px-workspace { grid-template-columns: minmax(0, 1fr); }
+  .px-tool-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .px-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media print {
+  .px input, .px textarea, .px select { box-shadow: none !important; }
+  .px-output { overflow: visible; }
+}
+
 .px-hero {
   padding-block: var(--space-7) var(--space-5);
 }
@@ -155,7 +235,7 @@
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
 }
 
-.px input:not([type="radio"]),
+.px input:not([type="radio"]):not([type="checkbox"]),
 .px select,
 .px textarea {
   font-family: var(--font-sans);
@@ -171,7 +251,7 @@
 
 .px textarea { resize: vertical; min-height: 4.5rem; line-height: 1.45; }
 
-.px input:not([type="radio"]):focus,
+.px input:not([type="radio"]):not([type="checkbox"]):focus,
 .px select:focus,
 .px textarea:focus {
   outline: none;

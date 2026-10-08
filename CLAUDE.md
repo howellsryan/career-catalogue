@@ -23,6 +23,12 @@ baseurl — every internal link must go through `relative_url` / `absolute_url`)
   not a post. Its UI lives in `assets/js/practice.js`; calculations and validation
   live in `assets/js/practice-core.js`. Keep `assets/css/practice.scss` on existing
   site tokens. Run `node --test scripts/*.test.mjs` when changing these tools.
+- **Companion tools** (`work-brief.html`, `fuzzy-search.html`, `experiment.html`,
+  `demo.html`) live under `/practice/` and use the same CSS tokens. Their
+  `assets/js/*-core.js` modules hold pure validation/calculations and their
+  matching `assets/js/*.js` modules manage the page. `practice-kit.js` provides
+  browser-local persistence and export helpers. Keep user entries local, render
+  previews as text, and show storage failures so readers can export a backup.
 
 ## Design system
 

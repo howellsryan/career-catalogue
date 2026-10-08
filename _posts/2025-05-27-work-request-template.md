@@ -11,6 +11,8 @@ redirect_from:
 
 A work request template may be useful if you are getting stakeholder requirements that aren't very detailed. It is good to have a common entry and exit point. 
 
+[Shape your own work brief]({{ '/practice/work-brief/' | relative_url }}) with a completed example, prompts for the smallest useful delivery, and a copyable refinement outline.
+
 A work request template is a good entry point to have so that you are getting a decent level of information in the first instance even though you still may need additional sessions afterwards before it gets to the team.
 
 ## Request Title

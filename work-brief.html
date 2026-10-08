@@ -1,0 +1,154 @@
+---
+layout: default
+title: Work brief
+permalink: /practice/work-brief/
+description: "Turn a vague request into a useful refinement conversation: the user, outcome, smallest slice, acceptance examples and questions still to answer."
+extra_css: /assets/css/practice.css
+---
+
+<section class="px-hero wrap">
+  <p class="px-eyebrow"><a href="{{ '/practice/' | relative_url }}">Practice</a> / Work brief</p>
+  <h1 class="px-title">A problem worth understanding.</h1>
+  <p class="px-lead">Bring a clearer request to refinement. Describe who needs help, the change you want to see, and the smallest useful slice. Leave room for what you do not know yet.</p>
+</section>
+
+<div class="wrap px px-stack">
+  <noscript><p class="px-empty">This tool needs JavaScript to save and export a brief. The <a href="{{ '/work-request-template/' | relative_url }}">work request template</a> is available to read and copy.</p></noscript>
+
+  <details class="px-card px-example">
+    <summary>See a worked example: a finance CSV export</summary>
+    <p>A finance analyst reconciles invoices by copying rows from an on-screen table. The first useful change is a CSV export of that same data, rather than a whole reporting dashboard.</p>
+    <p class="px-hint">The example includes evidence, acceptance examples and unresolved questions. It is illustrative; replace its assumptions with what you know about your own users.</p>
+    <div class="px-actions"><button type="button" class="px-btn" id="brief-example">Load the example</button></div>
+  </details>
+
+  <div class="px-workspace">
+    <form class="px-stack" id="work-brief-form" novalidate aria-label="Work brief draft">
+      <div class="px-field">
+        <label class="px-legend" for="brief-title">Give the work a name</label>
+        <input id="brief-title" name="title" type="text" maxlength="180" autocomplete="off" placeholder="For example: Export invoices for reconciliation" aria-describedby="brief-title-hint brief-title-error">
+        <p class="px-hint" id="brief-title-hint">A short label is enough. You can change it as you learn.</p>
+        <p class="px-error" id="brief-title-error" hidden></p>
+      </div>
+
+      <section class="px-card px-stack" aria-labelledby="brief-problem-heading">
+        <h2 class="px-tool-title" id="brief-problem-heading">1. The person and the problem</h2>
+        <div class="px-field">
+          <label class="px-legend" for="brief-user">Who needs this?</label>
+          <textarea id="brief-user" name="user" rows="2" maxlength="600" aria-describedby="brief-user-hint brief-user-error"></textarea>
+          <p class="px-hint" id="brief-user-hint">Name the user and the situation they are in, rather than the requesting department alone.</p>
+          <p class="px-error" id="brief-user-error" hidden></p>
+        </div>
+        <div class="px-field">
+          <label class="px-legend" for="brief-problem">What is hard today?</label>
+          <textarea id="brief-problem" name="problem" rows="3" maxlength="2000" aria-describedby="brief-problem-hint brief-problem-error"></textarea>
+          <p class="px-hint" id="brief-problem-hint">Describe the difficulty and its effect. Start with the problem before choosing an implementation.</p>
+          <p class="px-error" id="brief-problem-error" hidden></p>
+        </div>
+        <div class="px-field">
+          <label class="px-legend" for="brief-evidence">What evidence do we have?</label>
+          <textarea id="brief-evidence" name="evidence" rows="3" maxlength="2000" aria-describedby="brief-evidence-hint brief-evidence-error"></textarea>
+          <p class="px-hint" id="brief-evidence-hint">An observation, user conversation or baseline. Mark assumptions as assumptions; an unanswered question is useful too.</p>
+          <p class="px-error" id="brief-evidence-error" hidden></p>
+        </div>
+      </section>
+
+      <section class="px-card px-stack" aria-labelledby="brief-outcome-heading">
+        <h2 class="px-tool-title" id="brief-outcome-heading">2. The change that matters</h2>
+        <div class="px-field">
+          <label class="px-legend" for="brief-outcome">What should be different for the user?</label>
+          <textarea id="brief-outcome" name="outcome" rows="3" maxlength="1500" aria-describedby="brief-outcome-hint brief-outcome-error"></textarea>
+          <p class="px-hint" id="brief-outcome-hint">Describe a benefit they would notice, such as less waiting or fewer mistakes.</p>
+          <p class="px-error" id="brief-outcome-error" hidden></p>
+        </div>
+        <div class="px-field">
+          <label class="px-legend" for="brief-success">How will we know it helped?</label>
+          <textarea id="brief-success" name="success" rows="3" maxlength="1500" aria-describedby="brief-success-hint brief-success-error"></textarea>
+          <p class="px-hint" id="brief-success-hint">Name a signal, a baseline if known, and when to check. A small user test can be enough.</p>
+          <p class="px-error" id="brief-success-error" hidden></p>
+        </div>
+      </section>
+
+      <section class="px-card px-stack" aria-labelledby="brief-slice-heading">
+        <h2 class="px-tool-title" id="brief-slice-heading">3. The smallest useful slice</h2>
+        <div class="px-field">
+          <label class="px-legend" for="brief-slice">What could we deliver first?</label>
+          <textarea id="brief-slice" name="slice" rows="3" maxlength="2000" aria-describedby="brief-slice-hint brief-slice-error"></textarea>
+          <p class="px-hint" id="brief-slice-hint">A complete change that helps someone, even if it covers only one situation.</p>
+          <p class="px-error" id="brief-slice-error" hidden></p>
+        </div>
+        <div class="px-field">
+          <label class="px-legend" for="brief-nonGoals">What is outside this slice?</label>
+          <textarea id="brief-nonGoals" name="nonGoals" rows="3" maxlength="1500" aria-describedby="brief-nonGoals-hint brief-nonGoals-error"></textarea>
+          <p class="px-hint" id="brief-nonGoals-hint">Make the boundaries explicit so a useful first step can stay small.</p>
+          <p class="px-error" id="brief-nonGoals-error" hidden></p>
+        </div>
+      </section>
+
+      <section class="px-card px-stack" aria-labelledby="brief-acceptance-heading">
+        <h2 class="px-tool-title" id="brief-acceptance-heading">4. Concrete acceptance examples</h2>
+        <div class="px-field">
+          <label class="px-legend" for="brief-acceptance">What should happen in a real case?</label>
+          <textarea id="brief-acceptance" name="acceptance" rows="5" maxlength="4000" aria-describedby="brief-acceptance-hint brief-acceptance-error"></textarea>
+          <p class="px-hint" id="brief-acceptance-hint">Include a normal case and a boundary or failure case. “Given this situation, when this happens, then…” can help.</p>
+          <p class="px-error" id="brief-acceptance-error" hidden></p>
+        </div>
+      </section>
+
+      <section class="px-card px-stack" aria-labelledby="brief-constraints-heading">
+        <h2 class="px-tool-title" id="brief-constraints-heading">5. The boundaries and the waits</h2>
+        <div class="px-field">
+          <label class="px-legend" for="brief-constraints">What constrains the work?</label>
+          <textarea id="brief-constraints" name="constraints" rows="3" maxlength="2000" aria-describedby="brief-constraints-hint brief-constraints-error"></textarea>
+          <p class="px-hint" id="brief-constraints-hint">Accessibility, security, policy or a real timing need. Distinguish a hard requirement from a preference.</p>
+          <p class="px-error" id="brief-constraints-error" hidden></p>
+        </div>
+        <div class="px-field">
+          <label class="px-legend" for="brief-dependencies">Who or what do we depend on?</label>
+          <textarea id="brief-dependencies" name="dependencies" rows="3" maxlength="2000" aria-describedby="brief-dependencies-hint brief-dependencies-error"></textarea>
+          <p class="px-hint" id="brief-dependencies-hint">Name a decision, person, team or system, and what you need from them.</p>
+          <p class="px-error" id="brief-dependencies-error" hidden></p>
+        </div>
+      </section>
+
+      <section class="px-card px-stack" aria-labelledby="brief-questions-heading">
+        <h2 class="px-tool-title" id="brief-questions-heading">6. What we still need to find out</h2>
+        <div class="px-field">
+          <label class="px-legend" for="brief-unknowns">Open questions and assumptions</label>
+          <textarea id="brief-unknowns" name="unknowns" rows="4" maxlength="4000" aria-describedby="brief-unknowns-hint brief-unknowns-error"></textarea>
+          <p class="px-hint" id="brief-unknowns-hint">One question per line. Include who can help answer it, if you know. This brief starts a conversation; it does not certify readiness.</p>
+          <p class="px-error" id="brief-unknowns-error" hidden></p>
+        </div>
+      </section>
+    </form>
+
+    <div class="px-stack">
+      <section class="px-card px-stack" aria-labelledby="brief-discussion-heading">
+        <h2 class="px-tool-title" id="brief-discussion-heading">Questions to take to refinement</h2>
+        <p class="px-hint">Your open questions appear here, alongside prompts for the information you have left blank. There is no ready score.</p>
+        <ul class="px-checklist" id="brief-discussion"></ul>
+      </section>
+      <section class="px-card px-stack" aria-labelledby="brief-preview-heading">
+        <h2 class="px-tool-title" id="brief-preview-heading">Your brief</h2>
+        <p class="px-hint">The preview updates as you write. Blank fields export as “To discuss” so nobody has to guess.</p>
+        <div class="px-actions">
+          <button type="button" class="px-btn px-btn--primary" id="brief-copy" disabled>Copy Markdown</button>
+          <button type="button" class="px-btn" id="brief-download" disabled>Download .md</button>
+          <button type="button" class="px-btn px-btn--ghost" id="brief-clear" disabled>Clear draft</button>
+        </div>
+        <p class="px-status" id="brief-status" role="status" aria-live="polite"></p>
+        <pre class="px-output" id="brief-preview" tabindex="0" aria-label="Work brief Markdown preview"></pre>
+      </section>
+    </div>
+  </div>
+
+  <aside class="px-related">
+    <p class="px-legend">The thinking behind the tool</p>
+    <p><a href="{{ '/work-request-template/' | relative_url }}">The work request template</a> · <a href="{{ '/definition-of-ready/' | relative_url }}">Definition of Ready</a> · <a href="{{ '/empowering-product-with-ai/' | relative_url }}">Empowering Product with AI</a></p>
+  </aside>
+  <p class="px-foot"><span id="brief-save-status" role="status" aria-live="polite">Drafts save on this device as you write.</span> Content stays in this browser. Clearing browser data loses the draft; copy or download it for a backup.</p>
+</div>
+
+<script src="{{ '/assets/js/practice-kit.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+<script src="{{ '/assets/js/work-brief-core.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+<script src="{{ '/assets/js/work-brief.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

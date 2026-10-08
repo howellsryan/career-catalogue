@@ -263,6 +263,7 @@
   }
 
   function selectTab(id, updateURL) {
+    id = id.replace(/^panel-/, "");
     if (TABS.indexOf(id) < 0) id = "retro";
     var previous = activeTab();
     var focused = document.activeElement;
@@ -286,7 +287,7 @@
 
   function syncTabFromURL() {
     var id = location.hash.replace(/^#/, "");
-    selectTab(TABS.indexOf(id) < 0 ? "retro" : id, false);
+    selectTab(id, false);
   }
 
   function currentPool() {
