@@ -19,6 +19,10 @@ fuzzy search, and the lessons from running squads of AI agents.
 On the side, I experiment with AI and have been investigating agentic workflows
 through my game **PocketRPG**, which is played by 100s of people world-wide.
 
+Alongside the essays there is [Practice]({{ '/practice/' | relative_url }}): a retro
+opener, a Monte Carlo forecast, a team health check, one-to-one questions, and a
+couple of small sums for the room. It is a tool, not a post.
+
 ### Topics I come back to
 
 - **Engineering leadership** — feedback, motivation, and the culture that makes teams great
