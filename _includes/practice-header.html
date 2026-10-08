@@ -1,0 +1,27 @@
+{% assign current_tool = site.data.practice.tools | where: 'id', page.tool | first %}
+<section class="px-hero wrap">
+  <div class="px-tool-nav">
+    <nav class="px-breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="{{ '/practice/' | relative_url }}">{{ site.data.practice.name }}</a></li>
+        <li aria-current="page">{{ current_tool.title | escape }}</li>
+      </ol>
+    </nav>
+    <details class="px-tool-menu">
+      <summary>Switch tool</summary>
+      <nav aria-label="Practice tools">
+        {% for group in site.data.practice.groups %}
+        <p class="px-menu-group">{{ group.title }}</p>
+        {% assign group_tools = site.data.practice.tools | where: 'group', group.id %}
+        {% for tool in group_tools %}
+        <a href="{{ tool.url | relative_url }}"{% if tool.id == page.tool %} aria-current="page"{% endif %}>{{ tool.title | escape }}</a>
+        {% endfor %}
+        {% endfor %}
+      </nav>
+    </details>
+  </div>
+  <p class="px-eyebrow">{{ current_tool.category }}</p>
+  <h1 class="px-title" id="practice-tool-title">{{ current_tool.title | escape }}</h1>
+  <p class="px-lead">{{ current_tool.purpose | escape }}</p>
+  <p class="px-takeaway"><span>What you leave with</span> {{ current_tool.outcome | escape }}</p>
+</section>

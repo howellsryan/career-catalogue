@@ -1,0 +1,125 @@
+---
+layout: default
+title: Demo & feedback
+permalink: /practice/demo/
+description: "Prepare a useful demo and give stakeholder feedback a clear response, owner and follow-up date."
+extra_css: /assets/css/practice.css
+tool: demo
+---
+
+{% include practice-header.html %}
+
+<div class="wrap px px-stack" id="demo-tool">
+  <noscript><p class="px-empty">Enable JavaScript to use the worksheet. The <a href="{{ '/closing-the-feedback-loop/' | relative_url }}">closing the feedback loop article</a> explains the approach.</p></noscript>
+  <nav class="px-steps" aria-label="Demo worksheet sections">
+    <a href="#demo-prepare">Prepare</a>
+    <a href="#demo-feedback">Feedback</a>
+    <a href="#demo-share">Share</a>
+  </nav>
+  <p class="px-status" id="demo-storage" role="status" aria-live="polite"></p>
+  <p class="px-status" id="demo-status" role="status" aria-live="polite"></p>
+
+  <details class="px-example">
+    <summary>See a worked example: reporting for Finance</summary>
+    <p>Finance spends two hours reconciling payments. The first useful slice is a CSV export, demonstrated against the old manual process. A trial suggests value, while a real week of reconciliation still needs validating.</p>
+    <p>When someone asks for scheduled email delivery, record <strong>Investigate</strong>, name who will check the need, and agree a follow-up date. Respond with that plan. Sharing the plan does not mean the investigation is complete.</p>
+    <button class="px-btn" id="demo-example" type="button">Load this example</button>
+    <p class="px-hint">Loading the example replaces this browser's current demo after confirmation. Its dates are blank for you to choose.</p>
+  </details>
+
+  <div class="px-workspace">
+    <section class="px-stack" id="demo-prepare" aria-labelledby="demo-agenda-heading">
+      <h2 id="demo-agenda-heading">1. Prepare the demo</h2>
+      <div class="px-grid">
+        <div class="px-field">
+          <label class="px-legend" for="demo-title">Demo title (optional)</label>
+          <input id="demo-title" data-demo-field="title" type="text" maxlength="200" autocomplete="off" placeholder="For example: first reporting slice">
+        </div>
+        <div class="px-field">
+          <label class="px-legend" for="demo-date">Demo date (optional)</label>
+          <input id="demo-date" data-demo-field="demoDate" type="date" min="0001-01-01" max="9999-12-31" aria-describedby="demo-date-error">
+          <p class="px-error" id="demo-date-error" hidden></p>
+        </div>
+      </div>
+      <div class="px-field">
+        <label class="px-legend" for="demo-problem">Who has the problem, and what is it?</label>
+        <textarea id="demo-problem" data-demo-field="problem" rows="4" maxlength="3000" aria-describedby="demo-problem-hint" placeholder="Name a user and a real task that is difficult today."></textarea>
+        <p class="px-hint" id="demo-problem-hint">A concrete user problem gives the audience something to judge.</p>
+      </div>
+      <div class="px-field">
+        <label class="px-legend" for="demo-change">What changed? Describe before and after.</label>
+        <textarea id="demo-change" data-demo-field="change" rows="4" maxlength="3000" placeholder="Show the same task using the old and new flow."></textarea>
+      </div>
+      <div class="px-field">
+        <label class="px-legend" for="demo-evidence">What evidence of value do you have?</label>
+        <textarea id="demo-evidence" data-demo-field="evidence" rows="4" maxlength="3000" aria-describedby="demo-evidence-hint" placeholder="An observation, a measurement, or an assumption that still needs testing."></textarea>
+        <p class="px-hint" id="demo-evidence-hint">Separate observed value from hoped-for value. “We do not know yet” is a useful answer.</p>
+      </div>
+      <div class="px-field">
+        <label class="px-legend" for="demo-question">What question do you want the audience to answer?</label>
+        <textarea id="demo-question" data-demo-field="question" rows="3" maxlength="3000" placeholder="For example: could you complete Friday's reconciliation with these columns?"></textarea>
+      </div>
+    </section>
+
+    <section class="px-stack" aria-labelledby="demo-preview-heading">
+      <h2 id="demo-preview-heading">Your demo agenda</h2>
+      <div class="px-card px-stack" aria-label="Agenda at a glance">
+        <p class="px-kicker" id="demo-agenda-glance-title">Untitled demo</p>
+        <dl class="px-agenda-summary">
+          <dt>User problem</dt><dd id="demo-agenda-glance-problem">Name the user and their problem.</dd>
+          <dt>Before and after</dt><dd id="demo-agenda-glance-change">Describe the task you will demonstrate.</dd>
+          <dt>Evidence of value</dt><dd id="demo-agenda-glance-evidence">Record what you know, or what needs testing.</dd>
+          <dt>Question for the audience</dt><dd id="demo-agenda-glance-question">Choose what you want to learn.</dd>
+        </dl>
+      </div>
+      <div class="px-actions">
+        <button class="px-btn" id="demo-copy-agenda" type="button">Copy agenda</button>
+        <button class="px-btn px-btn--ghost" id="demo-download-agenda" type="button">Download agenda</button>
+      </div>
+      <details class="px-example" id="demo-agenda-markdown">
+        <summary>View agenda Markdown</summary>
+        <pre class="px-output" id="demo-agenda-output" tabindex="0" aria-label="Copyable demo agenda"></pre>
+      </details>
+      <p class="px-hint">The agenda updates as you write. Blank fields stay visible as open questions; they do not become claims.</p>
+    </section>
+  </div>
+
+  <section class="px-stack" id="demo-feedback" aria-labelledby="demo-feedback-heading">
+    <h2 id="demo-feedback-heading">2. Give feedback a response</h2>
+    <p class="px-section-lead">Capture one request per item. Choose Act, Defer, Decline or Investigate when you know enough, or leave the decision pending. Record the rationale, an owner and a date to follow up.</p>
+    <p class="px-hint">Mark “Response shared” after communicating the response. An acknowledged investigation can remain open; sharing a response does not mark the work complete.</p>
+    <p class="px-status" id="demo-feedback-summary" role="status" aria-live="polite"></p>
+    <div class="px-stack" id="demo-feedback-rows"></div>
+    <div class="px-actions">
+      <button class="px-btn" id="demo-add-feedback" type="button">Add feedback</button>
+      <span class="px-hint" id="demo-feedback-limit">Up to 20 items in this demo cycle.</span>
+    </div>
+  </section>
+
+  <section class="px-stack" id="demo-share" aria-labelledby="demo-follow-up-heading">
+    <h2 id="demo-follow-up-heading">3. Share the follow-up</h2>
+    <p class="px-section-lead">Review this draft, then paste it into your existing work tools. Copying or downloading does not send a message or mark responses as shared.</p>
+    <div class="px-actions">
+      <button class="px-btn" id="demo-copy-follow-up" type="button">Copy follow-up</button>
+      <button class="px-btn px-btn--ghost" id="demo-download-follow-up" type="button">Download follow-up</button>
+      <button class="px-btn px-btn--ghost" id="demo-download-pack" type="button">Download complete pack</button>
+    </div>
+    <details class="px-example" id="demo-follow-up-markdown">
+      <summary>View follow-up Markdown</summary>
+      <pre class="px-output" id="demo-follow-up-output" tabindex="0" aria-label="Copyable stakeholder follow-up"></pre>
+    </details>
+  </section>
+
+  <section class="px-stack" aria-labelledby="demo-next-heading">
+    <h2 id="demo-next-heading">Ready for the next demo?</h2>
+    <p class="px-hint">This tool keeps one demo cycle. Download the complete pack before starting the next one; starting over clears the current draft and feedback after confirmation.</p>
+    <div class="px-actions"><button class="px-btn px-btn--ghost" id="demo-reset" type="button">Start next demo / clear draft</button></div>
+  </section>
+
+  <p class="px-foot">Your draft stays in this browser. Download it before clearing browser data. This tool does not upload your entries or sync them between devices.</p>
+  <p class="px-related">Read <a href="{{ '/closing-the-feedback-loop/' | relative_url }}">Closing the Feedback Loop</a>, or explore the other <a href="{{ '/practice/' | relative_url }}">Practice tools</a>.</p>
+</div>
+
+<script src="{{ '/assets/js/practice-kit.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+<script src="{{ '/assets/js/demo-core.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+<script src="{{ '/assets/js/demo.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

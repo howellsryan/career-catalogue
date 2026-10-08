@@ -1,0 +1,77 @@
+<section class="px-panel" id="panel-retro" aria-labelledby="practice-tool-title">
+    <div class="px-layout">
+      <aside class="px-side">
+        <fieldset class="px-field">
+          <legend>Depth</legend>
+          <label class="px-choice"><input type="radio" name="warmth" value="1" checked> Ease people in</label>
+          <label class="px-choice"><input type="radio" name="warmth" value="2"> The work itself</label>
+          <label class="px-choice"><input type="radio" name="warmth" value="3"> Once the room is warm</label>
+          <label class="px-choice"><input type="radio" name="warmth" value="any"> Any depth</label>
+        </fieldset>
+
+        <div class="px-field">
+          <p class="px-legend" id="theme-label">Theme</p>
+          <div class="px-chips" role="group" aria-labelledby="theme-label">
+            <button type="button" class="px-chip" data-theme="any" aria-pressed="true">Any</button>
+            <button type="button" class="px-chip" data-theme="ease" aria-pressed="false">Getting started</button>
+            <button type="button" class="px-chip" data-theme="work" aria-pressed="false">How work moved</button>
+            <button type="button" class="px-chip" data-theme="felt" aria-pressed="false">How it felt</button>
+            <button type="button" class="px-chip" data-theme="craft" aria-pressed="false">Quality</button>
+            <button type="button" class="px-chip" data-theme="value" aria-pressed="false">Value</button>
+            <button type="button" class="px-chip" data-theme="together" aria-pressed="false">Together</button>
+            <button type="button" class="px-chip" data-theme="learn" aria-pressed="false">Learning</button>
+            <button type="button" class="px-chip" data-theme="next" aria-pressed="false">Next fortnight</button>
+            <button type="button" class="px-chip" data-theme="shape" aria-pressed="false">A shape for the hour</button>
+          </div>
+        </div>
+
+        <button type="button" class="px-btn px-btn--ghost px-btn--block" id="retro-round-btn">Suggest a full round</button>
+        <p class="px-hint">A round ignores the filters: a warm open, a shape for the middle, one deeper question, then a close.</p>
+      </aside>
+
+      <div class="px-stage">
+        <article class="px-card" id="retro-card" tabindex="0" aria-keyshortcuts="N C" aria-live="polite">
+          <p class="px-kicker" id="retro-kicker"></p>
+          <h2 class="px-question" id="retro-question"></h2>
+          <p class="px-intro" id="retro-intro" hidden></p>
+          <ol class="px-beats" id="retro-beats" hidden></ol>
+          <p class="px-facilitate" id="retro-facilitate"></p>
+          <p class="px-follow" id="retro-follow" hidden></p>
+        </article>
+
+        <p class="px-empty" id="retro-empty" role="status" aria-live="polite" hidden>Nothing sits in that combination. Ease-in questions stay light on purpose — try another theme, or let the depth go one step further.</p>
+
+        <div class="px-actions">
+          <button type="button" class="px-btn px-btn--primary" id="retro-draw">Another question</button>
+          <button type="button" class="px-btn" id="retro-copy">Copy</button>
+          <p class="px-keys">On the question: <kbd>N</kbd> next <span aria-hidden="true">·</span> <kbd>C</kbd> copy</p>
+        </div>
+        <p class="px-hint">Found something worth changing? <a href="{{ '/practice/experiment/?from=retro' | relative_url }}">Plan one experiment and review it next fortnight.</a></p>
+
+        <div class="px-timer" id="retro-timer">
+          <svg class="px-timer__ring" viewBox="0 0 80 80" aria-hidden="true">
+            <circle class="px-timer__track" cx="40" cy="40" r="34"></circle>
+            <circle class="px-timer__value" id="timer-ring" cx="40" cy="40" r="34"></circle>
+          </svg>
+          <div class="px-timer__body">
+            <p class="px-timer__clock" id="timer-clock">08:00</p>
+            <p class="px-timer__status" id="timer-status" aria-live="polite">Give the question a little silence before you fill it.</p>
+            <div class="px-timer__row">
+              <div class="px-seg" role="group" aria-label="Minutes for this question">
+                <button type="button" data-mins="4">4</button>
+                <button type="button" data-mins="8" aria-pressed="true">8</button>
+                <button type="button" data-mins="12">12</button>
+              </div>
+              <button type="button" class="px-btn px-btn--small" id="timer-toggle">Start</button>
+              <button type="button" class="px-btn px-btn--small px-btn--ghost" id="timer-reset">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <section class="px-round" id="retro-round" hidden>
+          <h3 class="px-round__title">A round for this retro</h3>
+          <ol class="px-round__list" id="retro-round-list"></ol>
+        </section>
+      </div>
+    </div>
+  </section>

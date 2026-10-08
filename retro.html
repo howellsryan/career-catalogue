@@ -1,0 +1,20 @@
+---
+layout: default
+title: Retro
+permalink: /practice/retro/
+description: "Open a retrospective with a useful question, facilitation prompts and a timer."
+extra_css: /assets/css/practice.css
+tool: retro
+---
+
+{% include practice-header.html %}
+
+<div class="wrap px px-stack">
+  <noscript><p class="px-empty">This tool needs JavaScript enabled. You can still browse the writing using the navigation above.</p></noscript>
+  <p id="practice-status" class="visually-hidden" role="status" aria-live="polite"></p>
+  {% include practice-panels/retro.html %}
+  <p class="px-foot">Recent question IDs stay in local storage on this device to reduce repeats. The timer and suggested round last only while this page is open. No answers are recorded.</p>
+</div>
+
+<script src="{{ '/assets/js/practice-core.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+<script src="{{ '/assets/js/practice.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

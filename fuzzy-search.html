@@ -1,0 +1,149 @@
+---
+layout: default
+title: Fuzzy-search lab
+permalink: /practice/fuzzy-search/
+description: "Try exact and Levenshtein matching, inspect the implementation, and learn where typo tolerance creates irrelevant results."
+extra_css: /assets/css/practice.css
+tool: fuzzy-search
+---
+
+{% include practice-header.html %}
+
+<div class="wrap px px-stack" id="fuzzy-search-lab">
+  <noscript><p class="px-empty">Enable JavaScript to run the lab. The worked example and implementation below can still be read without it.</p></noscript>
+  <div class="px-workspace">
+    <section class="px-card px-card--tool">
+      <h2 class="px-tool-title">Compare your candidates</h2>
+      <form id="fx-form" class="px-form" novalidate>
+        <label class="px-legend" for="fx-query">Search query</label>
+        <input id="fx-query" name="query" type="text" value="plumbr" maxlength="128" autocomplete="off" spellcheck="false" aria-describedby="fx-query-hint fx-query-error">
+        <p class="px-hint" id="fx-query-hint">Up to 64 characters. Case and surrounding whitespace are ignored.</p>
+        <p class="px-error" id="fx-query-error" hidden></p>
+
+        <label class="px-legend" for="fx-candidates">Candidates, one per line</label>
+        <textarea id="fx-candidates" name="candidates" rows="8" maxlength="6500" spellcheck="false" aria-describedby="fx-candidates-hint fx-candidates-error">plumber
+plumper
+carpenter
+electrician
+plumbing</textarea>
+        <p class="px-hint" id="fx-candidates-hint">Up to 50 non-empty lines and 64 characters per candidate. Blank lines and repeated normalized candidates are ignored.</p>
+        <p class="px-hint">Try one real typo from your domain, with its intended result and a confusing near-match in the candidate list.</p>
+        <p class="px-error" id="fx-candidates-error" hidden></p>
+
+        <label class="px-legend" for="fx-threshold">Maximum edit distance</label>
+        <select id="fx-threshold" name="threshold" aria-describedby="fx-threshold-hint fx-threshold-error">
+          <option value="0">0 · exact only</option>
+          <option value="1" selected>1 · one edit</option>
+          <option value="2">2 · two edits</option>
+          <option value="3">3 · three edits</option>
+        </select>
+        <p class="px-hint" id="fx-threshold-hint">An insertion, deletion or substitution costs one edit. Swapping two letters costs two.</p>
+        <p class="px-error" id="fx-threshold-error" hidden></p>
+        <div class="px-actions">
+          <button type="submit" class="px-btn px-btn--primary">Compare</button>
+          <button type="button" class="px-btn" id="fx-reset">Reset to worked example</button>
+        </div>
+        <p class="px-hint">Reset replaces the query, candidates and threshold with the example above. Inputs are not saved.</p>
+      </form>
+    </section>
+
+    <section class="px-card px-card--tool" aria-labelledby="fx-results-title">
+      <h2 class="px-tool-title" id="fx-results-title">Exact versus fuzzy</h2>
+      <p id="fx-status" class="px-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <div id="fx-results" hidden>
+        <div class="px-table-scroll" tabindex="0" role="region" aria-label="Search comparison">
+          <table>
+            <caption>Ranked by fewest edits; ties keep your candidate order.</caption>
+            <thead><tr><th scope="col">Candidate</th><th scope="col">Edits</th><th scope="col">Exact</th><th scope="col">Fuzzy accepts</th></tr></thead>
+            <tbody id="fx-rows"></tbody>
+          </table>
+        </div>
+        <p class="px-note" id="fx-example-note"></p>
+        <p class="px-hint" id="fx-duplicates" hidden></p>
+        <p class="px-hint">Edit distance measures spelling similarity. It does not know which result is useful. Larger thresholds trade missed matches for extra candidates; ranking and domain checks still matter.</p>
+        <details class="px-example">
+          <summary>Preview the comparison to take away</summary>
+          <pre class="px-output" id="fx-export" tabindex="0" aria-label="Comparison text to copy or download"></pre>
+        </details>
+      </div>
+      <div class="px-actions">
+        <button type="button" class="px-btn" id="fx-copy" disabled>Copy comparison</button>
+        <button type="button" class="px-btn" id="fx-download" disabled>Download comparison</button>
+      </div>
+      <p class="px-status" id="fx-copy-status" role="status" aria-live="polite" aria-atomic="true"></p>
+    </section>
+  </div>
+
+  <section class="px-card px-card--tool px-stack" aria-labelledby="fx-exercise-title">
+    <div>
+      <p class="px-kicker">Try it before reading on</p>
+      <h2 class="px-tool-title" id="fx-exercise-title">Recover the occupation, exclude the distraction</h2>
+      <p>For the fixed query <code>plumbr</code> and candidates <code>plumber</code> and <code>plumper</code>, choose the smallest threshold that accepts the occupation and excludes the unrelated word. This exercise uses those fixed words, even if you change the lab inputs.</p>
+    </div>
+    <div class="px-form">
+      <label class="px-legend" for="fx-exercise">Your threshold</label>
+      <select id="fx-exercise" name="exercise">
+        <option value="">Choose a threshold</option>
+        <option value="0">0 edits</option><option value="1">1 edit</option><option value="2">2 edits</option><option value="3">3 edits</option>
+      </select>
+      <div class="px-actions"><button type="button" class="px-btn" id="fx-check">Check my reasoning</button></div>
+      <p class="px-status" id="fx-exercise-feedback" role="status" aria-live="polite" aria-atomic="true"></p>
+    </div>
+    <details class="px-example">
+      <summary>The worked example</summary>
+      <div class="prose">
+        <p><code>plumbr → plumber</code>: insert <code>e</code> before the last letter. Distance <strong>1</strong>.</p>
+        <p><code>plumbr → plumper</code>: replace <code>b</code> with <code>p</code>, then insert <code>e</code>. Distance <strong>2</strong>.</p>
+        <p>At threshold 0 neither matches. At threshold 1 only <code>plumber</code> matches. At threshold 2 both match, although <code>plumper</code> is not the trade the person wanted. The threshold cannot infer that intent.</p>
+        <p>Before adopting fuzzy search, collect real misspellings and confusing near-matches from your own domain. Check both the useful results you recovered and the irrelevant results you introduced.</p>
+      </div>
+    </details>
+  </section>
+
+  <details class="px-card px-example">
+    <summary>Inspect the algorithm and its edge cases</summary>
+    <div class="prose">
+      <p>This is the same two-row dynamic-programming recurrence used by the lab. Inputs are trimmed, lowercased and normalized to Unicode NFC before comparison. Accents remain significant; each Unicode code point counts as a character.</p>
+      <pre class="px-output"><code>function distance(left, right) {
+  const a = Array.from(left), b = Array.from(right);
+  let previous = Array.from({ length: b.length + 1 }, (_, j) =&gt; j);
+  for (let i = 1; i &lt;= a.length; i++) {
+    const current = [i];
+    for (let j = 1; j &lt;= b.length; j++) {
+      current[j] = Math.min(
+        current[j - 1] + 1,                    // insert
+        previous[j] + 1,                       // delete
+        previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );                                       // match or substitute
+    }
+    previous = current;
+  }
+  return previous[b.length];
+}</code></pre>
+      <p>Time grows with the product of the string lengths. Two rows keep memory proportional to the candidate length. The lab validates its input limits before computing and compares at most 50 candidates of 64 characters.</p>
+      <div class="px-table-scroll" tabindex="0" role="region" aria-label="Implementation edge cases">
+        <table>
+          <caption>Useful checks for an implementation</caption>
+          <thead><tr><th scope="col">Left</th><th scope="col">Right</th><th scope="col">Distance</th><th scope="col">Checks</th></tr></thead>
+          <tbody>
+            <tr><td><code>""</code></td><td><code>cat</code></td><td>3</td><td>All characters inserted</td></tr>
+            <tr><td><code>kitten</code></td><td><code>sitting</code></td><td>3</td><td>Two substitutions and one insertion</td></tr>
+            <tr><td><code>ab</code></td><td><code>ba</code></td><td>2</td><td>Transposition is not a single operation here</td></tr>
+            <tr><td><code>😀</code></td><td><code>""</code></td><td>1</td><td>One code point, rather than two UTF-16 units</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The algorithm can compare an empty string; the search form asks for a non-empty query so the result has a useful meaning. It compares whole candidate strings, rather than finding matching words inside a sentence.</p>
+      <p><a href="{{ '/assets/js/fuzzy-search-core.js' | relative_url }}">Read the lab’s complete calculation and validation source</a>.</p>
+    </div>
+  </details>
+
+  <aside class="px-related">
+    <p>Read the background: <a href="{{ '/fuzzy-search-with-levenshtein/' | relative_url }}">Implementing Fuzzy Search with Levenshtein Distance</a>.</p>
+  </aside>
+  <p class="px-foot">The lab runs in your browser. Your query and candidate list stay on this page and are not saved or sent to a service.</p>
+</div>
+
+<script src="{{ '/assets/js/practice-kit.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+<script src="{{ '/assets/js/fuzzy-search-core.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+<script src="{{ '/assets/js/fuzzy-search.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

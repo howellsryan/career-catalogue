@@ -1,0 +1,20 @@
+---
+layout: default
+title: The room
+permalink: /practice/room/
+description: "Make meeting costs and the time left for focused work visible."
+extra_css: /assets/css/practice.css
+tool: room
+---
+
+{% include practice-header.html %}
+
+<div class="wrap px px-stack">
+  <noscript><p class="px-empty">This tool needs JavaScript enabled. You can still browse the writing using the navigation above.</p></noscript>
+  <p id="practice-status" class="visually-hidden" role="status" aria-live="polite"></p>
+  {% include practice-panels/room.html %}
+  <p class="px-foot">Your people counts, meeting times, hourly rates and focus-hour inputs stay in local storage on this device. Calculations run in your browser; nothing is sent to a service.</p>
+</div>
+
+<script src="{{ '/assets/js/practice-core.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+<script src="{{ '/assets/js/practice.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

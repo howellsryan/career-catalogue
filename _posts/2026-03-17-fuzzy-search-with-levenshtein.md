@@ -13,6 +13,8 @@ Vladimir Levenshtein, a Soviet mathematician, developed the concept of edit dist
 
 Exact string matching is often insufficient for production search systems because it fails to account for user typos or character variations. Implementing a fuzzy search mechanism allows the system to return relevant results based on string similarity rather than binary equality.
 
+[Try the fuzzy-search lab]({{ '/practice/fuzzy-search/' | relative_url }}) to compare exact matching with edit-distance thresholds, inspect an implementation, and practice avoiding unwanted matches.
+
 ### The Levenshtein Distance Algorithm
 
 Levenshtein distance, or edit distance, is a metric used to measure the difference between two sequences. It represents the minimum number of single-character edits required to transform one string into another.
