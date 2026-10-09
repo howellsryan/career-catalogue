@@ -22,9 +22,12 @@ export interface Job {
   budget?: { reservedTokens: number; requests: number };
   failure?: string;
   failurePermanent?: boolean;
+  recoveryUsed?: boolean;
 }
 export interface State { publication?: Publication; job?: Job }
 export const MAX_ATTEMPTS = 10;
+const RECOVERY_ATTEMPTS = 10;
+function attemptLimit(job: Job) { return MAX_ATTEMPTS + (job.recoveryUsed ? RECOVERY_ATTEMPTS : 0); }
 export const REQUEST_TIMEOUT_MS = 180_000;
 const RECOVERY_GRACE_MS = 15_000;
 // Older jobs did not persist failure permanence; only known retryable failures may resume.
@@ -49,7 +52,7 @@ export class DailyJob {
     private readonly tokenBudget: number = DEFAULT_DAILY_TOKEN_BUDGET
   ) {}
 
-  async queue(day: string, bootstrap = false): Promise<"accepted" | "pending" | "published" | "stopped" | "obsolete"> {
+  async queue(day: string, bootstrap = false, recover = false): Promise<"accepted" | "pending" | "published" | "stopped" | "obsolete"> {
     return this.store.transaction(async tx => {
       const now = this.now();
       const state = await tx.get<State>("state") ?? {};
@@ -61,7 +64,13 @@ export class DailyJob {
         if (job.status !== "stopped") return "pending";
         const retryable = job.failurePermanent === false ||
           (job.failurePermanent === undefined && LEGACY_RETRYABLE_FAILURES.has(job.failure ?? ""));
-        if (!bootstrap || !retryable || job.attempts >= MAX_ATTEMPTS) return "stopped";
+        if (recover) {
+          // One explicit operator recovery per day; retain every token reservation
+          // and attempt. Permanent failures and legacy unbounded budgets stay closed.
+          if (!retryable || job.recoveryUsed || !job.budget || job.budget.reservedTokens >= this.tokenBudget) return "stopped";
+          job.recoveryUsed = true;
+          this.log("daily_recovery", { day, attempts: job.attempts, reserved_tokens: job.budget.reservedTokens });
+        } else if (!bootstrap || !retryable || job.attempts >= attemptLimit(job)) return "stopped";
         job.status = "queued"; job.nextAt = now; job.active = undefined;
         await tx.put("state", state); await tx.setAlarm(now + 1);
         return "accepted";
@@ -123,7 +132,7 @@ export class DailyJob {
     job.active = undefined;
     job.failure = code;
     job.failurePermanent = permanent;
-    if (permanent || job.attempts >= MAX_ATTEMPTS || job.day !== utcDate(now)) {
+    if (permanent || job.attempts >= attemptLimit(job) || job.day !== utcDate(now)) {
       job.status = "stopped"; await tx.deleteAlarm();
     } else {
       job.status = "retry";
@@ -152,7 +161,7 @@ export class DailyJob {
         await this.failIn(tx, state, "interrupted_attempt", false, now); return null;
       }
       if (now < job.nextAt) { await tx.setAlarm(job.nextAt); return null; }
-      if (job.attempts >= MAX_ATTEMPTS) { await this.failIn(tx, state, "attempts_exhausted", true, now); return null; }
+      if (job.attempts >= attemptLimit(job)) { await this.failIn(tx, state, "attempts_exhausted", true, now); return null; }
       const id = this.newId();
       job.attempts++;
       job.status = "running";

@@ -10,6 +10,7 @@ export interface Env {
   DAILY_FACT: DurableObjectNamespace<DailyFactStore>;
   OPENAI_API_KEY?: string;
   BOOTSTRAP_TOKEN?: string;
+  RECOVERY_TOKEN?: string;
   OPENAI_MODEL: string;
   OPENAI_BUDGET_ENFORCED: string;
   OPENAI_DAILY_TOKEN_BUDGET?: string;
@@ -39,9 +40,9 @@ export class DailyFactStore extends DurableObject<Env> {
     });
     return historyPage([...entries.values()]);
   }
-  async start(day: string, bootstrap: boolean) {
+  async start(day: string, bootstrap: boolean, recover = false) {
     if (!ready(this.env)) return "unconfigured" as const;
-    return this.job.queue(day, bootstrap);
+    return this.job.queue(day, bootstrap, recover);
   }
   async alarm() { await this.job.alarm(); }
 }

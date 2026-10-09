@@ -74,14 +74,15 @@ export const handler = {
         return json(request, { error: history ? "history_unavailable" : "fact_unavailable" }, 503, cors);
       }
     }
-    if (url.pathname === "/internal/bootstrap") {
-      if (!await authorised(request, env.BOOTSTRAP_TOKEN)) return json(request, { error: "unauthorised" }, 401);
+    if (url.pathname === "/internal/bootstrap" || url.pathname === "/internal/retry") {
+      const bootstrap = url.pathname === "/internal/bootstrap";
+      if (!await authorised(request, bootstrap ? env.BOOTSTRAP_TOKEN : env.RECOVERY_TOKEN)) return json(request, { error: "unauthorised" }, 401);
       if (request.method !== "POST") return json(request, { error: "method_not_allowed" }, 405, { Allow: "POST" });
       if (url.search || await hasBody(request)) return json(request, { error: "parameters_not_supported" }, 400);
       try {
-        const status = await singleton(env).start(utcDate(Date.now()), true);
+        const status = await singleton(env).start(utcDate(Date.now()), bootstrap, !bootstrap);
         if (status === "unconfigured") return json(request, { error: "generation_not_configured" }, 503);
-        if (status === "published") return json(request, { error: "bootstrap_closed" }, 409);
+        if (status === "published") return json(request, { error: bootstrap ? "bootstrap_closed" : "already_published" }, 409);
         if (status === "stopped" || status === "obsolete") return json(request, { error: "daily_job_unavailable" }, 409);
         return json(request, { status }, 202);
       } catch { return json(request, { error: "generation_unavailable" }, 503); }

@@ -48,6 +48,23 @@ test("bootstrap authenticates before accessing the singleton",async()=>{
   const r=await handler.fetch(new Request("https://facts.example/internal/bootstrap",{method:"POST",headers:{Authorization:"Bearer incorrect"}}),s.value);
   assert.equal(r.status,401);assert.equal(s.calls.starts,0);
 });
+test("operator retry requires its separate token and an empty POST for the current day",async()=>{
+  const s=env();s.value.RECOVERY_TOKEN=token+"-recovery";
+  let args;s.value.DAILY_FACT.getByName=()=>({start:async(...values)=>{args=values;s.calls.starts++;return "accepted";}});
+  for(const [headers,method,suffix,body,status] of [
+    [{Authorization:"Bearer "+token},"POST","",undefined,401],
+    [{Authorization:"Bearer "+token+"-recovery"},"GET","",undefined,405],
+    [{Authorization:"Bearer "+token+"-recovery"},"POST","?date=2026-10-09",undefined,400],
+    [{Authorization:"Bearer "+token+"-recovery"},"POST","","{}",400]
+  ]) {
+    assert.equal((await handler.fetch(new Request("https://facts.example/internal/retry"+suffix,{headers,method,body}),s.value)).status,status);
+  }
+  assert.equal(s.calls.starts,0);
+  const response=await handler.fetch(new Request("https://facts.example/internal/retry",{method:"POST",
+    headers:{Authorization:"Bearer "+token+"-recovery"}}),s.value);
+  assert.equal(response.status,202);assert.equal(response.headers.get("Cache-Control"),"no-store");
+  assert.deepEqual(args,[new Date().toISOString().slice(0,10),false,true]);
+});
 test("authenticated bootstrap accepts only an empty initial request",async()=>{
   const s=env();const headers={Authorization:"Bearer "+token};
   const r=await handler.fetch(new Request("https://facts.example/internal/bootstrap",{method:"POST",headers}),s.value);

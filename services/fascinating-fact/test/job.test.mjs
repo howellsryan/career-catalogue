@@ -88,6 +88,41 @@ test("network failure can recover on the next attempt",async()=>{
   await s.job.queue(s.day);await s.job.alarm();s.tick(300000);await s.job.alarm();
   assert.equal(s.store.state.job.status,"succeeded");assert.equal(calls,2);
 });
+test("operator recovery preserves attempts, reservations, and yesterday's publication",async()=>{
+  const s=setup();
+  const previous=publication(candidate,review,Date.parse("2026-10-03T01:00:00Z"));
+  s.store.state={publication:previous,job:{day:s.day,attempts:10,status:"stopped",nextAt:s.now(),
+    failure:"review_rejected",failurePermanent:false,budget:{reservedTokens:350000,requests:13}}};
+  assert.equal(await s.job.queue(s.day),"stopped");
+  const outcomes=await Promise.all(Array.from({length:20},()=>s.job.queue(s.day,false,true)));
+  assert.equal(outcomes.filter(x=>x==="accepted").length,1);
+  assert.equal(s.store.state.job.attempts,10);
+  assert.deepEqual(s.store.state.job.budget,{reservedTokens:350000,requests:13});
+  assert.deepEqual(s.store.state.publication,previous);
+  await s.job.alarm();assert.equal(s.store.state.job.attempts,11);
+  assert.equal(s.store.state.job.status,"succeeded");
+  assert.equal(await s.job.queue(s.day,false,true),"published");
+});
+test("operator recovery cannot bypass permanent failures, exhausted budgets, or its one-day limit",async()=>{
+  for(const patch of [{failurePermanent:true},{budget:undefined},{budget:{reservedTokens:1000000,requests:20}},
+    {recoveryUsed:true}]) {
+    const s=setup();s.store.state={job:{day:s.day,attempts:10,status:"stopped",nextAt:s.now(),
+      failure:"review_rejected",failurePermanent:false,budget:{reservedTokens:350000,requests:13},...patch}};
+    const before=structuredClone(s.store.state);
+    assert.equal(await s.job.queue(s.day,false,true),"stopped");assert.deepEqual(s.store.state,before);
+  }
+});
+test("operator recovery is bounded and the next day returns to ten ordinary attempts",async()=>{
+  const s=setup({generate:async()=>candidate,review:async()=>({...review,factual:false})});
+  s.store.state={job:{day:s.day,attempts:10,status:"stopped",nextAt:s.now(),failure:"review_rejected",
+    failurePermanent:false,budget:{reservedTokens:350000,requests:13}}};
+  await s.job.queue(s.day,false,true);
+  for(let i=0;i<10;i++){await s.job.alarm();s.tick(600000);}
+  assert.equal(s.store.state.job.attempts,20);assert.equal(s.store.state.job.status,"stopped");
+  assert.equal(await s.job.queue(s.day,false,true),"stopped");
+  s.setTime(Date.parse("2026-10-05T01:00:00Z"));await s.job.queue("2026-10-05");
+  assert.equal(s.store.state.job.recoveryUsed,undefined);assert.equal(s.store.state.job.attempts,0);
+});
 test("billing or permanent model error stops remaining attempts",async()=>{
   for(const code of ["openai_quota_or_billing","openai_configuration_rejected","future_permanent_failure"]) {
     const s=setup({generate:async()=>{throw new FactError(code,true);},review:async()=>review});

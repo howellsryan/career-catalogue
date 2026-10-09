@@ -54,19 +54,16 @@
 
   function dateLabel(day) { return dateFormatter.format(new Date(day + 'T00:00:00Z')); }
 
-  function isToday(day) {
-    return day === latestDate || day === new Date().toISOString().slice(0, 10);
-  }
-
   function syncControls() {
-    // Today already represents the latest publication, including a retained previous day.
-    var dates = Array.from(knownDates).filter(function (day) { return !isToday(day); });
-    if (validDate(selectedDate) && !isToday(selectedDate) && dates.indexOf(selectedDate) === -1) dates.push(selectedDate);
+    // The latest option represents its actual publication date, not the current day.
+    var dates = Array.from(knownDates).filter(function (day) { return day !== latestDate; });
+    if (validDate(selectedDate) && selectedDate !== latestDate && dates.indexOf(selectedDate) === -1) dates.push(selectedDate);
     dates.sort().reverse();
     var options = document.createDocumentFragment();
     var today = document.createElement('option');
     today.value = '';
-    today.textContent = 'Today';
+    today.textContent = !latestDate ? 'Latest fact' : latestDate === new Date().toISOString().slice(0, 10)
+      ? 'Today' : dateLabel(latestDate) + ' (latest)';
     options.appendChild(today);
     dates.forEach(function (day) {
       var option = document.createElement('option');
@@ -75,7 +72,7 @@
       options.appendChild(option);
     });
     select.replaceChildren(options);
-    select.value = validDate(selectedDate) && !isToday(selectedDate) ? selectedDate : '';
+    select.value = validDate(selectedDate) && selectedDate !== latestDate ? selectedDate : '';
   }
 
   function showState(title, description, canRetry) {
@@ -149,7 +146,7 @@
       });
       if (requestId !== sequence) return;
       if (response.status === 404 && selectedDate) {
-        showState('No fact for this date', 'Choose another date, or select Today for the latest fact.', false);
+        showState('No fact for this date', 'Choose another date, or select the latest fact.', false);
         return;
       }
       if (response.status === 503 && !selectedDate) {

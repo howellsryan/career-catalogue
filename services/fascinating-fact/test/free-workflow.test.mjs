@@ -7,9 +7,10 @@ const quiet=()=>{};
 const documents=[{...candidate.sources[0],text:"Direct supporting evidence.",organization:"research",quote:undefined}];
 const evidence={generate:async()=>documents,review:async()=>documents};
 function envelope(value,legacy=false) {
+  const selected={...value,sources:value.sources.map((_source,document_index)=>({document_index,excerpt_index:0,primary:_source.primary}))};
   return {id:"response-id",status:"completed",usage:{input_tokens:100,output_tokens:100},
     output:[...(legacy?[{type:"web_search_call",status:"completed",action:{sources:value.sources.map(s=>({url:s.url}))}}]:[]),
-    {type:"message",content:[{type:"output_text",text:JSON.stringify(value)}]}]};
+    {type:"message",content:[{type:"output_text",text:JSON.stringify(selected)}]}]};
 }
 test("Worker evidence replaces all chargeable hosted tools in the outgoing request",async()=>{
   let body;
@@ -22,9 +23,9 @@ test("Worker evidence replaces all chargeable hosted tools in the outgoing reque
 });
 test("a plausible invented quote cannot pass grounding against fetched source text",async()=>{
   const forged={...candidate,sources:[{...candidate.sources[0],quote:"A quote that the publisher never wrote."}]};
-  const send=async(url,options)=>Response.json(envelope(forged,!!JSON.parse(options.body).tools));
+  const send=async()=>{const payload=envelope(forged);payload.output[0].content[0].text=JSON.stringify(forged);return Response.json(payload);};
   await assert.rejects(()=>new OpenAI("key","gpt-5.6-terra",send,quiet,true,evidence)
-    .generate("science","2026-10-04",{reserve:async()=>{}}),{code:"evidence_quote_mismatch"});
+    .generate("science","2026-10-04",{reserve:async()=>{}}),{code:"evidence_not_retrieved"});
 });
 test("a generation POST is preceded by an awaited token reservation",async()=>{
   const events=[];
@@ -64,9 +65,13 @@ test("a source cannot grant itself primary authority through generated metadata"
 });
 test("independent review uses freshly retrieved documents instead of trusting candidate quotes",async()=>{
   const changed=[{...documents[0],text:"The publisher has corrected the original observation."}];
-  const send=async(url,options)=>Response.json(envelope(review,!!JSON.parse(options.body).tools));
-  await assert.rejects(()=>new OpenAI("key","gpt-5.6-terra",send,quiet,true,{...evidence,review:async()=>changed})
-    .review(candidate,"2026-10-04",{reserve:async()=>{}}),{code:"evidence_quote_mismatch"});
+  const send=async(url,options)=>{
+    assert.match(JSON.parse(options.body).input,/The publisher has corrected the original observation/);
+    return Response.json(envelope({...review,factual:false},!!JSON.parse(options.body).tools));
+  };
+  const result=await new OpenAI("key","gpt-5.6-terra",send,quiet,true,{...evidence,review:async()=>changed})
+    .review(candidate,"2026-10-04",{reserve:async()=>{}});
+  assert.equal(result.factual,false);assert.equal(result.sources[0].quote,changed[0].text);
 });
 test("a persisted timeout reservation is never refunded on a restarted job",async()=>{
   const store=new MemoryStore();let now=Date.parse("2026-10-04T01:00:00Z");let calls=0,id=0;

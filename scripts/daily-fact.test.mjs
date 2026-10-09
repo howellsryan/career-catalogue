@@ -103,11 +103,12 @@ test("late responses cannot replace a more recent selection",async()=>{
   await p.respond("/v1/facts/2026-10-04",fact("2026-10-04","A late response"));
   assert.equal(e["fact-title"].textContent,"The selected fact");assert.equal(e["fact-loading"].hidden,true);
 });
-test("a retained previous-day publication is also represented once by Today",async()=>{
+test("a retained previous-day publication shows its actual date instead of Today",async()=>{
   const p=page(),e=p.elements;
   await p.respond("/v1/facts",history([fact("2026-10-04"),fact("2026-10-03")]));
   await p.respond("/v1/fact",fact("2026-10-04"));
   assert.deepEqual(e["fact-history"].options.map(option=>option.value),["","2026-10-03"]);
+  assert.equal(e["fact-history"].options[0].textContent,"4 October 2026 (latest)");
   assert.equal(e["fact-date"].dateTime,"2026-10-04");
 });
 test("date links and browser navigation preserve the requested fact without duplicating Today",async()=>{
@@ -127,6 +128,20 @@ test("UTC rollover and a fresh latest read make yesterday available",async()=>{
   assert.deepEqual(e["fact-history"].options.map(option=>option.value),["","2026-10-05","2026-10-04","2026-10-03"]);
   assert.equal(e["fact-date"].dateTime,"2026-10-06");
 });
+test("a latest read after UTC rollover labels a retained fact with yesterday's date",async()=>{
+  const p=await ready(),e=p.elements;
+  p.setDate("2026-10-06T02:00:00Z");e["fact-history"].change("");
+  await p.respond("/v1/fact",fact("2026-10-05"));
+  assert.equal(e["fact-history"].options[0].textContent,"5 October 2026 (latest)");
+  assert.equal(e["fact-history"].options.filter(option=>option.textContent==="Today").length,0);
+});
+test("an unpublished current date link stays selected alongside yesterday's latest fact",async()=>{
+  const p=page("?date=2026-10-05"),e=p.elements;
+  await p.respond("/v1/facts",history([fact("2026-10-04")]));
+  await p.respond("/v1/facts/2026-10-05",{},404);
+  assert.equal(e["fact-history"].value,"2026-10-05");
+  assert.equal(e["fact-history"].options[0].textContent,"4 October 2026 (latest)");
+});
 test("read errors show a plain actionable state and history errors do not hide the fact",async()=>{
   const p=page(),e=p.elements;
   await p.respond("/v1/fact",fact("2026-10-05"));
@@ -134,7 +149,7 @@ test("read errors show a plain actionable state and history errors do not hide t
   assert.equal(e["fact-content"].hidden,false);assert.equal(e["fact-earlier"].textContent,"Retry dates");
   await p.backTo("?date=2026-10-01");await p.respond("/v1/facts/2026-10-01",{error:"fact_not_found"},404);
   assert.equal(e["fact-content"].hidden,true);assert.equal(e["fact-state-title"].textContent,"No fact for this date");
-  assert.equal(e["fact-loading"].hidden,true);assert.match(e["fact-state-description"].textContent,/Today/);
+  assert.equal(e["fact-loading"].hidden,true);assert.match(e["fact-state-description"].textContent,/latest fact/);
 });
 test("copy follows the selected fact and is unavailable during a pending selection",async()=>{
   const p=await ready(),e=p.elements;

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { OpenAI } from "../dist/ai.js";
+import { OpenAI, evidenceExcerpts } from "../dist/ai.js";
 import { candidate,review } from "./fixtures.mjs";
 const quiet=()=>{};
 const budget={reserve:async()=>{}};
@@ -9,9 +9,12 @@ const evidence={generate:async()=>documents,review:async()=>documents};
 function adapter(send,log=quiet,enabled=true,provider=evidence) {
   return new OpenAI("key","gpt-5.6-terra",send,log,enabled,provider);
 }
-function envelope(value) {
+function envelope(value, fetched=documents) {
+  const selected={...value,sources:value.sources.map(source=>({
+    document_index:fetched.findIndex(doc=>doc.url===source.url),excerpt_index:0,primary:source.primary
+  }))};
   return {id:"response-id",status:"completed",usage:{input_tokens:100,output_tokens:100},
-    output:[{type:"message",content:[{type:"output_text",text:JSON.stringify(value)}]}]};
+    output:[{type:"message",content:[{type:"output_text",text:JSON.stringify(selected)}]}]};
 }
 test("generation uses the free-group model and strict structured output",async()=>{
   let requests=0;
@@ -109,8 +112,9 @@ test("different publisher hosts in the same organization cannot corroborate news
   const news={...candidate,category:"news"};
   const checked={...review,sources:[{...candidate.sources[0],primary:false},{...second,primary:false}],
     claims:[{claim:"The specific discovery was announced.",supported:true,source_urls:[candidate.sources[0].url,second.url]}]};
-  const provider={...evidence,review:async()=>[...documents,{...documents[0],...second,text:second.quote,organization:"research"}]};
-  await assert.rejects(()=>adapter(async()=>Response.json(envelope(checked)),quiet,true,provider).review(news,"2026-10-04",budget),
+  const fetched=[...documents,{...documents[0],...second,text:second.quote,organization:"research"}];
+  const provider={...evidence,review:async()=>fetched};
+  await assert.rejects(()=>adapter(async()=>Response.json(envelope(checked,fetched)),quiet,true,provider).review(news,"2026-10-04",budget),
     {code:"evidence_corroboration_missing"});
 });
 test("primary support for one claim cannot cover another unsupported secondary-only claim",async()=>{
@@ -118,7 +122,30 @@ test("primary support for one claim cannot cover another unsupported secondary-o
   const checked={...review,sources:[...candidate.sources,second],claims:[
     {claim:"The primary finding.",supported:true,source_urls:[candidate.sources[0].url]},
     {claim:"A further comparison.",supported:true,source_urls:[second.url]}]};
-  const provider={...evidence,review:async()=>[...documents,{...documents[0],...second,text:second.quote,organization:"secondary"}]};
-  await assert.rejects(()=>adapter(async()=>Response.json(envelope(checked)),quiet,true,provider).review(candidate,"2026-10-04",budget),
+  const fetched=[...documents,{...documents[0],...second,text:second.quote,organization:"secondary"}];
+  const provider={...evidence,review:async()=>fetched};
+  await assert.rejects(()=>adapter(async()=>Response.json(envelope(checked,fetched)),quiet,true,provider).review(candidate,"2026-10-04",budget),
     {code:"evidence_corroboration_missing"});
+});
+
+test("indexed evidence copies fetched Unicode quotations exactly without model transcription",async()=>{
+  const text='Researchers said “it’s a surprising result” — at 20 °C. '+"Evidence continues. ".repeat(100);
+  const fetched=[{...documents[0],text}];
+  const expected=evidenceExcerpts(text);
+  assert.ok(expected.length>1);assert.ok(expected.every(quote=>quote.length<=1200&&text.includes(quote)));
+  const payload=envelope(candidate,fetched);
+  const wire=JSON.parse(payload.output[0].content[0].text);wire.sources[0].excerpt_index=1;
+  payload.output[0].content[0].text=JSON.stringify(wire);
+  const result=await adapter(async()=>Response.json(payload),quiet,true,{...evidence,generate:async()=>fetched}).generate("science","2026-10-04",budget);
+  assert.equal(result.sources[0].quote,expected[1]);
+});
+test("invalid excerpt indices and upgraded authority cannot pass grounding",async()=>{
+  for(const patch of [{excerpt_index:99},{document_index:6},{document_index:-1},{quote:"invented"}]) {
+    const payload=envelope(candidate);const wire=JSON.parse(payload.output[0].content[0].text);
+    Object.assign(wire.sources[0],patch);payload.output[0].content[0].text=JSON.stringify(wire);
+    await assert.rejects(()=>adapter(async()=>Response.json(payload)).generate("science","2026-10-04",budget),{code:"evidence_not_retrieved"});
+  }
+  const fetched=[{...documents[0],primary:false}];
+  await assert.rejects(()=>adapter(async()=>Response.json(envelope(candidate,fetched)),quiet,true,{...evidence,generate:async()=>fetched})
+    .generate("science","2026-10-04",budget),{code:"evidence_metadata_mismatch"});
 });
